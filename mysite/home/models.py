@@ -17,14 +17,14 @@ class Tag(models.Model):
 	tag = models.CharField(max_length=100)
 	
 class Request(models.Model):
-	#STATUSES = (
-	#('O','Outstanding'),
-	#('A','Approved'),
-	#('D','Denied'))
+	STATUSES = (
+	('O','Outstanding'),
+	('A','Approved'),
+	('D','Denied'))
 	owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
 	item_id = models.ForeignKey(Item, on_delete=models.CASCADE, default=1)
 	reason = models.TextField()
-	#status = models.CharField(max_length=1, choices=STATUSES)
+	status = models.CharField(max_length=1, choices=STATUSES, default='O')
 	#testField = models.IntegerField(default=0);
 	def __str__(self):
 		return "User: " + self.owner.__str__() + ", Item: " + \
