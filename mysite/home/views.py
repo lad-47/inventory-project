@@ -57,4 +57,7 @@ class serviceRequestsView(LoggedInMixin, generic.ListView):
 	template_name = 'home/service.html';
 	def get_queryset(self):
 		return Request.objects.filter(status='O');
+
+def cannotService(request):
+	return render(request, 'home/notAdmin.html'); 
 	

@@ -29,7 +29,8 @@ urlpatterns = [
     url(r'^logout/$', auth_views.logout,name='logout'),
     url(r'^requests/$', views2.requestsView.as_view(), name='requests'),
     url(r'^service/$', permission_required('home.can_service')\
-        (views2.serviceRequestsView.as_view()), name='service')
+        (views2.serviceRequestsView.as_view()), name='service'),
+    url(r'^accounts/login/$', views2.cannotService, name='cant_service')
 ]
 
 
