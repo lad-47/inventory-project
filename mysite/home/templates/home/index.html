@@ -1,9 +1,17 @@
-{% if latest_item_list %}
-    <ul>
-    {% for item in latest_item_list %}
-        <li><a href="{% url 'home:detail' item.id %}">{{ item.item_name }}</a></li>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Inventory</title>
+</head>
+<body>
+{% extends "base.html" %}
+
+{% block content %}
+<ul>
+    {% for item in item_list %}
+        <li><a href="{{ item.get_absolute_url }}">{{ item.item_name }}</a></li>
     {% endfor %}
-    </ul>
-{% else %}
-    <p>No items are available.</p>
-{% endif %}
+</ul>
+{% endblock %}
+</body>
+</html>

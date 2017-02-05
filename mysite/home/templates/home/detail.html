@@ -1,6 +1,26 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
 {% load static %}
-
-<link rel="stylesheet" type="text/css" href="{% static 'home/style.css' %}" />
+<html>
+<head>
+	<title>{{item.item_name}}</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'home/style.css' %}" />
+</head>
+<body>
+{% block content %}
 
 <h1>{{ item.item_name }}</h1>
-<h2>Count: {{item.count}}</h2>
+<h2>Count: {{item.total_count}}</h2>
+
+<form action="{% url 'request' item.id %}" method="POST">
+  {% csrf_token %}
+  
+  <input type="text" name="reason" id="reason"/>
+  <label for="reason">Reason:</label>
+
+  <input id="save_request" type="submit" value="Save" />
+</form>
+
+{% endblock %}
+</body>
+</html>

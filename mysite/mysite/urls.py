@@ -18,13 +18,16 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+import home.views as views
 
+## refactor application urls when necessary
 urlpatterns = [
-    url(r'^$', RedirectView.as_view(url='/home')),
-    url(r'^home/', include('home.urls')),
+    url(r'^$', views.ListItemView.as_view(), name='index'),
+    url(r'^(?P<item_id>[0-9]+)/$', views.detail, name='detail'),
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.login, name="login"),
-    url(r'^logout/$', auth_views.logout,name='logout')
+    url(r'^logout/$', auth_views.logout,name='logout'),
+    url(r'^(?P<item_id>[0-9]+)/request/$', views.request, name='request')
 ]
 
 
