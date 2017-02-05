@@ -42,11 +42,19 @@ class RequestOwnerMixin(object):
 			raise PermsisionDenied
 		return obj
 
-class requestsView(RequestOwnerMixin, LoggedInMixin, generic.ListView):
+class requestsView(LoggedInMixin, RequestOwnerMixin, generic.ListView):
 	model = Request;
 	context_object_name = 'request_list';
 	template_name = 'home/requests.html';
 
 	def get_queryset(self):
 		return Request.objects.filter(owner=self.request.user);
+
+class serviceRequestsView(LoggedInMixin, generic.ListView):
+	model = Request;
+	context_object_name = 'request_list';
+
+	template_name = 'home/service.html';
+	def get_queryset(self):
+		return Request.objects.filter(status='O');
 	

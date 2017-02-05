@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.contrib.auth.decorators import login_required, permission_required
 from home import views as views2
 
 urlpatterns = [
@@ -26,7 +27,9 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.login, name="login"),
     url(r'^logout/$', auth_views.logout,name='logout'),
-    url(r'^requests/$', views2.requestsView.as_view(), name='requests')
+    url(r'^requests/$', views2.requestsView.as_view(), name='requests'),
+    url(r'^service/$', permission_required('home.can_service')\
+        (views2.serviceRequestsView.as_view()), name='service')
 ]
 
 
