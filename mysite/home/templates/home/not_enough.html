@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% load static %}
+<html>
+<head>
+	<title>{{item.item_name}}</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'home/style.css' %}" />
+</head>
+<body>
+{% block content %}
+<h2>Not enough available instances to disburse</h2>
+{% endblock %}
+</body>
+</html>

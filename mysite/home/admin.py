@@ -22,7 +22,8 @@ class RequestAdmin(admin.ModelAdmin):
     fieldsets = [
         (None,               {'fields': ['user_id','item_id']}),
         ('Reason', {'fields': ['reason']}),
-        ('Status', {'fields': ['status']})
+        ('Status', {'fields': ['status']}),
+        ('Comment', {'fields': ['admin_comment']})
     ]
 
 admin.site.register(Item, ItemAdmin)
