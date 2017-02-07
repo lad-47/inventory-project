@@ -32,10 +32,13 @@ urlpatterns = [
     url(r'^delete/(?P<pk>\d+)/$', views.DeleteRequestView.as_view(),
         name='request-delete'),
     url(r'^requests/$', views.requestsView.as_view(), name='requests'),
-    url(r'^service/$', permission_required('home.can_service')\
+    url(r'^all_requests/$', permission_required('home.can_service')\
         (views.serviceRequestsView.as_view()), name='service'),
+    ##this is hacked over the automatic destination of denying permission
     url(r'^accounts/login/$', views.cannotService, name='cant_service'),
-    url(r'^service_request/$', views.service_request, name='service form')
+    url(r'^request/(?P<request_id>[0-9]+)/$', views.request_details, name='service form'),
+    url(r'^request/(?P<request_id>[0-9]+)/service/$', views.service_request, \
+        name='service request form')
 ]
 
 

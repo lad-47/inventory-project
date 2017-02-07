@@ -18,7 +18,7 @@
     	{% endfor %}
     </select>
     <label for="exselect">Exclude Tag:</label>
-    <select id="exselect" name="exselect">
+    <select id="exselect" multiple name="exselect">
       <option value="none">None</option>
       {% for tag in tag_list %}
       <option value="{{tag.tag}}">{{tag.tag}}</option>
