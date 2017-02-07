@@ -16,12 +16,13 @@ def index(request):
     if request.method == 'GET': # If the form is submitted
         latest_item_list = Item.objects.all()
         search_query = request.GET.get('search_box', None)
-        tag_query = request.GET.get('select', None)
+        tag_query = request.GET.getlist('select', None)
         extag_query = request.GET.get('exselect', None)
         if search_query is not None:
             latest_item_list = latest_item_list.filter(item_name__icontains=search_query)
-        if tag_query is not None and tag_query!='all':
-            latest_item_list = latest_item_list.filter(tag__tag=tag_query)
+        if tag_query is not None and 'all' not in tag_query:
+            for tag in tag_query:
+                latest_item_list = latest_item_list.filter(tag__tag=tag) 
         if extag_query is not None and extag_query!='none':
         	latest_item_list = latest_item_list.exclude(tag__tag=extag_query)
     context = {
@@ -34,7 +35,7 @@ def detail(request, item_id):
     item = get_object_or_404(Item, pk=item_id)
     if not request.user.is_authenticated():
         return render(request, 'home/detail.html', {'item':item})
-    requests = Request.objects.filter(item_id=item.id,user_id=request.user)
+    requests = Request.objects.filter(item_id=item.id,owner=request.user)
     context = {
         'item': item,
         'requests': requests  
@@ -96,7 +97,7 @@ def service_request(request):
 	
 	if not request.user.is_authenticated():
 		return render(request, 'home/detail.html', {'item':item})
-	requests = Request.objects.filter(item_id=item.id,user_id=request.user)
+	requests = Request.objects.filter(item_id=item.id,owner=request.user)
 	context = {
         'item': item,
         'requests': requests  
@@ -105,7 +106,7 @@ def service_request(request):
 
 def request(request, item_id):
     item = get_object_or_404(Item, pk=item_id)
-    new_request = Request(user_id=request.user,item_id=item,reason=request.POST['reason'],status='O')
+    new_request = Request(owner=request.user,item_id=item,reason=request.POST['reason'],status='O')
     new_request.save()
     return HttpResponse("success")
 
