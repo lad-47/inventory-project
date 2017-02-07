@@ -2,8 +2,6 @@ from django.conf.urls import url
 
 from . import views
 
-from .views import ItemListView
-
 app_name = 'home'
 # urlpatterns = [
 # 	# ex: /home/
