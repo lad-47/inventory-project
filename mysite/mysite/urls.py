@@ -18,13 +18,22 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.contrib.auth.decorators import login_required, permission_required
+import home.views as views
 
+## refactor application urls when necessary
 urlpatterns = [
-    url(r'^$', RedirectView.as_view(url='/home')),
-    url(r'^home/', include('home.urls')),
+    url(r'^$', views.index, name='index'),
+    url(r'^(?P<item_id>[0-9]+)/$', views.detail, name='detail'),
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.login, name="login"),
-    url(r'^logout/$', auth_views.logout,name='logout')
+    url(r'^logout/$', auth_views.logout,name='logout'),
+    url(r'^requests/$', views.requestsView.as_view(), name='requests'),
+    url(r'^service/$', permission_required('home.can_service')\
+        (views.serviceRequestsView.as_view()), name='service'),
+    url(r'^accounts/login/$', views.cannotService, name='cant_service'),
+    url(r'^service_request/$', views.service_request, name='service form')
+    url(r'^(?P<item_id>[0-9]+)/request/$', views.request, name='request')
 ]
 
 

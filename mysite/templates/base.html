@@ -3,21 +3,38 @@
 <html>
 <head>
 	<title></title>
-	<link href="{% static 'bootstrap/css/bootstrap.min.css' %}"
-          rel="stylesheet" media="screen">
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 </head>
 <body>
-	<div>
-      {{ user }}
-      {% if user.is_anonymous %}
-      <a href="{% url 'login' %}">login</a>
-      {% else %}
-      <a href="{% url 'logout' %}">logout</a>
-      {% endif %}
-    </div>
+
+<nav class="navbar navbar-default">
+		<div class="container">
+			<div class="navbar-header">
+				 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-nav-demo" aria-expanded="false">
+	        <span class="sr-only">Toggle navigation</span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	      </button>
+				<a href="{% url 'index' %}" class="navbar-brand">Inventory</a>
+			</div>
+			<div class="collapse navbar-collapse" id="bs-nav-demo">
+				<ul class="nav navbar-nav">
+					<li><a>Signed in as {{ user }}</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					{% if user.is_anonymous %}
+      				<li><a href="{% url 'login' %}">Login</a></li>
+      				{% else %}
+      				<li><a href="{% url 'logout' %}">Logout</a></li>
+      				{% endif %}
+				</ul>
+			</div>
+		</div>
+	</nav>
 	{% block content %}
     {% endblock %}
-
-    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 </body>
 </html>

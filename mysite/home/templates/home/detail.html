@@ -1,6 +1,47 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
 {% load static %}
-
-<link rel="stylesheet" type="text/css" href="{% static 'home/style.css' %}" />
-
+<html>
+<head>
+	<title>{{item.item_name}}</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'home/style.css' %}" />
+</head>
+<body>
+{% block content %}
+<div style="padding-left: 15px">
 <h1>{{ item.item_name }}</h1>
-<h2>Count: {{item.total_count}}</h2>
+<p>Available: {{item.total_available}} out of {{item.total_count}} total</p>
+<p>Model: {{item.model_number}}</p>
+<p>Description: {{item.description}}</p>
+<p>Location: {{item.location}}</p>
+</div>
+<hr>
+
+<ul class="list-group">
+	{% for request in requests %}
+	{% if request.status == "O" %}
+  	<li class="list-group-item list-group-item-warning">Request Status: {{request.status}} <br> Reason: {{request.reason}}</li>
+  	{% elif request.status == "D" %}
+  	<li class="list-group-item list-group-item-danger">Request Status: {{request.status}} <br> Reason: {{request.reason}}</li>
+  	{% elif request.status == "A" %}
+  	<li class="list-group-item list-group-item-success">Request Status: {{request.status}} <br> Reason: {{request.reason}}</li>
+  	{% endif %}
+	{% endfor %}
+</ul>
+
+<hr>
+<h1 style="padding-left: 15px">Request This Item:</h1>
+<div>
+<form class="navbar-form navbar-top" role="search" action="{% url 'request' item.id %}" method="POST">	
+  {% csrf_token %}
+  <div class="form-group">
+  	<label for="reason">Reason:</label>
+    <input id="reason" name="reason" type="text" class="form-control" placeholder="Reason">
+  </div>
+  <button id="save_request" type="submit" class="btn btn-default">Submit</button>
+</form>
+</div>
+
+{% endblock %}
+</body>
+</html>

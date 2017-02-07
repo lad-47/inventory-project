@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<ul id="requestUnorderedList">
+	<li>el 1aaaaasdfasd</li>
+	<li>{{whatever}}</li>
+</ul>
+
+{% if request_list %}
+	<ul>
+	{% for request in request_list %}
+		<li><a href="/home/{{request.id}}/">{{request.reason}}</a></li>
+
+	{% endfor %}
+	</ul>
+{% else %}
+	<p> No Requests Available </p>
+{% endif %}
+{% endblock%}
