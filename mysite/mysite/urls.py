@@ -32,7 +32,7 @@ urlpatterns = [
     url(r'^service/$', permission_required('home.can_service')\
         (views.serviceRequestsView.as_view()), name='service'),
     url(r'^accounts/login/$', views.cannotService, name='cant_service'),
-    url(r'^service_request/$', views.service_request, name='service form')
+    url(r'^service_request/$', views.service_request, name='service form'),
     url(r'^(?P<item_id>[0-9]+)/request/$', views.request, name='request')
 ]
 
