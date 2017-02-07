@@ -10,8 +10,8 @@
 <form class="navbar-form navbar-top" role="search" action="{% url 'service request form' current_request.id %}" method="POST">	
   {% csrf_token %}
   <div class="form-group">
-  	<label for="reason">Comment:</label>
-    <input id="reason" name="reason" type="text" class="form-control" placeholder="Comment">
+  	<label for="comment">Comment:</label>
+    <input id="comment" name="comment" type="text" class="form-control" placeholder="Comment">
     <label for="select">Approve/Deny:</label>
     <select id="select" name="select">
     	<option value="Approve">Approve</option>

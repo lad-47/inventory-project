@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-<ul id="requestUnorderedList">
-	<li>el 1aaaaasdfasd</li>
-	<li>{{whatever}}</li>
-	<li> adfadf</li>
-</ul>
 
 {% if request_list %}
 	<h3>Outstanding Requests</h3>
 	<ul>
 	{% for request in request_list %}
 		{% if request.status == "O" %}
-		<li><p>Item: <a href="/{{request.item_id_id}}""> {{request.item_id}}</a><p> Reason: {{request.reason}}   <p><a href="/request/{{request.pk}}">Service This Request</a></li>
+		<li>
+		<p>Item: <a href="/{{request.item_id_id}}""> {{request.item_id}};</a></p>
+		<p>Quantity: {{request.quantity}}</p>
+		<p>Reason: {{request.reason}} </p>
+		<p><a href="/request/{{request.pk}}">Service This Request</a></p>
+		</li>
 		{% endif %}
 	{% endfor %}
 	</ul>
@@ -21,7 +21,12 @@
 	<ul>
 	{% for request in request_list %}
 		{% if request.status == "D" %}
-		<li><a href="/home/{{request.item_id_id_id}}/">{{request.reason}}</a></li>
+		<li>
+		<p>Item: <a href="/{{request.item_id_id}}""> {{request.item_id}};</a></p>
+		<p>Requested Quantity: {{request.quantity}}</p>
+		<p>Reason: {{request.reason}} </p>
+		<p>Administrator Comment: {{request.admin_comment}}</p>
+		</li>
 		{% endif %}
 	{% endfor %}
 	</ul>
@@ -30,7 +35,13 @@
 	<ul>
 	{% for request in request_list %}
 		{% if request.status == "A" %}
-		<li><a href="/home/{{request.item_id}}/">{{request.reason}}</a></li>
+		<li>
+		<p>Item: 
+		<a href="/{{request.item_id_id}}""> {{request.item_id}}</a></p>
+		<p> Requested Quantity: {{request.quantity}} </p>
+		<p> Reason: {{request.reason}} </p>
+		<p>Administrator Comment: {{request.admin_comment}}</p>
+		</li>
 		{% endif %}
 	{% endfor %}
 	</ul>

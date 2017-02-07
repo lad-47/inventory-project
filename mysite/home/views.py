@@ -81,29 +81,10 @@ class serviceRequestsView(LoggedInMixin, ListView):
 def cannotService(request):
 	return render(request, 'home/notAdmin.html'); 
 
-def service_request_form(request, request_id):
-	if request.method == 'POST':
-		form = ServiceReqForm(request.POST);
-
-		if form.is_valid():
-			return HttpResponseRedirect('/processed/');
-	else:
-		form = ServiceReqForm();
-		return render(request, 'home/serviceReq.html', {'form:': form})
-	
-	if not request.user.is_authenticated():
-		return render(request, 'home/serviceReq.html', {'item':item})
-	requests = Request.objects.filter(item_id=item.id,owner=request.user)
-	context = {
-        'item': item,
-        'requests': requests  
-        }
-	return render(request, 'home/serviceReq.html', context)
-
 def request_details(request, request_id):
-    current_request = get_object_or_404(Request, pk=request_id)
     if not request.user.is_staff:
         return render(request, 'home/notAdmin.html')
+    current_request = get_object_or_404(Request, pk=request_id)
     context = {
         'current_request': current_request 
     }
@@ -111,6 +92,8 @@ def request_details(request, request_id):
 
 
 def service_request(request, request_id):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
 	approve_deny = request.POST.get('select', None);
 	requestToService = get_object_or_404(Request, pk=request_id);
 	if (approve_deny == 'Approve'):
@@ -124,6 +107,8 @@ def service_request(request, request_id):
 	else:
 		requestToService.status='D';
 	
+	admin_comment_fromReq = request.POST.get('comment', None);
+	requestToService.admin_comment= admin_comment_fromReq;
 	requestToService.save();
 	return HttpResponse("success");
 
