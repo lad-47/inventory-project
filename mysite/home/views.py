@@ -115,13 +115,15 @@ def service_request(request, request_id):
 	admin_comment_fromReq = request.POST.get('comment', None);
 	requestToService.admin_comment= admin_comment_fromReq;
 	requestToService.save();
+	#return render(request, 'home/request_success.html')
 	return HttpResponse("success");
 
 def request(request, item_id):
     item = get_object_or_404(Item, pk=item_id)
     new_request = Request(owner=request.user,item_id=item,reason=request.POST['reason'],status='O')
     new_request.save()
-    return HttpResponse("success")
+    return render(request, 'home/request_success.html')
+    #return HttpResponse("success")
 
 class DeleteRequestView(DeleteView):
     model = Request
