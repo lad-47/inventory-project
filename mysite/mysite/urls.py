@@ -22,7 +22,7 @@ import home.views as views
 
 ## refactor application urls when necessary
 urlpatterns = [
-    url(r'^$', views.ListItemView.as_view(), name='index'),
+    url(r'^$', views.index, name='index'),
     url(r'^(?P<item_id>[0-9]+)/$', views.detail, name='detail'),
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.login, name="login"),
