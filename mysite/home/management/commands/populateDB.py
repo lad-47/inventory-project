@@ -11,7 +11,8 @@ class Command(BaseCommand):
         	name='Can Service Requests', \
         	content_type=ContentType.objects.get_for_model(Request));
         jdk1.user_permissions.add(canService);
-
+        jdk1.is_staff=True;
+        jdk1.save();
         jdk2 = User.objects.create_user(username='jdk2', \
         	password='yellowisacolor2', email=None);
         resistor100ohm = Item.objects.create(item_name="Resistor 100 Ohm", \
@@ -21,6 +22,6 @@ class Command(BaseCommand):
         	total_count=10, total_available=10, model_number="R200", \
         	description="Resistor", location="Hudson");
         jdk1Res100 = Request.objects.create(owner=jdk1, item_id=resistor100ohm,\
-        	reason="because I need it", status='O');
+        	reason="because I need it", status='O', quantity='5');
         jdk2Res200 = Request.objects.create(owner=jdk2, item_id=resistor200ohm, \
         	reason="hugh mungus what?", status='O');

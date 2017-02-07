@@ -6,7 +6,8 @@ from django.utils.decorators import method_decorator
 from .models import Item, Request, Tag;
 from .forms import ServiceReqForm;
 #chance genereic.Listview stuff to ListView
-from django.views.generic import View, DetailView, ListView, CreateView, FormView, DeleteView
+from django.views.generic import View, DetailView, ListView, DeleteView, CreateView, FormView
+
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
 
@@ -80,7 +81,7 @@ class serviceRequestsView(LoggedInMixin, ListView):
 
 	template_name = 'home/service.html';
 	def get_queryset(self):
-		return Request.objects.filter(status='O');
+		return Request.objects.all();
 
 def cannotService(request):
 	return render(request, 'home/notAdmin.html'); 
