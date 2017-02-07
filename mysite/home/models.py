@@ -27,6 +27,7 @@ class Request(models.Model):
 	owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
 	item_id = models.ForeignKey(Item, on_delete=models.CASCADE, default=1)
 	reason = models.TextField()
+	quantity = models.IntegerField(default=1);
 	status = models.CharField(max_length=1, choices=STATUSES, default='O')
 	#testField = models.IntegerField(default=0);
 	def __str__(self):

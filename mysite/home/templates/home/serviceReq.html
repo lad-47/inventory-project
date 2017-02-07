@@ -1,8 +1,24 @@
 {% extends "base.html" %}
 
-<h2> test service requirement </h2>
-<form action="/comment/" method="post">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit" />
+{% block content %}
+<p>Item: <a href="/{{current_request.item_id_id}}""> {{current_request.item_id}}</a><p> Reason: {{current_request.reason}}   <p>
+<h1 style="padding-left: 15px">Service This Request:</h1>
+<div>
+
+
+
+<form class="navbar-form navbar-top" role="search" action="{% url 'service request form' current_request.id %}" method="POST">	
+  {% csrf_token %}
+  <div class="form-group">
+  	<label for="reason">Comment:</label>
+    <input id="reason" name="reason" type="text" class="form-control" placeholder="Comment">
+    <label for="select">Approve/Deny:</label>
+    <select id="select" name="select">
+    	<option value="Approve">Approve</option>
+    	<option value="Deny">Deny</option>
+    </select>
+  </div>
+  <button id="save_request" type="submit" class="btn btn-default">Submit</button>
 </form>
+</div>
+{% endblock %}

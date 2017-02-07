@@ -4,15 +4,38 @@
 <ul id="requestUnorderedList">
 	<li>el 1aaaaasdfasd</li>
 	<li>{{whatever}}</li>
+	<li> adfadf</li>
 </ul>
 
 {% if request_list %}
+	<h3>Outstanding Requests</h3>
 	<ul>
 	{% for request in request_list %}
-		<li><a href="/home/{{request.id}}/">{{request.reason}}</a></li>
-
+		{% if request.status == "O" %}
+		<li><p>Item: <a href="/{{request.item_id_id}}""> {{request.item_id}}</a><p> Reason: {{request.reason}}   <p><a href="/request/{{request.pk}}">Service This Request</a></li>
+		{% endif %}
 	{% endfor %}
 	</ul>
+
+	<h3>Denied Requests</h3>
+	<ul>
+	{% for request in request_list %}
+		{% if request.status == "D" %}
+		<li><a href="/home/{{request.item_id_id_id}}/">{{request.reason}}</a></li>
+		{% endif %}
+	{% endfor %}
+	</ul>
+
+	<h3>Approved Requests</h3>
+	<ul>
+	{% for request in request_list %}
+		{% if request.status == "A" %}
+		<li><a href="/home/{{request.item_id}}/">{{request.reason}}</a></li>
+		{% endif %}
+	{% endfor %}
+	</ul>
+
+
 {% else %}
 	<p> No Requests Available </p>
 {% endif %}
