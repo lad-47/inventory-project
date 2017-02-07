@@ -23,6 +23,11 @@
 			<div class="collapse navbar-collapse" id="bs-nav-demo">
 				<ul class="nav navbar-nav">
 					<li><a>Signed in as {{ user }}</a></li>
+					{% if user.is_staff %}
+      				<li><a href="{% url 'service' %}">Service Requests</a></li>
+      				{% else %}
+      				<li><a href="{% url 'requests' %}">View Requests</a></li>
+      				{% endif %}
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					{% if user.is_anonymous %}

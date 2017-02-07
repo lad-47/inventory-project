@@ -8,7 +8,7 @@
 	{% for request in request_list %}
 		{% if request.status == "O" %}
 		<li>
-		<p>Item: <a href="/{{request.item_id_id}}""> {{request.item_id}};</a></p>
+		<p>Item: <a href="/{{request.item_id_id}}""> {{request.item_id}}</a></p>
 		<p>Quantity: {{request.quantity}}</p>
 		<p>Reason: {{request.reason}} </p>
 		<p><a href="/request/{{request.pk}}">Service This Request</a></p>
@@ -22,7 +22,7 @@
 	{% for request in request_list %}
 		{% if request.status == "D" %}
 		<li>
-		<p>Item: <a href="/{{request.item_id_id}}""> {{request.item_id}};</a></p>
+		<p>Item: <a href="/{{request.item_id_id}}""> {{request.item_id}}</a></p>
 		<p>Requested Quantity: {{request.quantity}}</p>
 		<p>Reason: {{request.reason}} </p>
 		<p>Administrator Comment: {{request.admin_comment}}</p>

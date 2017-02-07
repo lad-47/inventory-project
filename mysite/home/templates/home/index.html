@@ -9,7 +9,10 @@
 {% block content %}
 <form class="navbar-form navbar-top" role="search" type="get" action=".">
   <div class="form-group">
-    <input id="search_box" name="search_box" type="text" class="form-control" placeholder="Search">
+  	<label for="search_box">Search Name:</label>
+    <input id="search_box" name="search_box" type="text" class="form-control" placeholder="Search name">
+    <label for="model_box">Search Model:</label>
+    <input id="model_box" name="model_box" type="text" class="form-control" placeholder="Search model">
     <label for="select">Include Tag:</label>
     <select id="select" multiple name="select">
     	<option value="all">All</option>
@@ -18,7 +21,7 @@
     	{% endfor %}
     </select>
     <label for="exselect">Exclude Tag:</label>
-    <select multiple id="exselect" name="exselect">
+    <select id="exselect" multiple name="exselect">
       <option value="none">None</option>
       {% for tag in tag_list %}
       <option value="{{tag.tag}}">{{tag.tag}}</option>

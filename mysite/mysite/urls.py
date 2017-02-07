@@ -38,7 +38,7 @@ urlpatterns = [
     url(r'^accounts/login/$', views.cannotService, name='cant_service'),
     url(r'^request/(?P<request_id>[0-9]+)/$', views.request_details, name='service form'),
     url(r'^request/(?P<request_id>[0-9]+)/service/$', views.service_request, \
-        name='service request form'),
+        name='service request form')
 ]
 
 

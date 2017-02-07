@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 
 from .models import Item, Request, Tag;
 from .forms import ServiceReqForm;
-#chance genereic.Listview stuff to ListView
+# chance genereic.Listview stuff to ListView
 from django.views.generic import View, DetailView, ListView, DeleteView, CreateView, FormView
 
 from django.views.generic.detail import SingleObjectMixin
@@ -14,18 +14,22 @@ from django.core.urlresolvers import reverse
 def index(request):
     latest_item_list = Item.objects.order_by('id')[:5]
     tag_list = Tag.objects.distinct('tag')
-    if request.method == 'GET': # If the form is submitted
+    if request.method == 'GET':  # If the form is submitted
         latest_item_list = Item.objects.all()
         search_query = request.GET.get('search_box', None)
+        model_query = request.GET.get('model_box', None)
         tag_query = request.GET.getlist('select', None)
-        extag_query = request.GET.get('exselect', None)
+        extag_query = request.GET.getlist('exselect', None)
         if search_query is not None:
             latest_item_list = latest_item_list.filter(item_name__icontains=search_query)
+        if model_query is not None:
+            latest_item_list = latest_item_list.filter(model_number__icontains=model_query)
         if tag_query is not None and 'all' not in tag_query:
             for tag in tag_query:
                 latest_item_list = latest_item_list.filter(tag__tag=tag) 
-        if extag_query is not None and extag_query!='none':
-        	latest_item_list = latest_item_list.exclude(tag__tag=extag_query)
+        if extag_query is not None and 'none' not in extag_query:
+            for tag in extag_query:
+        	       latest_item_list = latest_item_list.exclude(tag__tag=tag)
     context = {
         'latest_item_list': latest_item_list,
         'tag_list': tag_list
@@ -36,7 +40,7 @@ def detail(request, item_id):
     item = get_object_or_404(Item, pk=item_id)
     if not request.user.is_authenticated():
         return render(request, 'home/detail.html', {'item':item})
-    requests = Request.objects.filter(item_id=item.id,owner=request.user)
+    requests = Request.objects.filter(item_id=item.id, owner=request.user)
     context = {
         'item': item,
         'requests': requests  
@@ -85,7 +89,7 @@ class serviceRequestsView(LoggedInMixin, ListView):
 
 def cannotService(request):
 	return render(request, 'home/notAdmin.html'); 
-
+    
 def request_details(request, request_id):
     if not request.user.is_staff:
         return render(request, 'home/notAdmin.html')
@@ -95,35 +99,35 @@ def request_details(request, request_id):
     }
     return render(request, 'home/serviceReq.html', context)
 
-
 def service_request(request, request_id):
-	if not request.user.is_staff:
-		return render(request, 'home/notAdmin.html')
-	approve_deny = request.POST.get('select', None);
-	requestToService = get_object_or_404(Request, pk=request_id);
-	if (approve_deny == 'Approve'):
-		itemToChange = Item.objects.get(id=requestToService.item_id_id);
-		oldQuantity = itemToChange.total_available;
-		requestAmount = requestToService.quantity;
-		newQuantity = oldQuantity - requestAmount;
-		itemToChange.total_available=newQuantity;
-		requestToService.status='A';
-		itemToChange.save();
-	else:
-		requestToService.status='D';
+    if not request.user.is_staff:
+        return render(request, 'home/notAdmin.html')
+    approve_deny = request.POST.get('select', None);
+    requestToService = get_object_or_404(Request, pk=request_id);
+    if (approve_deny == 'Approve'):
+        itemToChange = Item.objects.get(id=requestToService.item_id_id);
+        oldQuantity = itemToChange.total_available;
+        requestAmount = requestToService.quantity;
+        newQuantity = oldQuantity - requestAmount;
+        if newQuantity < 0:
+            return render(request, 'home/not_enough.html')
+        itemToChange.total_available = newQuantity;
+        requestToService.status = 'A';
+        itemToChange.save();
+    else:
+        requestToService.status = 'D';
 	
-	admin_comment_fromReq = request.POST.get('comment', None);
-	requestToService.admin_comment= admin_comment_fromReq;
-	requestToService.save();
-	#return render(request, 'home/request_success.html')
-	return HttpResponse("success");
+    admin_comment_fromReq = request.POST.get('comment', None);
+    requestToService.admin_comment = admin_comment_fromReq;
+    requestToService.save();
+    return render(request, 'home/request_success.html')
 
 def request(request, item_id):
     item = get_object_or_404(Item, pk=item_id)
-    new_request = Request(owner=request.user,item_id=item,reason=request.POST['reason'],status='O')
+    new_request = Request(owner=request.user, item_id=item, reason=request.POST['reason'], quantity=request.POST['quantity'], status='O')
     new_request.save()
     return render(request, 'home/request_success.html')
-    #return HttpResponse("success")
+    # return HttpResponse("success")
 
 class DeleteRequestView(DeleteView):
     model = Request
