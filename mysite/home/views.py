@@ -6,7 +6,8 @@ from django.utils.decorators import method_decorator
 from .models import Item, Request, Tag;
 from .forms import ServiceReqForm;
 #chance genereic.Listview stuff to ListView
-from django.views.generic import View, DetailView, ListView, CreateView, FormView, DeleteView
+from django.views.generic import View, DetailView, ListView, DeleteView, CreateView, FormView
+
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
 
@@ -80,29 +81,41 @@ class serviceRequestsView(LoggedInMixin, ListView):
 
 	template_name = 'home/service.html';
 	def get_queryset(self):
-		return Request.objects.filter(status='O');
+		return Request.objects.all();
 
 def cannotService(request):
 	return render(request, 'home/notAdmin.html'); 
 
-def service_request(request):
-	if request.method == 'POST':
-		form = ServiceReqForm(request.POST);
+def request_details(request, request_id):
+    if not request.user.is_staff:
+        return render(request, 'home/notAdmin.html')
+    current_request = get_object_or_404(Request, pk=request_id)
+    context = {
+        'current_request': current_request 
+    }
+    return render(request, 'home/serviceReq.html', context)
 
-		if form.is_valid():
-			return HttpResponseRedirect('/processed/');
+
+def service_request(request, request_id):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	approve_deny = request.POST.get('select', None);
+	requestToService = get_object_or_404(Request, pk=request_id);
+	if (approve_deny == 'Approve'):
+		itemToChange = Item.objects.get(id=requestToService.item_id_id);
+		oldQuantity = itemToChange.total_available;
+		requestAmount = requestToService.quantity;
+		newQuantity = oldQuantity - requestAmount;
+		itemToChange.total_available=newQuantity;
+		requestToService.status='A';
+		itemToChange.save();
 	else:
-		form = ServiceReqForm();
-		return render(request, 'home/serviceReq.html', {'form:': form})
+		requestToService.status='D';
 	
-	if not request.user.is_authenticated():
-		return render(request, 'home/detail.html', {'item':item})
-	requests = Request.objects.filter(item_id=item.id,owner=request.user)
-	context = {
-        'item': item,
-        'requests': requests  
-        }
-	return render(request, 'home/detail.html', context)
+	admin_comment_fromReq = request.POST.get('comment', None);
+	requestToService.admin_comment= admin_comment_fromReq;
+	requestToService.save();
+	return HttpResponse("success");
 
 def request(request, item_id):
     item = get_object_or_404(Item, pk=item_id)
