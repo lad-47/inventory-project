@@ -10,7 +10,7 @@
 
 <h1>Delete Request</h1>
 
-<p>Are you sure you want to delete the request?</p>
+<p>Are you sure you want to delete the request for {{request.item_id}}?</p>
 <p>Reason: {{request.reason}}</p>
 
 <form action="{% url "request-delete" pk=request.id %}" method="POST">

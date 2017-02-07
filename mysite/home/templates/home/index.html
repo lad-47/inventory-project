@@ -11,7 +11,7 @@
   <div class="form-group">
     <input id="search_box" name="search_box" type="text" class="form-control" placeholder="Search">
     <label for="select">With Tag:</label>
-    <select id="select" name="select">
+    <select id="select" multiple name="select">
     	<option value="all">All</option>
     	{% for tag in tag_list %}
     	<option value="{{tag.tag}}">{{tag.tag}}</option>
