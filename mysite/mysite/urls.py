@@ -30,7 +30,8 @@ urlpatterns = [
     url(r'^requests/$', views2.requestsView.as_view(), name='requests'),
     url(r'^service/$', permission_required('home.can_service')\
         (views2.serviceRequestsView.as_view()), name='service'),
-    url(r'^accounts/login/$', views2.cannotService, name='cant_service')
+    url(r'^accounts/login/$', views2.cannotService, name='cant_service'),
+    url(r'^service_request/$', views2.service_request, name='service form')
 ]
 
 

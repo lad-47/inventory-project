@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+<h2> test service requirement </h2>
+<form action="/comment/" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit" />
+</form>

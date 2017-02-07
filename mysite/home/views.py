@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
 from .models import Item, Request, Tag;
-
+from .forms import ServiceReqForm;
 
 def index(request):
     latest_item_list = Item.objects.order_by('id')[:5]
@@ -60,4 +60,14 @@ class serviceRequestsView(LoggedInMixin, generic.ListView):
 
 def cannotService(request):
 	return render(request, 'home/notAdmin.html'); 
+
+def service_request(request):
+	if request.method == 'POST':
+		form = ServiceReqForm(request.POST);
+
+		if form.is_valid():
+			return HttpResponseRedirect('/processed/');
+	else:
+		form = ServiceReqForm();
+	return render(request, 'home/serviceReq.html', {'form:': form})
 	
