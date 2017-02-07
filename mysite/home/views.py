@@ -7,6 +7,7 @@ from .models import Item, Request, Tag;
 from .forms import ServiceReqForm;
 #chance genereic.Listview stuff to ListView
 from django.views.generic import View, DetailView, ListView, DeleteView, CreateView, FormView
+
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
 
@@ -16,11 +17,15 @@ def index(request):
     if request.method == 'GET': # If the form is submitted
         latest_item_list = Item.objects.all()
         search_query = request.GET.get('search_box', None)
-        tag_query = request.GET.get('select', None)
+        tag_query = request.GET.getlist('select', None)
+        extag_query = request.GET.get('exselect', None)
         if search_query is not None:
             latest_item_list = latest_item_list.filter(item_name__icontains=search_query)
-        if tag_query is not None and tag_query!='all':
-            latest_item_list = latest_item_list.filter(tag__tag=tag_query)
+        if tag_query is not None and 'all' not in tag_query:
+            for tag in tag_query:
+                latest_item_list = latest_item_list.filter(tag__tag=tag) 
+        if extag_query is not None and extag_query!='none':
+        	latest_item_list = latest_item_list.exclude(tag__tag=extag_query)
     context = {
         'latest_item_list': latest_item_list,
         'tag_list': tag_list
