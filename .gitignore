@@ -5,3 +5,5 @@ staticfiles
 db.sqlite3
 .project
 .pydevproject
+mysite/mysiteenv
+mysite/env
