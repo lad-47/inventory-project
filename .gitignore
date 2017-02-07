@@ -7,3 +7,5 @@ db.sqlite3
 .pydevproject
 mysite/mysiteenv
 mysite/env
+.metadata
+**/.DS_Store
