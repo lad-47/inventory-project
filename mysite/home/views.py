@@ -86,13 +86,13 @@ def service_request(request):
 		return render(request, 'home/serviceReq.html', {'form:': form})
 	
 	if not request.user.is_authenticated():
-		return render(request, 'home/detail.html', {'item':item})
+		return render(request, 'home/serviceReq.html', {'item':item})
 	requests = Request.objects.filter(item_id=item.id,user_id=request.user)
 	context = {
         'item': item,
         'requests': requests  
         }
-	return render(request, 'home/detail.html', context)
+	return render(request, 'home/serviceReq.html', context)
 
 def request(request, item_id):
     item = get_object_or_404(Item, pk=item_id)

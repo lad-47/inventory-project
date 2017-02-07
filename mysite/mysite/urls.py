@@ -29,8 +29,9 @@ urlpatterns = [
     url(r'^login/$', auth_views.login, name="login"),
     url(r'^logout/$', auth_views.logout,name='logout'),
     url(r'^requests/$', views.requestsView.as_view(), name='requests'),
-    url(r'^service/$', permission_required('home.can_service')\
+    url(r'^all_requests/$', permission_required('home.can_service')\
         (views.serviceRequestsView.as_view()), name='service'),
+    ##this is hacked over the automatic destination of denying permission
     url(r'^accounts/login/$', views.cannotService, name='cant_service'),
     url(r'^service_request/$', views.service_request, name='service form'),
     url(r'^(?P<item_id>[0-9]+)/request/$', views.request, name='request')
