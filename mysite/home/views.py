@@ -1,6 +1,5 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
-
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
@@ -30,7 +29,14 @@ def index(request):
  	
 def detail(request, item_id):
     item = get_object_or_404(Item, pk=item_id)
-    return render(request, 'home/detail.html', {'item': item})
+    if not request.user.is_authenticated():
+        return render(request, 'home/detail.html', {'item':item})
+    requests = Request.objects.filter(item_id=item.id,user_id=request.user)
+    context = {
+        'item': item,
+        'requests': requests  
+    }
+    return render(request, 'home/detail.html', context)
 
 class LoggedInMixin(object):
 
@@ -100,6 +106,13 @@ def request(request, item_id):
     new_request.save()
     return HttpResponse("success")
 
+class DeleteRequestView(DeleteView):
+    model = Request
+    template_name = 'home/delete_request.html'
+    
+    def get_success_url(self):
+        return reverse('index')
+
 # class ListItemView(ListView):
 #     model=Item
 #     template_name='home/index.html'
@@ -107,4 +120,3 @@ def request(request, item_id):
 # class ItemDetailView(DetailView):
 #     model=Item
 #     template_name='home/detail.html'
-   
