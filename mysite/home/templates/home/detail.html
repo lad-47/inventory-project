@@ -20,11 +20,12 @@
 <ul class="list-group">
 	{% for request in requests %}
 	{% if request.status == "O" %}
-  	<li class="list-group-item list-group-item-warning">Request Status: {{request.status}} <br> Reason: {{request.reason}}</li>
+  	<li class="list-group-item list-group-item-warning">Request Status: Outstanding <br> Reason: {{request.reason}} 
+  	<a href="{% url "request-delete" pk=request.id %}" class="btn btn-danger btn-xs">Delete</a></li>
   	{% elif request.status == "D" %}
-  	<li class="list-group-item list-group-item-danger">Request Status: {{request.status}} <br> Reason: {{request.reason}}</li>
+  	<li class="list-group-item list-group-item-danger">Request Status: Denied <br> Reason: {{request.reason}}</li>
   	{% elif request.status == "A" %}
-  	<li class="list-group-item list-group-item-success">Request Status: {{request.status}} <br> Reason: {{request.reason}}</li>
+  	<li class="list-group-item list-group-item-success">Request Status: Approved <br> Reason: {{request.reason}}</li>
   	{% endif %}
 	{% endfor %}
 </ul>

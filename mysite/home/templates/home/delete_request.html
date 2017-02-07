@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Delete Request</title>
+</head>
+<body>
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Delete Request</h1>
+
+<p>Are you sure you want to delete the request?</p>
+<p>Reason: {{request.reason}}</p>
+
+<form action="{% url "request-delete" pk=request.id %}" method="POST">
+  {% csrf_token %}
+
+  <input type="submit" value="Yes, delete." />
+  <a href="{% url "index" %}">No, cancel.</a>
+</form>
+
+{% endblock %}
+</body>
+</html>
