@@ -97,31 +97,32 @@ def request_details(request, request_id):
     return render(request, 'home/serviceReq.html', context)
 
 def service_request(request, request_id):
-    if not request.user.is_staff:
-        return render(request, 'home/notAdmin.html')
-    approve_deny = request.POST.get('select', None);
-    requestToService = get_object_or_404(Request, pk=request_id);
-    if (approve_deny == 'Approve'):
-        itemToChange = Item.objects.get(id=requestToService.item_id_id);
-        oldQuantity = itemToChange.total_available;
-        requestAmount = requestToService.quantity;
-        newQuantity = oldQuantity - requestAmount;
-        itemToChange.total_available=newQuantity;
-        requestToService.status='A';
-        itemToChange.save();
-    else:
-        requestToService.status='D';
-    
-    admin_comment_fromReq = request.POST.get('comment', None);
-    requestToService.admin_comment= admin_comment_fromReq;
-    requestToService.save();
-    return HttpResponse("success");
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	approve_deny = request.POST.get('select', None);
+	requestToService = get_object_or_404(Request, pk=request_id);
+	if (approve_deny == 'Approve'):
+		itemToChange = Item.objects.get(id=requestToService.item_id_id);
+		oldQuantity = itemToChange.total_available;
+		requestAmount = requestToService.quantity;
+		newQuantity = oldQuantity - requestAmount;
+		itemToChange.total_available=newQuantity;
+		requestToService.status='A';
+		itemToChange.save();
+	else:
+		requestToService.status='D';
+	
+	admin_comment_fromReq = request.POST.get('comment', None);
+	requestToService.admin_comment= admin_comment_fromReq;
+	requestToService.save();
+	return render(request, 'home/request_success.html')
 
 def request(request, item_id):
     item = get_object_or_404(Item, pk=item_id)
     new_request = Request(owner=request.user,item_id=item,reason=request.POST['reason'],quantity=request.POST['quantity'],status='O')
     new_request.save()
-    return HttpResponse("success")
+    return render(request, 'home/request_success.html')
+    #return HttpResponse("success")
 
 class DeleteRequestView(DeleteView):
     model = Request
