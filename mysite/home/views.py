@@ -1,6 +1,6 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
-from django.views.generic import View, DetailView, ListView, CreateView, FormView
+from django.views.generic import View, DetailView, ListView, CreateView, FormView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
 
@@ -39,6 +39,13 @@ def request(request, item_id):
     new_request = Request(user_id=request.user,item_id=item,reason=request.POST['reason'],status='O')
     new_request.save()
     return HttpResponse("success")
+
+class DeleteRequestView(DeleteView):
+    model = Request
+    template_name = 'home/delete_request.html'
+    
+    def get_success_url(self):
+        return reverse('index')
 
 # class ListItemView(ListView):
 #     model=Item

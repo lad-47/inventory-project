@@ -27,7 +27,9 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.login, name="login"),
     url(r'^logout/$', auth_views.logout,name='logout'),
-    url(r'^(?P<item_id>[0-9]+)/request/$', views.request, name='request')
+    url(r'^(?P<item_id>[0-9]+)/request/$', views.request, name='request'),
+    url(r'^delete/(?P<pk>\d+)/$', views.DeleteRequestView.as_view(),
+        name='request-delete')
 ]
 
 
