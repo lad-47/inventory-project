@@ -20,6 +20,8 @@ from django.views.generic import RedirectView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth.decorators import login_required, permission_required
 import home.views as views
+from rest_framework.urlpatterns import format_suffix_patterns
+
 
 ## refactor application urls when necessary
 urlpatterns = [
@@ -41,5 +43,11 @@ urlpatterns = [
         name='service request form')
 ]
 
+urlpatterns += [
+    url(r'^api-auth/', include('rest_framework.urls',
+                               namespace='rest_framework')),
+]
 
 urlpatterns += staticfiles_urlpatterns()
+
+urlpatterns = format_suffix_patterns(urlpatterns)

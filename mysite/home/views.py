@@ -12,12 +12,12 @@ from django.views.generic import View, DetailView, ListView, DeleteView, CreateV
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
 
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
-
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 @api_view(['GET', 'POST'])
-def item_list(request):
+def item_list(request, format=None):
 	"""
     List all code snippets, or create a new snippet.
     """
@@ -33,6 +33,7 @@ def item_list(request):
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# item_list() above replaces this view!!!!!!!!!!!!
 def index(request):
     latest_item_list = Item.objects.order_by('id')[:5]
     tag_list = Tag.objects.distinct('tag')
