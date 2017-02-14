@@ -7,9 +7,9 @@ from django.contrib.auth.decorators import login_required, permission_required
 
 from . import views
 
-app_name = 'home'
-
 urlpatterns = [
+    url(r'^$', views.index, name='index'),
+
     url(r'^(?P<item_id>[0-9]+)/$', views.detail, name='detail'),
     
     url(r'^login/$', auth_views.login, name="login"),
