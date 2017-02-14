@@ -9,7 +9,6 @@ from home import views
 
 urlpatterns = [
     #3 apps, separated primarily by permissions
-    url(r'^$', views.index, name='index'),
     url(r'^', include('home.urls')),
     url(r'^manager/', include('manager.urls')),
     url(r'^admin/', admin.site.urls),
