@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from home import views
 
 urlpatterns = [
+    #3 apps, separated primarily by permissions
     url(r'^$', views.index, name='index'),
     url(r'^', include('home.urls')),
     url(r'^manager/', include('manager.urls')),

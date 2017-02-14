@@ -8,10 +8,12 @@ from django.contrib.auth.decorators import login_required, permission_required
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.index, name='index'),
 
+    #these are our old urls that were in mysite.urls
+    #they will all end up the same as they were, since
+    #the prefix for them is just '^' before the include
+    url(r'^$', views.index, name='index'),
     url(r'^(?P<item_id>[0-9]+)/$', views.detail, name='detail'),
-    
     url(r'^login/$', auth_views.login, name="login"),
     url(r'^logout/$', auth_views.logout,name='logout'),
     url(r'^(?P<item_id>[0-9]+)/request/$', views.request, name='request'),
