@@ -9,3 +9,4 @@ mysite/mysiteenv
 mysite/env
 .metadata
 **/.DS_Store
+mysite/settings.py
