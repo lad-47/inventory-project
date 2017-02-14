@@ -5,11 +5,33 @@ from django.utils.decorators import method_decorator
 
 from .models import Item, Request, Tag;
 from .forms import ServiceReqForm;
+from .serializers import ItemSerializer
 # chance genereic.Listview stuff to ListView
 from django.views.generic import View, DetailView, ListView, DeleteView, CreateView, FormView
 
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
+
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+
+
+@api_view(['GET', 'POST'])
+def item_list(request):
+	"""
+    List all code snippets, or create a new snippet.
+    """
+	if request.method == 'GET':
+		items = Item.objects.all()
+		serializer = ItemSerializer(items, many=True)
+		return Response(serializer.data)
+
+	elif request.method == 'POST':
+		serializer = ItemSerializer(data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 def index(request):
     latest_item_list = Item.objects.order_by('id')[:5]
@@ -143,3 +165,7 @@ class DeleteRequestView(DeleteView):
 # class ItemDetailView(DetailView):
 #     model=Item
 #     template_name='home/detail.html'
+
+
+
+

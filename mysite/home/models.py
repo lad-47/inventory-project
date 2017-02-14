@@ -4,8 +4,7 @@ from django.core.urlresolvers import reverse
 
 class Item(models.Model):
 	item_name = models.CharField(max_length=100)
-	total_count = models.IntegerField(default=0)
-	total_available = models.IntegerField(default=0)
+	count = models.IntegerField(default=0)
 	model_number = models.CharField(max_length=100, null=True)
 	description = models.TextField(null=True)
 	location = models.CharField(max_length=100,null=True)
