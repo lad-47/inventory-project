@@ -18,6 +18,17 @@ class Item(models.Model):
 class Tag(models.Model):
 	item_id = models.ForeignKey(Item, on_delete=models.CASCADE)
 	tag = models.CharField(max_length=100)
+
+class Cart_Request(models.Model):
+	STATUSES = (
+	('O','Outstanding'),
+	('A','Approved'),
+	('D','Denied'))
+	cart_owner = models.ForeignKey(User, on_delete=models.CASCADE);
+	cart_reason = models.TextField();
+	cart_admin_comment = models.TextField(default="No Comment");
+	cart_status = models.CharField(max_length=1, choices=STATUSES, default='O');
+	is_active_request = models.BooleanField(default=True);
 	
 class Request(models.Model):
 	STATUSES = (
@@ -31,6 +42,9 @@ class Request(models.Model):
 	quantity = models.IntegerField(default=1);
 	status = models.CharField(max_length=1, choices=STATUSES, default='O')
 	#testField = models.IntegerField(default=0);
+	parent_cart = models.ForeignKey(Cart_Request, null=True);
+
 	def __str__(self):
 		return "User: " + self.owner.__str__() + ", Item: " + \
 		self.item_id.__str__() + " Reason: " + self.reason;
+
