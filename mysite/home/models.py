@@ -18,7 +18,7 @@ class Tag(models.Model):
 	item_id = models.ForeignKey(Item, related_name='tags', on_delete=models.CASCADE)
 	tag = models.CharField(max_length=100)
 	
-	def __unicode__(self):
+	def __str__(self):
 		return self.tag
 
 	

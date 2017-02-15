@@ -20,12 +20,13 @@ from django.views.generic import RedirectView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth.decorators import login_required, permission_required
 import home.views as views
+import home.api_views as api_views
 from rest_framework.urlpatterns import format_suffix_patterns
 
 
 ## refactor application urls when necessary
 urlpatterns = [
-    url(r'^$', views.item_list, name='index'),
+    url(r'^$', views.index, name='index'),
     url(r'^(?P<item_id>[0-9]+)/$', views.detail, name='detail'),
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.login, name="login"),
@@ -40,7 +41,9 @@ urlpatterns = [
     url(r'^accounts/login/$', views.cannotService, name='cant_service'),
     url(r'^request/(?P<request_id>[0-9]+)/$', views.request_details, name='service form'),
     url(r'^request/(?P<request_id>[0-9]+)/service/$', views.service_request, \
-        name='service request form')
+        name='service request form'),
+    url(r'^api/item/$', api_views.item_list),
+    url(r'^api/item/(?P<pk>[0-9]+)$', api_views.item_detail),
 ]
 
 urlpatterns += [
