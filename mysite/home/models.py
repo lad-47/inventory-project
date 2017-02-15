@@ -15,8 +15,12 @@ class Item(models.Model):
 		return reverse('detail', kwargs={'item_id': self.id})
 		
 class Tag(models.Model):
-	item_id = models.ForeignKey(Item, on_delete=models.CASCADE)
+	item_id = models.ForeignKey(Item, related_name='tags', on_delete=models.CASCADE)
 	tag = models.CharField(max_length=100)
+	
+	def __unicode__(self):
+		return self.tag
+
 	
 class Request(models.Model):
 	STATUSES = (
