@@ -9,11 +9,17 @@ class MyPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
         return str(value)
 
 class ItemSerializer(serializers.ModelSerializer):
-    tags = MyPrimaryKeyRelatedField(allow_null=True, many=True, queryset=Tag.objects.all())
+    tags = serializers.SlugRelatedField(
+        queryset=Tag.objects.all(),
+        many=True,
+        required=False,
+        slug_field='tag'
+     )
     
     class Meta:
         model = Item
         fields = ('item_name', 'count', 'model_number', 'description', 'location', 'tags')
+
         
 class RequestSerializer(serializers.ModelSerializer):
     item_id = serializers.PrimaryKeyRelatedField(queryset=Item.objects.all())

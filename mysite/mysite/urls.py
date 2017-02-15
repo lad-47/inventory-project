@@ -22,6 +22,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 import home.views as views
 import home.api_views as api_views
 from rest_framework.urlpatterns import format_suffix_patterns
+from ctypes.test.test_pickling import name
 
 
 ## refactor application urls when necessary
@@ -42,8 +43,9 @@ urlpatterns = [
     url(r'^request/(?P<request_id>[0-9]+)/$', views.request_details, name='service form'),
     url(r'^request/(?P<request_id>[0-9]+)/service/$', views.service_request, \
         name='service request form'),
-    url(r'^api/item/$', api_views.item_list),
-    url(r'^api/item/(?P<pk>[0-9]+)$', api_views.item_detail),
+    url(r'^api/item/$', api_views.item_list, name='item-list'),
+    url(r'^api/item/(?P<pk>[0-9]+)$', api_views.item_detail, name='item-detail'),
+    url(r'^api/$', api_views.api_root),
 ]
 
 urlpatterns += [
