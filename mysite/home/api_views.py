@@ -6,9 +6,13 @@ from .models import Item, Request, Tag;
 from .serializers import ItemSerializer, RequestSerializer, UserSerializer, UserCreateSerializer
 from rest_framework.reverse import reverse
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from django.contrib.auth.models import User
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication, BasicAuthentication,\
+    SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
 
 @api_view(['GET'])
 def api_root(request, format=None):
@@ -19,14 +23,25 @@ def api_root(request, format=None):
     })
 
 @api_view(['GET', 'POST'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
 def item_list(request, format=None):
     """
-    List all code snippets, or create a new snippet.
+    List all items, or create a new item.
+    curl -X GET -H "Authorization: Token <insert API token>" https://<insert project domain>/api/item
     """
     if request.method == 'GET':
         items = Item.objects.all()
         serializer = ItemSerializer(items, many=True)
-        return Response(serializer.data)
+        response = Response(serializer.data)
+        if 'HTTP_AUTHORIZATION' in request.META.keys():
+            if Token.objects.get(key=request.META['HTTP_AUTHORIZATION'][6:]):
+                return response
+        elif Token.objects.get(user=request.user):
+            response['Authorization']=Token.objects.get(user=request.user)
+            return response
+        else:
+            return HttpResponse('Please Request an API Token')
 
     elif request.method == 'POST':
         serializer = ItemSerializer(data=request.data)
