@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from home.models import User, Item, Request
+from home.models import User, Item, Request, Cart_Request
 
 class Command(BaseCommand):
     def handle(self, **options):
@@ -25,3 +25,5 @@ class Command(BaseCommand):
         	reason="because I need it", status='O', quantity='5');
         jdk2Res200 = Request.objects.create(owner=jdk2, item_id=resistor200ohm, \
         	reason="hugh mungus what?", status='O');
+        cartReq1 = Cart_Request.objects.create(cart_owner=jdk1, \
+            cart_reason="Project Mayhem");

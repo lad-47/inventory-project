@@ -1,34 +1,46 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from home.models import Request, Cart_Request, User, Item
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
 
-def cart_request_details(request, request_id):
+def cart_requests(request):
 	#check if the user is a manager
-    if not request.user.is_staff:
-        return render(request, 'home/notAdmin.html')
-    current_cart_request = get_object_or_404(Request, pk=cart_request_id)
-    subrequests = Request.objects.filter(parent_cart=cart_request_id)
-    new_quantities = [];
-    request_validities = [];
-    for subrequest in subrequests:
-        itemToChange = Item.objects.get(id=subrequest.item_id_id);
-        oldQuantity = itemToChange.total_available;
-        requestAmount = subrequest.quantity;
-        newQuantity = oldQuantity - requestAmount;
-        new_quantities+=[newQuantity];
-        request_validities+=[not (newQuantity < 0)];
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	cart_requests = Cart_Request.objects.all();
+	cart_requests_and_v = [];
+	#determine if each request can be serviced or not
+	request_validities = [];
+	count = 0;
+	for cart_request in cart_requests:
+		cart_requests_and_v += [(cart_request, True)];
+		subrequests = Request.objects.filter(parent_cart=cart_request);
+		for subrequest in subrequests:
+			itemToChange = Item.objects.get(id=subrequest.item_id_id);
+			oldQuantity = itemToChange.total_available;
+			requestAmount = subrequest.quantity;
+			newQuantity = oldQuantity - requestAmount;
+			if newQuantity < 0:
+				cart_requests_and_v[count][1]=False;
+				break;
+		count+=1;
     #pass the cart_request and all of its children
     #also, pass arrays with the new quantities of items after servicing request,
     #plus whether those requests can be serviced
-    context = {
-        'current_cart_request': current_cart_request, 
-        'subrequests': subrequests,
-        'new_quantities': new_quantities,
-        'request_validities': request_validities
-    }
-    return render(request, 'manager/cart_requests.html', context)
+	context = {
+        'cart_requests_and_v': cart_requests_and_v
+	}
+	return render(request, 'manager/cart_requests.html', context)
+
+def cart_request_details(request, cart_request_id):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
+	context = {
+		'var': current_request,
+	}
+	return render(request, 'manager/cart_request_details.html', context);
 
 def service_cart_request(request, cart_request_id):
 	#check if user is a manager
