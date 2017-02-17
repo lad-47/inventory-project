@@ -27,7 +27,7 @@ class Request(models.Model):
 	('O','Outstanding'),
 	('A','Approved'),
 	('D','Denied'))
-	owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+	owner = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE, default=1)
 	item_id = models.ForeignKey(Item, on_delete=models.CASCADE, default=1)
 	reason = models.TextField()
 	admin_comment = models.TextField(default="Unserviced");

@@ -45,6 +45,11 @@ urlpatterns = [
         name='service request form'),
     url(r'^api/item/$', api_views.item_list, name='item-list'),
     url(r'^api/item/(?P<pk>[0-9]+)$', api_views.item_detail, name='item-detail'),
+    url(r'^api/request/$', api_views.request_list, name='request-list'),
+    url(r'^api/request/(?P<pk>[0-9]+)$', api_views.request_detail, name='request-detail'),
+    url(r'^api/user/$', api_views.user_list, name='user-list'),
+    url(r'^api/user/(?P<pk>[0-9]+)$', api_views.user_detail, name='user-detail'),
+    url(r'^api/user/create$', api_views.user_create, name='user-create'),
     url(r'^api/$', api_views.api_root),
 ]
 
