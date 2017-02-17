@@ -46,6 +46,9 @@ def detail(request, item_id):
         'requests': requests  
     }
     return render(request, 'home/detail.html', context)
+    
+def developers(request):
+    return render(request, 'home/developers.html')
 
 class LoggedInMixin(object):
 

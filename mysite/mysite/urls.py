@@ -16,10 +16,11 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.views.generic import RedirectView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth.decorators import login_required, permission_required
 import home.views as views
+import mysite.oauth_views as oauth_views
+from django.views.generic import RedirectView
 
 ## refactor application urls when necessary
 urlpatterns = [
@@ -38,7 +39,10 @@ urlpatterns = [
     url(r'^accounts/login/$', views.cannotService, name='cant_service'),
     url(r'^request/(?P<request_id>[0-9]+)/$', views.request_details, name='service form'),
     url(r'^request/(?P<request_id>[0-9]+)/service/$', views.service_request, \
-        name='service request form')
+        name='service request form'),
+    url(r'^developers/', views.developers, name='developers'),
+    url(r'^accounts/login/duke/$', RedirectView.as_view(url='https://oauth.oit.duke.edu/oauth/authorize.php?response_type=code&client_id=inventory&scope=identity%%3Anetid%%3Aread&redirect_uri=https%%3A%%2F%%2Fcolab-sbx-44.oit.duke.edu%%2Faccounts%%2Fcallback%%2Fduke%%2F&state=basic'), name='allaccess-login'),
+    url(r'^accounts/callback/duke/$', oauth_views.callback, name='allaccess-callback')
 ]
 
 

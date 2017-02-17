@@ -31,13 +31,13 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-	'home.apps.HomeConfig',
+	  'home.apps.HomeConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles'
 ]
 
 MIDDLEWARE = [
@@ -76,27 +76,27 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 ## SERVER
-# DATABASES = {
-#      'default': {
-#          'ENGINE': 'django.db.backends.postgresql',
-#          'NAME': 'inventory',
-#          'USER': 'postgres',
-#          'PASSWORD': '',
-#          'PORT': '5432'
-#      }
-#  }
-
-## LOCALHOST 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'inventory',
-        'USER': '',
+        'USER': 'postgres',
         'PASSWORD': '',
-        'HOST': '127.0.0.1',
         'PORT': '5432'
     }
 }
+
+## LOCALHOST 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': 'inventory',
+#        'USER': '',
+#        'PASSWORD': '',
+#        'HOST': '127.0.0.1',
+#        'PORT': '5432'
+#    }
+#}
 
 
 # Password validation
@@ -158,3 +158,4 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = 'login'
+
