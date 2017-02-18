@@ -11,20 +11,18 @@ def cart_requests(request):
 	cart_requests = Cart_Request.objects.all();
 	cart_requests_and_v = [];
 	#determine if each request can be serviced or not
-	request_validities = [];
-	count = 0;
 	for cart_request in cart_requests:
-		cart_requests_and_v += [(cart_request, True)];
 		subrequests = Request.objects.filter(parent_cart=cart_request);
+		valid = True;
 		for subrequest in subrequests:
 			itemToChange = Item.objects.get(id=subrequest.item_id_id);
 			oldQuantity = itemToChange.total_available;
 			requestAmount = subrequest.quantity;
 			newQuantity = oldQuantity - requestAmount;
 			if newQuantity < 0:
-				cart_requests_and_v[count][1]=False;
+				valid = False;
 				break;
-		count+=1;
+		cart_requests_and_v += [(cart_request, valid)];
     #pass the cart_request and all of its children
     #also, pass arrays with the new quantities of items after servicing request,
     #plus whether those requests can be serviced
@@ -37,8 +35,18 @@ def cart_request_details(request, cart_request_id):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
+	subrequests = Request.objects.filter(parent_cart_id=cart_request_id);
+	req_info = [];
+	for subrequest in subrequests:
+		itemToChange = Item.objects.get(id=subrequest.item_id_id);
+		oldQuantity = itemToChange.total_available;
+		requestAmount = subrequest.quantity;
+		newQuantity = oldQuantity - requestAmount;
+		valid = not (newQuantity < 0)
+		req_info+=[(subrequest, requestAmount, oldQuantity, valid)];
 	context = {
-		'var': current_request,
+		'current_request': current_request,
+		'req_info': req_info,
 	}
 	return render(request, 'manager/cart_request_details.html', context);
 

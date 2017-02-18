@@ -21,9 +21,22 @@ class Command(BaseCommand):
         resistor200ohm = Item.objects.create(item_name="Resistor 200 Ohm", \
         	total_count=10, total_available=10, model_number="R200", \
         	description="Resistor", location="Hudson");
-        jdk1Res100 = Request.objects.create(owner=jdk1, item_id=resistor100ohm,\
-        	reason="because I need it", status='O', quantity='5');
-        jdk2Res200 = Request.objects.create(owner=jdk2, item_id=resistor200ohm, \
-        	reason="hugh mungus what?", status='O');
+        
+        #making some cart requests
         cartReq1 = Cart_Request.objects.create(cart_owner=jdk1, \
             cart_reason="Project Mayhem");
+        cartReq2 = Cart_Request.objects.create(cart_owner=jdk2, \
+            cart_reason="Project Runway");
+
+        #giving said cart requests some subrequests
+        jdk1Res100 = Request.objects.create(owner=jdk1, item_id=resistor100ohm,\
+        	reason="because I need it", status='O', quantity='5', parent_cart=cartReq1);
+        jdk1Res100 = Request.objects.create(owner=jdk1, item_id=resistor200ohm,\
+            reason="because I need it", status='O', quantity='6', parent_cart=cartReq1);
+        jdk2Res100 = Request.objects.create(owner=jdk1, item_id=resistor100ohm,\
+            reason="because I need it", status='O', quantity='5', parent_cart=cartReq2);
+        jdk2Res100 = Request.objects.create(owner=jdk1, item_id=resistor200ohm,\
+            reason="because I need it", status='O', quantity='80', parent_cart=cartReq2);
+        jdk2Res200 = Request.objects.create(owner=jdk2, item_id=resistor200ohm, \
+        	reason="hugh mungus what?", status='O');
+       

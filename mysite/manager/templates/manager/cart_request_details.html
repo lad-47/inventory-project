@@ -1,8 +1,29 @@
 {% extends "base.html" %}
 
 {% block content %}
-<p> penis: {{var.cart_owner}} </p>
 
-adfadfadf
-elegiggle
+
+<table class="table table-condensed">
+	<tr class="active"> 
+	<th> Item </th><th> Amount Requested </th><th> In Stock </th>
+	</tr>
+
+	<!-- rows for each cart request -->
+	{% for req in req_info %}
+		<!-- color the row based on validity -->
+		{% if req.3 %}
+		<tr class="success">
+		{% else %}
+		<tr class="danger">
+
+		{% endif %}
+
+		<!--make the actual tablerow -->
+		<th> {{req.0.item_id}} </th>
+		<th> {{req.1}} </th>
+		<th> {{req.2}} </th>
+
+	{% endfor %}
+	</table>
+
 {% endblock %}

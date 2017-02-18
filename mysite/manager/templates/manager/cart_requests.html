@@ -6,7 +6,7 @@
 	<!-- table header -->
 	<table class="table table-condensed">
 	<tr class="active"> 
-	<th> Requestee </th><th> Reason </th><th> Actions </th>
+	<th> Requestee </th><th> Reason </th><th> Actions </th><th>pk</th>
 	</tr>
 
 	<!-- rows for each cart request -->
@@ -23,7 +23,9 @@
 		<th> {{cart_request_and_v.0.cart_owner}} </th>
 		<th> {{cart_request_and_v.0.cart_reason}} </th>
 		<th> <a href="{% url 'cart request details' cart_request_id=cart_request_and_v.0.pk %}"> View Details </a> 
+		<th> {{cart_request_and_v.0.pk}}</th>
 		</tr>
+
 
 	{% endfor %}
 	</table>
