@@ -1,29 +1,27 @@
-{% extends "base.html" %}
-
 {% block content %}
-	<h3>Active Requests</h3>
 
-	<!-- table header -->
-	<table class="table table-condensed>
+<table class="table table-condensed" style="border:1px solid black">
 	<tr class="active"> 
-	<th> Requestee </th><th> Reason </th><th> Actions </th><th>pk</th>
+	<th> Requestee </th><th> Reason </th><th> Actions </th>
 	</tr>
 
 	<!-- rows for each cart request -->
 	{% for cart_request_and_v in cart_requests_and_v %}
 		<!-- color the row based on validity -->
-		{% if cart_request_and_v.1 %}
-		<tr class="success">
+		{% if color %}
+			{% if cart_request_and_v.1 %}
+			<tr class="success">
+			{% else %}
+			<tr class="danger">
+			{% endif %}
 		{% else %}
-		<tr class="danger">
-
+		<tr>
 		{% endif %}
 
 		<!--make the actual tablerow -->
 		<th> {{cart_request_and_v.0.cart_owner}} </th>
 		<th> {{cart_request_and_v.0.cart_reason}} </th>
 		<th> <a href="{% url 'cart request details' cart_request_id=cart_request_and_v.0.pk %}"> View Details </a> 
-		<th> {{cart_request_and_v.0.pk}}</th>
 		</tr>
 
 

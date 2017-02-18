@@ -8,9 +8,31 @@ def cart_requests(request):
 	#check if the user is a manager
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	cart_requests = Cart_Request.objects.all();
+	#this duplicated code is necessary (I think) because of the
+	#restrictive nature of calling things from a template
+	cart_requests = Cart_Request.objects.filter(is_active_request=True);
+	cart_requestsO = cart_requests.filter(cart_status='O');
+	cart_requestsO_and_v = create_request_info(cart_requestsO);
+	context = {
+        'outstanding': cart_requestsO_and_v,
+	}
+	return render(request, 'manager/cart_requestsI.html', context)
+
+def request_history(request):
+	cart_requests = Cart_Request.objects.filter(is_active_request=True);
+	cart_requestsA = cart_requests.filter(cart_status='A');
+	cart_requestsD = cart_requests.filter(cart_status='D');
+	cart_requestsA_and_v = create_request_info(cart_requestsA);
+	cart_requestsD_and_v = create_request_info(cart_requestsD);
+	context = {
+		'approved': cart_requestsA_and_v,
+        'denied': cart_requestsD_and_v,
+	}
+	return render(request, 'manager/request_history.html', context);
+
+
+def create_request_info(cart_requests):
 	cart_requests_and_v = [];
-	#determine if each request can be serviced or not
 	for cart_request in cart_requests:
 		subrequests = Request.objects.filter(parent_cart=cart_request);
 		valid = True;
@@ -23,13 +45,7 @@ def cart_requests(request):
 				valid = False;
 				break;
 		cart_requests_and_v += [(cart_request, valid)];
-    #pass the cart_request and all of its children
-    #also, pass arrays with the new quantities of items after servicing request,
-    #plus whether those requests can be serviced
-	context = {
-        'cart_requests_and_v': cart_requests_and_v
-	}
-	return render(request, 'manager/cart_requests.html', context)
+	return cart_requests_and_v;
 
 def cart_request_details(request, cart_request_id):
 	if not request.user.is_staff:
