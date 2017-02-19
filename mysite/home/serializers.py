@@ -2,12 +2,16 @@ from .models import Item,Request,Tag
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
+class MyPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+
+    def to_representation(self, value):
+        return str(value)
+
 class ItemSerializer(serializers.ModelSerializer):
-    tags = serializers.SlugRelatedField(
+    tags = MyPrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True,
-        required=False,
-        slug_field='tag'
+        required=False
      )
     
     class Meta:
