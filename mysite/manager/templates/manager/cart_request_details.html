@@ -30,4 +30,21 @@
 	{% endfor %}
 	</table>
 
+<form method=POST>
+	{% csrf_token %}
+
+	{{ service_form.non_field_errors }}
+<div class="fieldWrapper">
+    {{ service_form.admin_comment.errors }}
+    <label for="{{ form.admin_comment.id_for_label }}">Leave a Comment:</label>
+    {{ service_form.admin_comment }}
+</div>
+<div class="fieldWrapper">
+    <label for="{{ form.approve_deny.id_for_label }}">Service Request:</label>
+    {{ service_form.approve_deny }}
+</div>
+<input type="submit" value="Service">
+	
+</form>
+
 {% endblock %}

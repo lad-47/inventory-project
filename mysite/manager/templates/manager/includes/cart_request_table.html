@@ -21,7 +21,13 @@
 		<!--make the actual tablerow -->
 		<th> {{cart_request_and_v.0.cart_owner}} </th>
 		<th> {{cart_request_and_v.0.cart_reason}} </th>
-		<th> <a href="{% url 'cart request details' cart_request_id=cart_request_and_v.0.pk %}"> View Details </a> 
+		<th> 
+		{% if color %}
+			<a href="{% url 'cart request details' cart_request_id=cart_request_and_v.0.pk %}"> View Details / Service </a>
+		{% else %}
+			<a href="{% url 'old cart request details' cart_request_id=cart_request_and_v.0.pk %}"> View Details</a>
+		{% endif %}
+		</th>
 		</tr>
 
 
