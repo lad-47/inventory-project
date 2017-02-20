@@ -80,7 +80,6 @@ def cart_request_details(request, cart_request_id):
 				current_request.cart_status='A';
 				for el in req_info:
 					if not el[3]:
-						print("el3: " + str(el[3]));
 						return HttpResponseRedirect('/manager/request_failure');
 				for el in req_info:
 					el[4].count = el[2]-el[1]; ##update item quantity
