@@ -94,7 +94,8 @@ def cart_request_details(request, cart_request_id):
 			return HttpResponseRedirect('/manager/request_success');
 
 	##the form that will be sent to the template on a GET
-	service_form = ServiceForm();
+	else:
+		service_form = ServiceForm();
 
 	context = {
 		'current_request': current_request,
