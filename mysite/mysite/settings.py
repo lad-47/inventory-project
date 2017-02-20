@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [
@@ -77,27 +79,27 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 ## SERVER
-DATABASES = {
-      'default': {
-          'ENGINE': 'django.db.backends.postgresql',
-          'NAME': 'inventory',
-          'USER': 'postgres',
-          'PASSWORD': '',
-          'PORT': '5432'
-      }
-  }
+# DATABASES = {
+#       'default': {
+#           'ENGINE': 'django.db.backends.postgresql',
+#           'NAME': 'inventory',
+#           'USER': 'postgres',
+#           'PASSWORD': '',
+#           'PORT': '5432'
+#       }
+#   }
 
 ## LOCALHOST 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': 'inventory',
-#        'USER': '',
-#        'PASSWORD': '',
-#        'HOST': '127.0.0.1',
-#        'PORT': '5432'
-#    }
-#}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'inventory',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
+        'PORT': '5432'
+    }
+}
 
 
 # Password validation
@@ -159,3 +161,12 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = 'login'
+
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication'
+    )
+}

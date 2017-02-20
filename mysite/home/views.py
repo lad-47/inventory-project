@@ -5,12 +5,18 @@ from django.utils.decorators import method_decorator
 
 from .models import Item, Request, Tag;
 from .forms import ServiceReqForm;
+from .serializers import ItemSerializer
 # chance genereic.Listview stuff to ListView
 from django.views.generic import View, DetailView, ListView, DeleteView, CreateView, FormView
 
 from django.views.generic.detail import SingleObjectMixin
 from django.core.urlresolvers import reverse
 
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+# item_list() above replaces this view!!!!!!!!!!!!
 def index(request):
     latest_item_list = Item.objects.order_by('id')[:5]
     tag_list = Tag.objects.distinct('tag')
@@ -143,3 +149,7 @@ class DeleteRequestView(DeleteView):
 # class ItemDetailView(DetailView):
 #     model=Item
 #     template_name='home/detail.html'
+
+
+
+

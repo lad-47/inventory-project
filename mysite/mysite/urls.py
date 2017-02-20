@@ -4,12 +4,33 @@ from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib.auth.decorators import login_required, permission_required
-
-from home import views
+import home.views as views
+import home.api_views as api_views
+from rest_framework.urlpatterns import format_suffix_patterns
+from ctypes.test.test_pickling import name
 
 urlpatterns = [
     #3 apps, separated primarily by permissions
     url(r'^', include('home.urls')),
     url(r'^manager/', include('manager.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^login/$', auth_views.login, name="login"),
+    url(r'^logout/$', auth_views.logout,name='logout'),
+    url(r'^api/item/$', api_views.item_list, name='item-list'),
+    url(r'^api/item/(?P<pk>[0-9]+)$', api_views.item_detail, name='item-detail'),
+    url(r'^api/request/$', api_views.request_list, name='request-list'),
+    url(r'^api/request/(?P<pk>[0-9]+)$', api_views.request_detail, name='request-detail'),
+    url(r'^api/user/$', api_views.user_list, name='user-list'),
+    url(r'^api/user/(?P<pk>[0-9]+)$', api_views.user_detail, name='user-detail'),
+    url(r'^api/user/create$', api_views.user_create, name='user-create'),
+    url(r'^api/$', api_views.api_root),
 ]
+
+urlpatterns += [
+    url(r'^api-auth/', include('rest_framework.urls',
+                               namespace='rest_framework')),
+]
+
+urlpatterns += staticfiles_urlpatterns()
+
+urlpatterns = format_suffix_patterns(urlpatterns)
