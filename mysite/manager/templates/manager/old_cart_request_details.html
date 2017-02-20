@@ -23,7 +23,7 @@
 	<tr>
 	{% endif %}
 		<!--make the actual tablerow -->
-		<th> {{req.0.item_id}} </th>
+		<th> <a href='/{{req.4.pk}}'> {{req.0.item_id}} </a> </th>
 		<th> {{req.1}} </th>
 		</tr>
 	{% endfor %}
