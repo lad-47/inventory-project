@@ -40,7 +40,7 @@ def create_request_info(cart_requests):
 		valid = True;
 		for subrequest in subrequests:
 			itemToChange = Item.objects.get(id=subrequest.item_id_id);
-			oldQuantity = itemToChange.total_available;
+			oldQuantity = itemToChange.count;
 			requestAmount = subrequest.quantity;
 			newQuantity = oldQuantity - requestAmount;
 			if newQuantity < 0:
@@ -55,7 +55,7 @@ def create_indv_request_info(cart_request):
 	req_info = [];
 	for subrequest in subrequests:
 		itemToChange = Item.objects.get(id=subrequest.item_id_id);
-		oldQuantity = itemToChange.total_available;
+		oldQuantity = itemToChange.count;
 		requestAmount = subrequest.quantity;
 		newQuantity = oldQuantity - requestAmount;
 		valid = not (newQuantity < 0)
@@ -83,7 +83,7 @@ def cart_request_details(request, cart_request_id):
 						print("el3: " + str(el[3]));
 						return HttpResponseRedirect('/manager/request_failure');
 				for el in req_info:
-					el[4].total_available = el[2]-el[1]; ##update item quantity
+					el[4].count = el[2]-el[1]; ##update item quantity
 					el[0].status='A'; ##subrequest was serviced
 					el[0].save();  ##save the subrequest's updated status
 					el[4].save();  ##save the item with new quantity
