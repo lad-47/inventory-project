@@ -48,3 +48,19 @@ class Request(models.Model):
 		return "User: " + self.owner.__str__() + ", Item: " + \
 		self.item_id.__str__() + " Reason: " + self.reason;
 
+#custom fields implemented using extra tables in the database
+#in theory, "CustomField" should be an abstract class, but 
+#I'm not totally sure how to implement that funcionality in python
+class CustomField(models.Model):
+	parent_item = models.ForeignKey(Item, on_delete=models.CASCADE);
+	field_name = models.CharField(max_length=100);
+	is_private = models.BooleanField();
+
+class CustomLongTextField(CustomField):
+	field_value = models.TextField();
+
+class CustomShortTextField(CustomField):
+	field_value = models.CharField(max_length=70);
+
+class CustomIntField(CustomField):
+	field_value = models.IntegerField();

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<table class="table table-condensed">
+
+	<tr class="active"> 
+	<th> Item </th><th> Amount Requested </th>
+	</tr>
+
+	<!-- rows for each cart request -->
+	{% for req in req_info %}
+	{% if current_request.cart_status == 'O' %}
+		<!-- color the row based on validity -->
+		{% if req.3 %}
+		<tr class="success">
+		{% else %}
+		<tr class="danger">
+		{% endif %}
+
+	{% else %}
+	<tr>
+	{% endif %}
+		<!--make the actual tablerow -->
+		<th> <a href='/{{req.4.pk}}'> {{req.0.item_id}} </a> </th>
+		<th> {{req.1}} </th>
+		</tr>
+	{% endfor %}
+	</table>
+{% endblock %}
