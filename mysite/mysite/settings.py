@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
 	'home.apps.HomeConfig',
+    'manager.apps.ManagerConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -79,14 +80,14 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 ## SERVER
 # DATABASES = {
-#      'default': {
-#          'ENGINE': 'django.db.backends.postgresql',
-#          'NAME': 'inventory',
-#          'USER': 'postgres',
-#          'PASSWORD': '',
-#          'PORT': '5432'
-#      }
-#  }
+#       'default': {
+#           'ENGINE': 'django.db.backends.postgresql',
+#           'NAME': 'inventory',
+#           'USER': 'postgres',
+#           'PASSWORD': '',
+#           'PORT': '5432'
+#       }
+#   }
 
 ## LOCALHOST 
 DATABASES = {
