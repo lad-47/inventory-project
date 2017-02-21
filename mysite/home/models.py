@@ -56,7 +56,6 @@ class CustomFieldEntry(models.Model):
 	field_name = models.CharField(max_length=100);
 	is_private = models.BooleanField();
 
-
 #custom fields implemented using extra tables in the database
 #in theory, "CustomField" should be an abstract class, but 
 #I'm not totally sure how to implement that funcionality in python
