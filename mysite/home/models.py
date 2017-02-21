@@ -55,6 +55,7 @@ class Request(models.Model):
 class CustomFieldEntry(models.Model):
 	field_name = models.CharField(max_length=100);
 	is_private = models.BooleanField();
+	value_type = models.CharField(max_length=10); # string key to indicate which type of value (lt,st,int,float)
 
 #custom fields implemented using extra tables in the database
 #in theory, "CustomField" should be an abstract class, but 
