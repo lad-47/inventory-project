@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from .models import Item, Request, Tag;
+from .models import Item, Request, Tag, CustomFieldEntry, CustomLongTextField, CustomShortTextField, CustomIntField, CustomFloatField;
 from .forms import ServiceReqForm;
 from .serializers import ItemSerializer
 # chance genereic.Listview stuff to ListView
@@ -47,9 +47,28 @@ def detail(request, item_id):
     if not request.user.is_authenticated():
         return render(request, 'home/detail.html', {'item':item})
     requests = Request.objects.filter(item_id=item.id, owner=request.user)
+    custom_fields = CustomFieldEntry.objects.all()
+    custom_values = []
+    for cf in custom_fields:
+    	if cf.value_type == 'lt': # Long Text
+    		val = CustomLongTextField.objects.filter(parent_item=item.id, field_name=cf.field_name)
+    		custom_values.append(val)
+    	elif cf.value_type == 'st': # Short Text
+    		val = CustomShortTextField.objects.filter(parent_item=item.id, field_name=cf.field_name)
+    		custom_values.append(val)
+    	elif cf.value_type == 'int': # Integer
+    		val = CustomIntField.objects.filter(parent_item=item.id, field_name=cf.field_name)
+    		custom_values.append(val)
+    	elif cf.value_type == 'float': # Float
+    		val = CustomFloatField.objects.filter(parent_item=item.id, field_name=cf.field_name)
+    		custom_values.append(val)
+    	else:
+    		return HttpResponseNotFound('<h1>Custom Field not found<h1>')
+    custom = zip(custom_fields,custom_values)
     context = {
         'item': item,
-        'requests': requests  
+        'requests': requests,
+        'custom': custom
     }
     return render(request, 'home/detail.html', context)
     

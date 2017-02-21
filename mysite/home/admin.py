@@ -9,8 +9,8 @@ class TagInline(admin.TabularInline):
 
 class ItemAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None,               {'fields': ['item_name']}),
-        ('Starting Quantity', {'fields': ['total_count']}),
+        ('Item', {'fields': ['item_name']}),
+        ('Starting Quantity', {'fields': ['count']}),
         ('Model Number', {'fields': ['model_number']}),
         ('Description', {'fields': ['description']}),
         ('Location', {'fields': ['location']}),
