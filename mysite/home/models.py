@@ -72,3 +72,6 @@ class CustomShortTextField(CustomField):
 
 class CustomIntField(CustomField):
 	field_value = models.IntegerField();
+
+class CustomFloatField(CustomField):
+	field_value = models.FloatField();
