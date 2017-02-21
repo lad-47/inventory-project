@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 import home.views as views
 import home.api_views as api_views
 from rest_framework.urlpatterns import format_suffix_patterns
-from ctypes.test.test_pickling import name
+#from ctypes.test.test_pickling import name
 
 urlpatterns = [
     #3 apps, separated primarily by permissions
