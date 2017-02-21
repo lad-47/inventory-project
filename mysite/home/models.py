@@ -1,10 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from .current_user import get_current_user
-from django.utils import timezone
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 class Item(models.Model):
 	item_name = models.CharField(max_length=100,unique=True)
@@ -17,17 +13,6 @@ class Item(models.Model):
 	
 	def get_absolute_url(self):
 		return reverse('detail', kwargs={'item_id': self.id})
-
-			
-@receiver(post_save, sender=Item, dispatch_uid="item_save")
-def log_item(sender, instance, created, **kwargs):
-	user = get_current_user()
-	if created:
-		log = Log(initiating_user=user,involved_item=instance,nature='Create item',timestamp=timezone.now())
-		log.save()
-	else:
-		log = Log(initiating_user=user,involved_item=instance,nature='Update item',timestamp=timezone.now())
-		log.save()
 			
 		
 class Tag(models.Model):
