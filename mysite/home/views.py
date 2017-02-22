@@ -115,12 +115,12 @@ def service_request(request, request_id):
     requestToService = get_object_or_404(Request, pk=request_id);
     if (approve_deny == 'Approve'):
         itemToChange = Item.objects.get(id=requestToService.item_id_id);
-        oldQuantity = itemToChange.total_available;
+        oldQuantity = itemToChange.count;
         requestAmount = requestToService.quantity;
         newQuantity = oldQuantity - requestAmount;
         if newQuantity < 0:
             return render(request, 'home/not_enough.html')
-        itemToChange.total_available = newQuantity;
+        itemToChange.count = newQuantity;
         requestToService.status = 'A';
         itemToChange.save();
     else:

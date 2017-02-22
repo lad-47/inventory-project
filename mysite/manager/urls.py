@@ -14,6 +14,7 @@ urlpatterns = [
 		views.old_cart_request_details, name="old cart request details"),
 	url(r'^request_success/$', views.request_success, name="request success"),
 	url(r'^request_failure/$', views.request_failure, name="request failure"),
+	url(r'^logs/$', views.logs, name="logs"),
 	#url(r'^cart_request/(?P<cart_request_id>[0-9]+$)', \
 		#views.cart_request_details, name="cart request details"),
 ]

@@ -74,8 +74,9 @@ class CustomIntField(CustomField):
 	
 	
 class Log(models.Model):
-	initiating_user = models.ForeignKey(User, related_name='initiating_user', on_delete=models.CASCADE)
-	involved_item = models.ForeignKey(Item, on_delete=models.CASCADE)
+	initiating_user = models.IntegerField(db_index=True)
+	involved_item = models.IntegerField(db_index=True)
 	nature = models.TextField()
 	timestamp = models.DateTimeField()
-	affected_user = models.ForeignKey(User, related_name='affected_user', null=True, blank=True, on_delete=models.CASCADE)
+	related_request = models.IntegerField(null=True, blank=True, db_index=True)
+	affected_user = models.IntegerField(null=True, blank=True, db_index=True)

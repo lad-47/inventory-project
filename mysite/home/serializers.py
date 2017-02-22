@@ -18,6 +18,11 @@ class ItemSerializer(serializers.ModelSerializer):
         model = Item
         fields = ('item_name', 'count', 'model_number', 'description', 'location', 'tags')
 
+class TagSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Tag
+        fields = ('item_id', 'tag')
         
 class RequestSerializer(serializers.ModelSerializer):
     item_id = serializers.SlugRelatedField(
