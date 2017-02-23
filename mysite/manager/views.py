@@ -40,7 +40,7 @@ def create_request_info(cart_requests):
 		valid = True;
 		for subrequest in subrequests:
 			itemToChange = Item.objects.get(id=subrequest.item_id_id);
-			oldQuantity = itemToChange.total_available;
+			oldQuantity = itemToChange.count;
 			requestAmount = subrequest.quantity;
 			newQuantity = oldQuantity - requestAmount;
 			if newQuantity < 0:
@@ -55,7 +55,7 @@ def create_indv_request_info(cart_request):
 	req_info = [];
 	for subrequest in subrequests:
 		itemToChange = Item.objects.get(id=subrequest.item_id_id);
-		oldQuantity = itemToChange.total_available;
+		oldQuantity = itemToChange.count;
 		requestAmount = subrequest.quantity;
 		newQuantity = oldQuantity - requestAmount;
 		valid = not (newQuantity < 0)
@@ -72,35 +72,29 @@ def cart_request_details(request, cart_request_id):
 	
 	#assemble useful info to pass to template or use for db manipulation
 	req_info = create_indv_request_info(current_request);
-	print("ASDFASDFASDFADF");
 	##handle the data from the form on a post
 	if request.method == 'POST':
-		print("in post");
 		service_form = ServiceForm(request.POST);
 		if service_form.is_valid():
-			print("in valid");
 			if service_form.cleaned_data['approve_deny'] == 'Approve':
-				print("in approve");
 				current_request.cart_status='A';
 				for el in req_info:
 					if not el[3]:
-						print("el3: " + str(el[3]));
 						return HttpResponseRedirect('/manager/request_failure');
 				for el in req_info:
-					print("in second el loop");
-					el[4].total_available = el[2]-el[1]; ##update item quantity
+					el[4].count = el[2]-el[1]; ##update item quantity
 					el[0].status='A'; ##subrequest was serviced
 					el[0].save();  ##save the subrequest's updated status
 					el[4].save();  ##save the item with new quantity
 			else:
-				print("in else (deny)" + service_form.cleaned_data['approve_deny']);
 				current_request.cart_status='D';
 			current_request.admin_comment=service_form.cleaned_data['admin_comment'];
 			current_request.save();
 			return HttpResponseRedirect('/manager/request_success');
 
 	##the form that will be sent to the template on a GET
-	service_form = ServiceForm();
+	else:
+		service_form = ServiceForm();
 
 	context = {
 		'current_request': current_request,
