@@ -25,6 +25,7 @@
 					<li><a>Signed in as {{ user }}</a></li>
 					{% if user.is_staff %}
       				<li><a href="{% url 'service' %}">Service Requests</a></li>
+      				<li><a href="{% url 'logs' %}">Logs</a></li>
       				{% else %}
       				<li><a href="{% url 'requests' %}">View Requests</a></li>
       				{% endif %}
