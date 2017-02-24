@@ -79,27 +79,27 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 ## SERVER
-DATABASES = {
-       'default': {
-           'ENGINE': 'django.db.backends.postgresql',
-           'NAME': 'inventory',
-           'USER': 'postgres',
-           'PASSWORD': '',
-           'PORT': '5432'
-       }
-   }
+# DATABASES = {
+#        'default': {
+#            'ENGINE': 'django.db.backends.postgresql',
+#            'NAME': 'inventory',
+#            'USER': 'postgres',
+#            'PASSWORD': '',
+#            'PORT': '5432'
+#        }
+#    }
 
 ## LOCALHOST 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': 'inventory',
-#        'USER': '',
-#        'PASSWORD': '',
-#        'HOST': '127.0.0.1',
-#        'PORT': '5432'
-#    }
-#}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'inventory',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
+        'PORT': '5432'
+    }
+}
 
 
 # Password validation
@@ -147,7 +147,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
-STATIC_URL = '/static/'
+STATIC_URL = '/staticfiles/'
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = (

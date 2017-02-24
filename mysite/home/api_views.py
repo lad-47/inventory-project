@@ -218,3 +218,14 @@ def user_create(request, format=None):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response('Administrator Permission Required')
+    
+def get_token(request):
+    if request.user.is_authenticated():
+        token, created = Token.objects.get_or_create(user=request.user)
+        context = {
+            'token': token.key
+        }
+        return render(request, 'home/get_token.html', context);
+    return render(request, 'home/notAdmin.html')
+
+
