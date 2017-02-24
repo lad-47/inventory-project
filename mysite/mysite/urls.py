@@ -8,12 +8,16 @@ import mysite.oauth_views as oauth_views
 from django.views.generic import RedirectView
 import home.api_views as api_views
 from rest_framework.urlpatterns import format_suffix_patterns
+from ctypes.test.test_pickling import name
+#from ctypes.test.test_pickling import name
 
 urlpatterns = [
     #3 apps, separated primarily by permissions
     url(r'^', include('home.urls')),
     url(r'^manager/', include('manager.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^admin/delete_item/(?P<item_id>[0-9]+)/$', views.delete_item, name='delete item'),
+    url(r'^admin/delete_item/(?P<item_id>[0-9]+)/confirm$', views.delete_check, name='delete check'),
     url(r'^login/$', auth_views.login, name="login"),
     url(r'^logout/$', auth_views.logout,name='logout'),
     url(r'^developers/', views.developers, name='developers'),
@@ -26,7 +30,8 @@ urlpatterns = [
     url(r'^api/user/$', api_views.user_list, name='user-list'),
     url(r'^api/user/(?P<pk>[0-9]+)$', api_views.user_detail, name='user-detail'),
     url(r'^api/user/create$', api_views.user_create, name='user-create'),
-    url(r'^api/$', api_views.api_root),
+    url(r'^api/$', api_views.api_root, name='api'),
+    url(r'^token/$', api_views.get_token, name='get-token'),
 ]
 
 urlpatterns += [

@@ -29,6 +29,7 @@
       				{% else %}
       				<li><a href="{% url 'requests' %}">View Requests</a></li>
       				{% endif %}
+      				<li><a href="{% url 'developers' %}">Developers</a></li>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					{% if user.is_anonymous %}

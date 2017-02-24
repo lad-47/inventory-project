@@ -9,11 +9,17 @@
 <body>
 {% block content %}
 <div style="padding-left: 15px">
-<h1>{{ item.item_name }}</h1>
-<p>Available: {{item.total_available}} out of {{item.total_count}} total</p>
-<p>Model: {{item.model_number}}</p>
-<p>Description: {{item.description}}</p>
-<p>Location: {{item.location}}</p>
+  <h1>{{ item.item_name }}</h1>
+  <p>Available: {{item.count}}</p>
+  <p>Model: {{item.model_number}}</p>
+  <p>Description: {{item.description}}</p>
+  <p>Location: {{item.location}}</p>
+</div>
+<div style="padding-left: 15px">
+  <h2>Custom Fields<h2>
+  {% for cf in custom %}
+    <p>{{cf}}<p>
+  {% endfor %}
 </div>
 <hr>
 
