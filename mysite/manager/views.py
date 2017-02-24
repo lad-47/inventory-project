@@ -1,6 +1,8 @@
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from home.models import Request, Cart_Request, User, Item, Tag, CustomFieldEntry, \
+from datetime import date
+from django.contrib.auth.models import User
+from home.models import Request, Cart_Request, User, Item, Log, Tag, CustomFieldEntry, \
 CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField
 from .forms import ServiceForm, ItemForm_factory
 from django.core.exceptions import ObjectDoesNotExist
@@ -18,7 +20,7 @@ def cart_requests(request):
 	cart_requestsO = cart_requests.filter(cart_status='O');
 	cart_requestsO_and_v = create_request_info(cart_requestsO);
 	context = {
-        'outstanding': cart_requestsO_and_v,
+		'outstanding': cart_requestsO_and_v,
 	}
 	return render(request, 'manager/cart_requestsI.html', context)
 
@@ -32,7 +34,7 @@ def request_history(request):
 	cart_requestsD_and_v = create_request_info(cart_requestsD);
 	context = {
 		'approved': cart_requestsA_and_v,
-        'denied': cart_requestsD_and_v,
+		'denied': cart_requestsD_and_v,
 	}
 	return render(request, 'manager/request_history.html', context);
 
@@ -126,6 +128,48 @@ def old_cart_request_details(request, cart_request_id):
 		'req_info': req_info,
 	}
 	return render(request, 'manager/old_cart_request_details.html', context);
+
+def logs(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	logs = Log.objects.all()
+	items = Item.objects.all()
+	users = User.objects.all()
+	if request.method == 'GET':  # If the form is submitted
+		item_query = request.GET.get('item_box', None)
+		user_query = request.GET.get('user_box', None)
+		time_query = request.GET.get('date', None)
+		if item_query is not None and not item_query=="":
+			try:
+				item = Item.objects.get(item_name=item_query)
+				logs = logs.filter(involved_item=item.id)
+			except Item.DoesNotExist:
+				context = {
+					'logs': logs,
+					'items': items,
+					'users': users,
+					'error': "Item does not exist" }
+				return render(request, 'manager/logs.html', context)
+		if user_query is not None and not user_query=="":
+			try:
+				user = User.objects.get(username=user_query)
+				logs = logs.filter(initiating_user=user.id)
+			except User.DoesNotExist:
+				context = {
+					'logs': logs,
+					'items': items,
+					'users': users,
+					'error': "User does not exist" }
+				return render(request, 'manager/logs.html', context)
+		if time_query is not None and not time_query=="":
+			date_string = time_query.split("-")
+			logs = logs.filter(timestamp__date__gte=date(int(date_string[0]),int(date_string[1]),int(date_string[2]))) 
+	context = {
+		'logs': logs,
+		'items': items,
+		'users': users
+	}
+	return render(request, 'manager/logs.html', context)
 
 
 def updateItem(item_instance, data):

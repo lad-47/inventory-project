@@ -6,6 +6,9 @@ from django.core.urlresolvers import reverse
 class Tag(models.Model):
 	#item_id = models.ForeignKey(Item, related_name='tags', on_delete=models.CASCADE)
 	tag = models.CharField(max_length=100, unique=True);
+	
+	def __str__(self):
+  		return self.tag
 
 # if we add a field to this, we'll have to go add it to the
 # ItemForm_factory properties dictionary as well, using the same name
@@ -20,7 +23,7 @@ class Item(models.Model):
 		return self.item_name
 	
 	def get_absolute_url(self):
-		return reverse('detail', kwargs={'item_id': self.id})	
+		return reverse('detail', kwargs={'item_id': self.id})
 
 
 class Cart_Request(models.Model):
@@ -73,10 +76,20 @@ class CustomLongTextField(CustomField):
 	field_value = models.TextField();
 
 class CustomShortTextField(CustomField):
-	field_value = models.CharField(max_length=70);
+	field_value = models.CharField(max_length=100);
 
 class CustomIntField(CustomField):
 	field_value = models.IntegerField();
-
+	
 class CustomFloatField(CustomField):
 	field_value = models.FloatField();
+	
+class Log(models.Model):
+	initiating_user = models.IntegerField(db_index=True)
+	involved_item = models.IntegerField(db_index=True)
+	nature = models.TextField()
+	timestamp = models.DateTimeField()
+	related_request = models.IntegerField(null=True, blank=True, db_index=True)
+	affected_user = models.IntegerField(null=True, blank=True, db_index=True)
+
+
