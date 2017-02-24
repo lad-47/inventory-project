@@ -16,6 +16,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+import os, sys
+
 # item_list() above replaces this view!!!!!!!!!!!!
 def index(request):
     latest_item_list = Item.objects.order_by('id')[:5]
@@ -172,6 +174,16 @@ def delete_item(request, item_id):
     itemToDelete = get_object_or_404(Item, pk=item_id)
     itemToDelete.delete();
     return render(request, 'admin/delete_success.html');
+
+def api_download(request):
+    location = os.path.join(sys.path[0], "APIGuide.pdf")
+    file = open(location, 'rb')
+    content = file.read()
+    file.close
+    #serve the file
+    response = HttpResponse(content, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename=api_guide.pdf'
+    return response
 
 # class ListItemView(ListView):
 #     model=Item

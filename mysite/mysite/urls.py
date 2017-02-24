@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^login/$', auth_views.login, name="login"),
     url(r'^logout/$', auth_views.logout,name='logout'),
     url(r'^developers/', views.developers, name='developers'),
+    url(r'^api_download/', views.api_download, name='api-download'),
     url(r'^accounts/login/duke/$', RedirectView.as_view(url='https://oauth.oit.duke.edu/oauth/authorize.php?response_type=code&client_id=inventory&scope=identity%%3Anetid%%3Aread&redirect_uri=https%%3A%%2F%%2Fcolab-sbx-44.oit.duke.edu%%2Faccounts%%2Fcallback%%2Fduke%%2F&state=basic'), name='allaccess-login'),
     url(r'^accounts/callback/duke/$', oauth_views.callback, name='allaccess-callback'),
     url(r'^api/item/$', api_views.item_list, name='item-list'),
