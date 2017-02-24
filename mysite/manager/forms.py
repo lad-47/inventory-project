@@ -7,28 +7,6 @@ class ServiceForm(forms.Form):
 	approve_deny = forms.ChoiceField(widget=forms.RadioSelect, \
 		choices=CHOICES);
 
-class ItemForm2(forms.Form):
-
-	#base fields of the item form
-	item_name = forms.CharField(max_length=100)
-	count = forms.IntegerField(min_value=0);
-	model_number = forms.CharField()
-	globals()['forms.ItemForm.description'] = forms.CharField(widget=forms.Textarea);
-	#a dictionary of custom fields indexed by field name
-	globals()['location'] = "yellow";
-	custom_fields = CustomFieldEntry.objects.all();
-	for cf in custom_fields:
-		field_name = cf.field_name;
-		field_type = cf.value_type;
-		if field_type == 'st':
-			globals()[field_name] = forms.CharField(max_length=100)
-		elif field_type == 'lt':
-			globals()[field_name] = forms.CharField(widget=forms.Textarea);
-		elif field_type == 'int':
-			globals()[field_name] = forms.InegerField();
-		elif field_type == 'float':
-			globals()[field_name] = forms.FloatField();
-
 def ItemForm_factory():
 
 	# this is a hacky way to assemble the tag choices but python tuples are weird

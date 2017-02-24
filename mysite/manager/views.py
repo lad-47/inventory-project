@@ -1,7 +1,9 @@
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from home.models import Request, Cart_Request, User, Item, Tag
-from .forms import ServiceForm, ItemForm2, ItemForm_factory
+from home.models import Request, Cart_Request, User, Item, Tag, CustomFieldEntry, \
+CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField
+from .forms import ServiceForm, ItemForm_factory
+from django.core.exceptions import ObjectDoesNotExist
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -124,6 +126,61 @@ def old_cart_request_details(request, cart_request_id):
 	return render(request, 'manager/old_cart_request_details.html', context);
 
 
+def updateItem(item_instance, data):
+	for field in data.keys():
+		
+		# we have to parse the tags by hand
+		if field == 'tags':
+			continue;
+
+		# the getattr is a hacky way of getting it to throw an AttributeError
+		try:
+			getattr(item_instance, field);
+			setattr(item_instance, field, data[field]);
+
+		# AttributeError should mean it's a custom field
+		# I have no idea why it throws ValueError for customs...
+		except AttributeError as ex:
+			field_entry = CustomFieldEntry.objects.get(field_name=field);
+			field_type = field_entry.value_type;
+			try:
+				if field_type == 'st':
+					to_change = CustomShortTextField.objects.get(parent_item=item_instance,\
+						field_name=field_entry)
+				elif field_type == 'lt':
+					to_change = CustomLongTextField.objects.get(parent_item=item_instance,\
+						field_name=field_entry)
+				elif field_type == 'int':
+					to_change = CustomIntTextField.objects.get(parent_item=item_instance,\
+						field_name=field_entry)
+				elif field_type == 'float':
+					to_change = CustomFloatTextField.objects.get(parent_item=item_instance,\
+						field_name=field_entry)
+				to_change.field_value = data[field];
+				to_change.save();
+			# perhaps the data is currently null (no entry in custom table)
+			except ObjectDoesNotExist as ex2:
+				print("Exception: ")
+				print(type(ex2).__name__)
+				if field_type == 'st':
+					to_change = CustomShortTextField.objects.create(parent_item=item_instance,\
+						field_name=field_entry, field_value = data[field])
+				elif field_type == 'lt':
+					to_change = CustomLongTextField.objects.get(parent_item=item_instance,\
+						field_name=field_entry, field_value = data[field])
+				elif field_type == 'int':
+					to_change = CustomIntTextField.objects.get(parent_item=item_instance,\
+						field_name=field_entry, field_value = data[field])
+				elif field_type == 'float':
+					to_change = CustomFloatTextField.objects.get(parent_item=item_instance,\
+						field_name=field_entry, field_value = data[field])
+				to_change.save();
+
+
+	item_instance.save();
+
+
+
 def modify_an_item(request, item_id):
 	itemToChange = get_object_or_404(Item, pk=item_id);
 	ItemForm = ItemForm_factory();
@@ -132,6 +189,7 @@ def modify_an_item(request, item_id):
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
+			updateItem(itemToChange, item_form.cleaned_data);
 			for key in item_form.cleaned_data.keys():
 				print('key: ' + key)
 				print('data: ' + str(item_form.cleaned_data[key]))

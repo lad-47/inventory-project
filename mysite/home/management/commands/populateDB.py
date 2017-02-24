@@ -17,10 +17,10 @@ class Command(BaseCommand):
         	password='yellowisacolor2', email=None);
         resistor100ohm = Item.objects.create(item_name="Resistor 100 Ohm", \
         	count=10, model_number="R100", \
-        	description="Resistor", location="Hudson");
+        	description="Resistor");
         resistor200ohm = Item.objects.create(item_name="Resistor 200 Ohm", \
         	count=10, model_number="R200", \
-        	description="Resistor", location="Hudson");
+        	description="Resistor");
 
         tag100OhmR = Tag.objects.create(item_id=resistor100ohm, tag="Resistor");
         tag200OhmR = Tag.objects.create(item_id=resistor200ohm, tag="Resistor");
@@ -64,5 +64,7 @@ class Command(BaseCommand):
             reason="hugh mungus what?", status='O');
 
         locationField = CustomFieldEntry.objects.create(field_name='Location', \
+            is_private=False, value_type='st');
+        testField = CustomFieldEntry.objects.create(field_name="TEST", \
             is_private=False, value_type='st');
        
