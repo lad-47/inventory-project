@@ -3,6 +3,10 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
 
+class Tag(models.Model):
+	#item_id = models.ForeignKey(Item, related_name='tags', on_delete=models.CASCADE)
+	tag = models.CharField(max_length=100)
+
 # if we add a field to this, we'll have to go add it to the
 # ItemForm_factory properties dictionary as well, using the same name
 class Item(models.Model):
@@ -10,16 +14,14 @@ class Item(models.Model):
 	count = models.IntegerField(default=0)
 	model_number = models.CharField(max_length=100, null=True)
 	description = models.TextField(null=True)
+	tags = models.ManyToManyField(Tag);
 	#location = models.CharField(max_length=100,null=True)
 	def __str__(self):
 		return self.item_name
 	
 	def get_absolute_url(self):
-		return reverse('detail', kwargs={'item_id': self.id})
-		
-class Tag(models.Model):
-	item_id = models.ForeignKey(Item, related_name='tags', on_delete=models.CASCADE)
-	tag = models.CharField(max_length=100)
+		return reverse('detail', kwargs={'item_id': self.id})	
+
 
 class Cart_Request(models.Model):
 	STATUSES = (

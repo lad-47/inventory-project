@@ -11,7 +11,7 @@ def ItemForm_factory():
 
 	# this is a hacky way to assemble the tag choices but python tuples are weird
 	first = True;
-	for item_tag in Tag.objects.distinct('tag'):
+	for item_tag in Tag.objects.all():
 		if first:
 			TAGS = ((item_tag.pk, item_tag.tag),);
 			first = False;

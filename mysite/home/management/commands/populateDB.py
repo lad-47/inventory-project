@@ -22,11 +22,15 @@ class Command(BaseCommand):
         	count=10, model_number="R200", \
         	description="Resistor");
 
-        tag100OhmR = Tag.objects.create(item_id=resistor100ohm, tag="Resistor");
-        tag200OhmR = Tag.objects.create(item_id=resistor200ohm, tag="Resistor");
-        tag100OhmU = Tag.objects.create(item_id=resistor100ohm, tag="Used");
-        tag200OhmU = Tag.objects.create(item_id=resistor200ohm, tag="Used");
-        tag200OhmW = Tag.objects.create(item_id=resistor200ohm, tag="200 ohms");
+
+        resistor = Tag.objects.create(tag="Resistor");
+        used = Tag.objects.create(tag="Used");
+        r200ohms = Tag.objects.create(tag="200 ohms");
+
+        resistor100ohm.tags.add(resistor);
+        resistor200ohm.tags.add(resistor);
+        resistor100ohm.tags.add(used);
+        resistor200ohm.tags.add(r200ohms);
         
         #making some cart requests
         cartReq1 = Cart_Request.objects.create(cart_owner=jdk1, \

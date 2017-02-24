@@ -1,7 +1,14 @@
 {% block content %}
-
+<head>
+  <style type="text/css">
+    .options_layout p { margin-left:10px; 
+    				margin-bottom:10px; }
+  </style>
+</head>
+<div class="options_layout">
 <p> Perhaps you'd like to... </p>
 <p> <a href="{% url 'request history' %}"> View Old Requests </a> </p>
 <p> <a href="{% url 'cart requests' %}"> View Outstanding Requests </a></p>
+</div>
 
 {% endblock %}

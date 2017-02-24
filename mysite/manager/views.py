@@ -131,20 +131,28 @@ def updateItem(item_instance, data):
 		
 		# we have to parse the tags by hand
 		if field == 'tags':
+			for tag in Tag.objects.all():
+				item_instance.tags.remove(tag);
+			for tagPK in data['tags']: #also data[field]
+				item_instance.tags.add(Tag.objects.get(pk=tagPK));
 			continue;
 
 		# the getattr is a hacky way of getting it to throw an AttributeError
 		try:
 			getattr(item_instance, field);
 			setattr(item_instance, field, data[field]);
+			print("setting: ")
+			print(field);
 
 		# AttributeError should mean it's a custom field
 		# I have no idea why it throws ValueError for customs...
 		except AttributeError as ex:
 			field_entry = CustomFieldEntry.objects.get(field_name=field);
 			field_type = field_entry.value_type;
+			print("inside attribute error")
 			try:
 				if field_type == 'st':
+					print("updating st field")
 					to_change = CustomShortTextField.objects.get(parent_item=item_instance,\
 						field_name=field_entry)
 				elif field_type == 'lt':
@@ -156,7 +164,11 @@ def updateItem(item_instance, data):
 				elif field_type == 'float':
 					to_change = CustomFloatTextField.objects.get(parent_item=item_instance,\
 						field_name=field_entry)
+				print("old value")
+				print(to_change.field_value)
 				to_change.field_value = data[field];
+				print("new value")
+				print(to_change.field_value)
 				to_change.save();
 			# perhaps the data is currently null (no entry in custom table)
 			except ObjectDoesNotExist as ex2:
@@ -166,14 +178,16 @@ def updateItem(item_instance, data):
 					to_change = CustomShortTextField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
 				elif field_type == 'lt':
-					to_change = CustomLongTextField.objects.get(parent_item=item_instance,\
+					to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
 				elif field_type == 'int':
-					to_change = CustomIntTextField.objects.get(parent_item=item_instance,\
+					to_change = CustomIntTextField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
 				elif field_type == 'float':
-					to_change = CustomFloatTextField.objects.get(parent_item=item_instance,\
+					to_change = CustomFloatTextField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
+				print("to change field name: ")
+				print(to_change.field_name);
 				to_change.save();
 
 
@@ -229,7 +243,7 @@ def item_to_dict(item_instance):
 			except AttributeError:
 				pass; #fml
 
-	item_tags = Tag.objects.filter(item_id=item_instance);
+	item_tags = item_instance.tags.all();
 
 	# now we add the tags by hand because... we have to
 	tag_list = [];
@@ -237,6 +251,19 @@ def item_to_dict(item_instance):
 		tag_list.append(tag.pk);
 	item_dict['tags'] = tag_list;
 
+	# and finally the custom fields
+	custom_fields = CustomFieldEntry.objects.all();
+	for cf in custom_fields:
+		field_type = cf.value_type;
+		if field_type == 'st':
+			data_field = CustomShortTextField.objects.get(parent_item=item_instance, field_name=cf);
+		elif field_type == 'lt':
+			data_field = CustomLongTextField.objects.get(parent_item=item_instance,field_name=cf);
+		elif field_type == 'int':
+			data_field = CustomIntTextField.objects.get(parent_item=item_instance,field_name=cf);
+		elif field_type == 'float':
+			data_field = CustomFloatTextField.objects.get(parent_item=item_instance,ield_name=cf);
+		item_dict[cf.field_name] = data_field.field_value;
 	print('item dict: ');
 	print(item_dict);
 	return item_dict;
