@@ -11,7 +11,7 @@ class Tag(models.Model):
 # ItemForm_factory properties dictionary as well, using the same name
 class Item(models.Model):
 	item_name = models.CharField(max_length=100, unique=True)
-	count = models.IntegerField(default=0)
+	count = models.PositiveIntegerField(default=0)
 	model_number = models.CharField(max_length=100, null=True)
 	description = models.TextField(null=True)
 	tags = models.ManyToManyField(Tag);
