@@ -86,7 +86,7 @@ class CustomFloatField(CustomField):
 	
 class Log(models.Model):
 	initiating_user = models.IntegerField(db_index=True)
-	involved_item = models.IntegerField(db_index=True)
+	involved_item = models.IntegerField(null=True, blank=True, db_index=True)
 	nature = models.TextField()
 	timestamp = models.DateTimeField()
 	related_request = models.IntegerField(null=True, blank=True, db_index=True)

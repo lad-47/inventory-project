@@ -82,7 +82,12 @@
         <tr>
             <th scope="row">{{log.id}}</th>
             <td>{{log.initiating_user}}</td>
-            <td><a href="{% url 'detail' log.involved_item %}">{{log.involved_item}}</a></td>
+            <td>
+            {% if log.involved_item %}
+            <a href="{% url 'detail' log.involved_item %}">{{log.involved_item}}</a>
+            {% else %}
+            {{log.involved_item}}
+            {% endif %}</td>
             <td style="width: 30%">{{log.nature}}</td>
             <td>{{log.timestamp}}</td>
             <td>

@@ -23,19 +23,20 @@ def log_item_delete(sender, instance, **kwargs):
     log = Log(initiating_user=user.id,involved_item=instance.id,nature='DELETE',timestamp=timezone.now())
     log.save()
         
-@receiver(post_save, sender=Tag, dispatch_uid="tag_save")
-def log_tag(sender, instance, **kwargs):
-    user = get_current_user()
-    serializer=TagSerializer(instance)
-    log = Log(initiating_user=user.id,involved_item=instance.item_id.id,nature='UPDATE TAG '+str(serializer.data),timestamp=timezone.now())
-    log.save()
-    
-@receiver(pre_delete, sender=Tag, dispatch_uid="tag_delete")
-def log_tag_delete(sender, instance, **kwargs):
-    user = get_current_user()
-    serializer=TagSerializer(instance)
-    log = Log(initiating_user=user.id,involved_item=instance.item_id.id,nature='DELETE TAG '+str(serializer.data),timestamp=timezone.now())
-    log.save()
+# Updating tags handled in item logs
+# @receiver(post_save, sender=Tag, dispatch_uid="tag_save")
+# def log_tag(sender, instance, **kwargs):
+#     user = get_current_user()
+#     serializer=TagSerializer(instance)
+#     log = Log(initiating_user=user.id,nature='UPDATE TAG '+str(serializer.data),timestamp=timezone.now())
+#     log.save()
+#     
+# @receiver(pre_delete, sender=Tag, dispatch_uid="tag_delete")
+# def log_tag_delete(sender, instance, **kwargs):
+#     user = get_current_user()
+#     serializer=TagSerializer(instance)
+#     log = Log(initiating_user=user.id,nature='DELETE TAG '+str(serializer.data),timestamp=timezone.now())
+#     log.save()
     
 @receiver(post_save, sender=Request, dispatch_uid="request_save")
 def log_request(sender, instance, created, **kwargs):
