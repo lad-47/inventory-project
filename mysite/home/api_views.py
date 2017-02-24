@@ -49,9 +49,20 @@ def item_list(request, format=None):
                 del serializer.initial_data['tags']
             if serializer.is_valid():
                 serializer.save()
+                item = Item.objects.get(item_name=serializer.data['item_name'])
                 for tag in tags:
-                    new_tag=Tag(item_id=Item.objects.get(item_name=serializer.data['item_name']),tag=tag)
-                    new_tag.save()
+                    try: 
+                        Tag.objects.get(tag=tag)
+                        tag_object=Tag.objects.get(tag=tag)
+                        tag_object.item_set.add(item)
+                        tag_object.save()
+                        item.save()
+                    except Tag.DoesNotExist:
+                        tag_object=Tag(tag=tag)
+                        tag_object.save()
+                        tag_object.item_set.add(item)
+                        tag_object.save()
+                        item.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response('Manager Permission Required')
@@ -85,15 +96,27 @@ def item_detail(request, pk, format=None):
                 del serializer.initial_data['tags']
             if serializer.is_valid():
                 serializer.save()
-                for tag in Tag.objects.filter(item_id=Item.objects.get(item_name=serializer.data['item_name'])):
+                item = Item.objects.get(item_name=serializer.data['item_name'])
+                for tag in item.tags.all():
                     if tag.tag not in tags:
                         tag.delete()
+                        item.save()
                 for tag in tags:
                     try: 
-                        Tag.objects.get(item_id=Item.objects.get(item_name=serializer.data['item_name']),tag=tag)
+                        item.tags.get(tag=tag)
                     except Tag.DoesNotExist:
-                        new_tag=Tag(item_id=Item.objects.get(item_name=serializer.data['item_name']),tag=tag)
-                        new_tag.save()
+                        try:
+                            Tag.objects.get(tag=tag)
+                            tag_object=Tag.objects.get(tag=tag)
+                            tag_object.item_set.add(item)
+                            tag_object.save()
+                            item.save()
+                        except Tag.DoesNotExist:
+                            tag_object=Tag(tag=tag)
+                            tag_object.save()
+                            tag_object.item_set.add(item)
+                            tag_object.save()
+                            item.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response('Manager Permission Required')

@@ -16,13 +16,13 @@ class ItemSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Item
-        fields = ('item_name', 'count', 'model_number', 'description', 'location', 'tags')
+        fields = ('item_name', 'count', 'model_number', 'description', 'tags')
 
 class TagSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Tag
-        fields = ('item_id', 'tag')
+        fields = ('tag',)
         
 class RequestSerializer(serializers.ModelSerializer):
     item_id = serializers.SlugRelatedField(
