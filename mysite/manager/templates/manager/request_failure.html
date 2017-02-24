@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h3 style="margin-left:10px"> Request Approval Failed Due to Insufficient Inventory. </h3>
-{% include "manager/includes/perhaps_options.html" %}
+
+{% include "manager/includes/perhaps_options.html" with message="Request Approval Failed Due to Insufficient Inventory." %}
 
 {% endblock %}

@@ -32,7 +32,8 @@ def index(request):
             latest_item_list = latest_item_list.filter(model_number__icontains=model_query)
         if tag_query is not None and 'all' not in tag_query:
             for tag in tag_query:
-                latest_item_list = latest_item_list.filter(tag__tag=tag) 
+                tag = Tag.objects.get(tag=tag);
+                latest_item_list = latest_item_list.filter(tags=tag) 
         if extag_query is not None and 'none' not in extag_query:
             for tag in extag_query:
         	       latest_item_list = latest_item_list.exclude(tag__tag=tag)
@@ -163,6 +164,14 @@ class DeleteRequestView(DeleteView):
     
     def get_success_url(self):
         return reverse('index')
+
+def delete_check(request, item_id):
+    return render(request, 'admin/delete_check.html', {'item_id':item_id})
+
+def delete_item(request, item_id):
+    itemToDelete = get_object_or_404(Item, pk=item_id)
+    itemToDelete.delete();
+    return render(request, 'admin/delete_success.html');
 
 # class ListItemView(ListView):
 #     model=Item

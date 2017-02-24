@@ -24,8 +24,8 @@ def ItemForm_factory():
 	# class variables of the ItemForm class for which this is a factory
 	properties = {
 		'item_name': forms.CharField(max_length=100),
-		'model_number': forms.CharField(),
-		'description': forms.CharField(widget=forms.Textarea),
+		'model_number': forms.CharField(max_length=100, required=False),
+		'description': forms.CharField(widget=forms.Textarea, required=False),
 		'count': forms.IntegerField(min_value=0),
 		'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
 			choices=TAGS, required=False),

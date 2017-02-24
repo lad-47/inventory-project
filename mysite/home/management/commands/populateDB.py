@@ -11,6 +11,7 @@ class Command(BaseCommand):
         	name='Can Service Requests', \
         	content_type=ContentType.objects.get_for_model(Request));
         jdk1.user_permissions.add(canService);
+        jdk1.is_superuser=True;
         jdk1.is_staff=True;
         jdk1.save();
         jdk2 = User.objects.create_user(username='jdk2', \

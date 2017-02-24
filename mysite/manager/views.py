@@ -23,6 +23,8 @@ def cart_requests(request):
 	return render(request, 'manager/cart_requestsI.html', context)
 
 def request_history(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
 	cart_requests = Cart_Request.objects.filter(is_active_request=True);
 	cart_requestsA = cart_requests.filter(cart_status='A');
 	cart_requestsD = cart_requests.filter(cart_status='D');
@@ -196,6 +198,8 @@ def updateItem(item_instance, data):
 
 
 def modify_an_item(request, item_id):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
 	itemToChange = get_object_or_404(Item, pk=item_id);
 	ItemForm = ItemForm_factory();
 
@@ -255,15 +259,65 @@ def item_to_dict(item_instance):
 	custom_fields = CustomFieldEntry.objects.all();
 	for cf in custom_fields:
 		field_type = cf.value_type;
-		if field_type == 'st':
-			data_field = CustomShortTextField.objects.get(parent_item=item_instance, field_name=cf);
-		elif field_type == 'lt':
-			data_field = CustomLongTextField.objects.get(parent_item=item_instance,field_name=cf);
-		elif field_type == 'int':
-			data_field = CustomIntTextField.objects.get(parent_item=item_instance,field_name=cf);
-		elif field_type == 'float':
-			data_field = CustomFloatTextField.objects.get(parent_item=item_instance,ield_name=cf);
-		item_dict[cf.field_name] = data_field.field_value;
+		try:
+			if field_type == 'st':
+				data_field = CustomShortTextField.objects.get(parent_item=item_instance, field_name=cf);
+			elif field_type == 'lt':
+				data_field = CustomLongTextField.objects.get(parent_item=item_instance,field_name=cf);
+			elif field_type == 'int':
+				data_field = CustomIntTextField.objects.get(parent_item=item_instance,field_name=cf);
+			elif field_type == 'float':
+				data_field = CustomFloatTextField.objects.get(parent_item=item_instance,ield_name=cf);
+			item_dict[cf.field_name] = data_field.field_value;
+		except ObjectDoesNotExist:
+			pass; # no need to do anything to the dictionary
 	print('item dict: ');
 	print(item_dict);
 	return item_dict;
+
+def add_an_item(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	ItemForm = ItemForm_factory();
+
+	# on a post we (print) the data and then return success
+	if request.method == 'POST':
+		item_form = ItemForm(request.POST);
+		if item_form.is_valid():
+			createItem(item_form.cleaned_data);
+			return HttpResponseRedirect('/manager/create_success');
+
+	else:
+		item_form = ItemForm();
+
+	return render(request, 'manager/add_an_item.html', {'item_form':item_form})
+
+
+def createItem(data):
+	item_instance = Item.objects.create(item_name=data['item_name'],\
+	 model_number=data['model_number'], description=data['description'],\
+	 count=data['count']);
+
+	for field_entry in CustomFieldEntry.objects.all():
+		field_type = field_entry.value_type;
+		field = field_entry.field_name;
+		if field_type == 'st':
+			to_change = CustomShortTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+		elif field_type == 'lt':
+			to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+		elif field_type == 'int':
+			to_change = CustomIntTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+		elif field_type == 'float':
+			to_change = CustomFloatTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+		to_change.save();
+
+	for tagPK in data['tags']:
+		item_instance.tags.add(Tag.objects.get(pk=tagPK));
+	item_instance.save();
+
+def create_success(request):
+	return render(request, 'manager/create_success.html');

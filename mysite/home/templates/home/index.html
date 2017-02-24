@@ -39,13 +39,23 @@
     <div class="d-flex w-100 justify-content-between">
 
       <h4 class="mb-1" ><a href="{{ item.get_absolute_url }}" style="margin-right:12px">{{item.item_name}}</a><span class="badge">{{item.count}}</span></h4>
-      
-      <small><a href="{% url 'modify_an_item' item_id=item.id%}" > Modify This Item </a></small>
+      {% if request.user.is_staff or request.user.is_superuser %}
+        <small>
+        <a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"> Modify This Item </a>
+        {% if request.user.is_superuser %}
+          <a href="{% url 'delete check' item_id=item.id %}" > Delete This Item </a>
+        {% endif %}
+        </small>
+      {% endif %}
     </div>
   </li>
   {% endfor %}
 </ul>
 
+{% if request.user.is_staff %}
+<h4 style="padding-left: 15px"> 
+<a href = "{% url 'add an item' %}">Add An Item </h4>
+{% endif %}
 {% endblock %}
 </body>
 </html>
