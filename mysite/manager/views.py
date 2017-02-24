@@ -6,6 +6,8 @@ from home.models import Request, Cart_Request, User, Item, Log, Tag, CustomField
 CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField
 from .forms import ServiceForm, ItemForm_factory
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from urllib import parse
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -129,12 +131,17 @@ def old_cart_request_details(request, cart_request_id):
 	}
 	return render(request, 'manager/old_cart_request_details.html', context);
 
-def logs(request):
+def logs(request, *args, **kwargs):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	logs = Log.objects.all()
 	items = Item.objects.all()
 	users = User.objects.all()
+	page = request.GET.get('page', 1)
+	new_request = request.GET.copy()
+	if 'page' in new_request.keys():
+		del new_request['page']
+	params = parse.urlencode(new_request)
 	if request.method == 'GET':  # If the form is submitted
 		item_query = request.GET.get('item_box', None)
 		user_query = request.GET.get('user_box', None)
@@ -144,10 +151,13 @@ def logs(request):
 				item = Item.objects.get(item_name=item_query)
 				logs = logs.filter(involved_item=item.id)
 			except Item.DoesNotExist:
+				paginator = Paginator(logs, 10)
+				logs = paginator.page(1)
 				context = {
 					'logs': logs,
 					'items': items,
 					'users': users,
+					'params': params,
 					'error': "Item does not exist" }
 				return render(request, 'manager/logs.html', context)
 		if user_query is not None and not user_query=="":
@@ -155,19 +165,30 @@ def logs(request):
 				user = User.objects.get(username=user_query)
 				logs = logs.filter(initiating_user=user.id)
 			except User.DoesNotExist:
+				paginator = Paginator(logs, 10)
+				logs = paginator.page(1)
 				context = {
 					'logs': logs,
 					'items': items,
 					'users': users,
+					'params': params,
 					'error': "User does not exist" }
 				return render(request, 'manager/logs.html', context)
 		if time_query is not None and not time_query=="":
 			date_string = time_query.split("-")
 			logs = logs.filter(timestamp__date__gte=date(int(date_string[0]),int(date_string[1]),int(date_string[2]))) 
+	paginator = Paginator(logs, 10)
+	try:
+		logs = paginator.page(page)
+	except PageNotAnInteger:
+		logs = paginator.page(1)
+	except EmptyPage:
+		logs = paginator.page(paginator.num_pages)
 	context = {
 		'logs': logs,
 		'items': items,
-		'users': users
+		'users': users,
+		'params': params
 	}
 	return render(request, 'manager/logs.html', context)
 

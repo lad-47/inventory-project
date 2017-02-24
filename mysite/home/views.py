@@ -18,9 +18,11 @@ from rest_framework.response import Response
 
 import os, sys
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 # item_list() above replaces this view!!!!!!!!!!!!
 def index(request):
-    latest_item_list = Item.objects.order_by('id')[:5]
+    latest_item_list = Item.objects.all()
     tag_list = Tag.objects.distinct('tag')
     if request.method == 'GET':  # If the form is submitted
         latest_item_list = Item.objects.all()
@@ -39,8 +41,16 @@ def index(request):
         if extag_query is not None and 'none' not in extag_query:
             for tag in extag_query:
         	       latest_item_list = latest_item_list.exclude(tag__tag=tag)
+    page = request.GET.get('page', 1)
+    paginator = Paginator(latest_item_list, 10)
+    try:
+        items = paginator.page(page)
+    except PageNotAnInteger:
+        items = paginator.page(1)
+    except EmptyPage:
+        items = paginator.page(paginator.num_pages)
     context = {
-        'latest_item_list': latest_item_list,
+        'items': items,
         'tag_list': tag_list
     }
     return render(request, 'home/index.html', context)

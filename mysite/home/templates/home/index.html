@@ -33,8 +33,9 @@
 <div class="page-header" style="padding-left: 15px">
   <h1>Inventory <small>Item List</small></h1>
 </div>
+
 <ul class="list-group">
-  {% for item in latest_item_list %}
+  {% for item in items %}
   <li class="list-group-item list-group-item-action flex-column align-items-start">
     <div class="d-flex w-100 justify-content-between">
 
@@ -51,6 +52,28 @@
   </li>
   {% endfor %}
 </ul>
+
+{% if items.has_other_pages %}
+  <ul class="pagination" style="padding-left: 15px">
+    {% if items.has_previous %}
+      <li><a href="?page={{ items.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in items.paginator.page_range %}
+      {% if items.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if items.has_next %}
+      <li><a href="?page={{ items.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
 
 {% if request.user.is_staff %}
 <h4 style="padding-left: 15px"> 
