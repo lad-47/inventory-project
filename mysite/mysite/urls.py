@@ -15,7 +15,7 @@ urlpatterns = [
     #3 apps, separated primarily by permissions
     url(r'^', include('home.urls')),
     url(r'^manager/', include('manager.urls')),
-    url(r'^admin/', admin.site.urls),
+    url(r'^admin/', include('administrator.urls')),
     url(r'^admin/delete_item/(?P<item_id>[0-9]+)/$', views.delete_item, name='delete item'),
     url(r'^admin/delete_item/(?P<item_id>[0-9]+)/confirm$', views.delete_check, name='delete check'),
     url(r'^login/$', auth_views.login, name="login"),

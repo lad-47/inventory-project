@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+<html>
+<head>
+	<title>Inventory</title>
+</head>
+<body>
+
+{% block content %}
+
+<div class="page-header" style="padding-left: 15px">
+  <h1>Inventory <small>User</small></h1>
+</div>
+
+<div style="padding-left: 15px">
+  <p>Username: {{edit_user.username}}</p>
+  <form method="POST">
+  {% csrf_token %}
+  <div class="form-group">
+    {% if edit_user.is_staff %}
+    <label for="manager_box">Manager:</label>
+    <input id="manager_box" name="manager_box" type="checkbox" checked value="manager"><br>
+    {% else %}
+    <label for="manager_box">Manager:</label>
+    <input id="manager_box" name="manager_box" type="checkbox" value="manager"><br>
+    {% endif %}
+    {% if edit_user.is_superuser %}
+    <label for="admin_box">Admin:</label>
+    <input id="admin_box" name="admin_box" type="checkbox" checked value="admin">
+    {% else %}
+    <label for="admin_box">Admin:</label>
+    <input id="admin_box" name="admin_box" type="checkbox" value="admin">
+    {% endif %}
+  </div>
+  <button id="submit" type="submit" class="btn btn-default">Submit</button>
+</form>
+</div>
+
+{% endblock %}
+</body>
+</html>
