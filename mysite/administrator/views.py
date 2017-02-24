@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
 
@@ -18,6 +19,14 @@ def users(request):
                     'users': users,
                     'error': "User does not exist" }
                 return render(request, 'administrator/users.html', context)
+    page = request.GET.get('page', 1)
+    paginator = Paginator(users, 2)
+    try:
+        users = paginator.page(page)
+    except PageNotAnInteger:
+        users = paginator.page(1)
+    except EmptyPage:
+        users = paginator.page(paginator.num_pages)
     context = {
         'users': users
     }
