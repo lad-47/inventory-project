@@ -1,7 +1,9 @@
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from home.models import Request, Cart_Request, User, Item
-from .forms import ServiceForm
+from home.models import Request, Cart_Request, User, Item, Tag, CustomFieldEntry, \
+CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField
+from .forms import ServiceForm, ItemForm_factory
+from django.core.exceptions import ObjectDoesNotExist
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -21,6 +23,8 @@ def cart_requests(request):
 	return render(request, 'manager/cart_requestsI.html', context)
 
 def request_history(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
 	cart_requests = Cart_Request.objects.filter(is_active_request=True);
 	cart_requestsA = cart_requests.filter(cart_status='A');
 	cart_requestsD = cart_requests.filter(cart_status='D');
@@ -122,3 +126,198 @@ def old_cart_request_details(request, cart_request_id):
 		'req_info': req_info,
 	}
 	return render(request, 'manager/old_cart_request_details.html', context);
+
+
+def updateItem(item_instance, data):
+	for field in data.keys():
+		
+		# we have to parse the tags by hand
+		if field == 'tags':
+			for tag in Tag.objects.all():
+				item_instance.tags.remove(tag);
+			for tagPK in data['tags']: #also data[field]
+				item_instance.tags.add(Tag.objects.get(pk=tagPK));
+			continue;
+
+		# the getattr is a hacky way of getting it to throw an AttributeError
+		try:
+			getattr(item_instance, field);
+			setattr(item_instance, field, data[field]);
+			print("setting: ")
+			print(field);
+
+		# AttributeError should mean it's a custom field
+		# I have no idea why it throws ValueError for customs...
+		except AttributeError as ex:
+			field_entry = CustomFieldEntry.objects.get(field_name=field);
+			field_type = field_entry.value_type;
+			print("inside attribute error")
+			try:
+				if field_type == 'st':
+					print("updating st field")
+					to_change = CustomShortTextField.objects.get(parent_item=item_instance,\
+						field_name=field_entry)
+				elif field_type == 'lt':
+					to_change = CustomLongTextField.objects.get(parent_item=item_instance,\
+						field_name=field_entry)
+				elif field_type == 'int':
+					to_change = CustomIntTextField.objects.get(parent_item=item_instance,\
+						field_name=field_entry)
+				elif field_type == 'float':
+					to_change = CustomFloatTextField.objects.get(parent_item=item_instance,\
+						field_name=field_entry)
+				print("old value")
+				print(to_change.field_value)
+				to_change.field_value = data[field];
+				print("new value")
+				print(to_change.field_value)
+				to_change.save();
+			# perhaps the data is currently null (no entry in custom table)
+			except ObjectDoesNotExist as ex2:
+				print("Exception: ")
+				print(type(ex2).__name__)
+				if field_type == 'st':
+					to_change = CustomShortTextField.objects.create(parent_item=item_instance,\
+						field_name=field_entry, field_value = data[field])
+				elif field_type == 'lt':
+					to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
+						field_name=field_entry, field_value = data[field])
+				elif field_type == 'int':
+					to_change = CustomIntTextField.objects.create(parent_item=item_instance,\
+						field_name=field_entry, field_value = data[field])
+				elif field_type == 'float':
+					to_change = CustomFloatTextField.objects.create(parent_item=item_instance,\
+						field_name=field_entry, field_value = data[field])
+				print("to change field name: ")
+				print(to_change.field_name);
+				to_change.save();
+
+
+	item_instance.save();
+
+
+
+def modify_an_item(request, item_id):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	itemToChange = get_object_or_404(Item, pk=item_id);
+	ItemForm = ItemForm_factory();
+
+	# on a post we (print) the data and then return success
+	if request.method == 'POST':
+		item_form = ItemForm(request.POST);
+		if item_form.is_valid():
+			updateItem(itemToChange, item_form.cleaned_data);
+			for key in item_form.cleaned_data.keys():
+				print('key: ' + key)
+				print('data: ' + str(item_form.cleaned_data[key]))
+			return HttpResponseRedirect('/manager/update_success');
+
+	# otherwise, it's a GET, and we init the form using the current data
+	else:
+		item_dict = item_to_dict(itemToChange);
+		item_form = ItemForm(item_dict);
+
+	#item_form = ItemForm(item_dict);
+	#item_form=ItemForm();
+	
+	#print(item_to_dict(itemToChange));
+	context = {
+		'item_form': item_form,
+	}
+	return render(request, 'manager/modify_an_item.html', context);
+
+def update_success(request):
+	return render(request, 'manager/update_success.html');
+
+def item_to_dict(item_instance):
+	item_dict = dict();
+
+	for field in item_instance._meta.get_fields():
+		# Okay this is popsicle sticks held together with funtac;
+		# the db has lingering old fields, which don't exist with
+		# getattr.  Additionally, the 'id' field will not be part
+		# of the form, so it will (I think) yell at me when I try
+		# to use this dictionary to populate the form.
+		# Also tags... it's some strange RelatableManager or something
+		# which won't be parsed correctly by the form.
+		if not (field.name == 'id' or field.name == 'tags'):
+			try:
+				item_dict[field.name] = getattr(item_instance, field.name);
+			except AttributeError:
+				pass; #fml
+
+	item_tags = item_instance.tags.all();
+
+	# now we add the tags by hand because... we have to
+	tag_list = [];
+	for tag in item_tags:
+		tag_list.append(tag.pk);
+	item_dict['tags'] = tag_list;
+
+	# and finally the custom fields
+	custom_fields = CustomFieldEntry.objects.all();
+	for cf in custom_fields:
+		field_type = cf.value_type;
+		try:
+			if field_type == 'st':
+				data_field = CustomShortTextField.objects.get(parent_item=item_instance, field_name=cf);
+			elif field_type == 'lt':
+				data_field = CustomLongTextField.objects.get(parent_item=item_instance,field_name=cf);
+			elif field_type == 'int':
+				data_field = CustomIntTextField.objects.get(parent_item=item_instance,field_name=cf);
+			elif field_type == 'float':
+				data_field = CustomFloatTextField.objects.get(parent_item=item_instance,ield_name=cf);
+			item_dict[cf.field_name] = data_field.field_value;
+		except ObjectDoesNotExist:
+			pass; # no need to do anything to the dictionary
+	print('item dict: ');
+	print(item_dict);
+	return item_dict;
+
+def add_an_item(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	ItemForm = ItemForm_factory();
+
+	# on a post we (print) the data and then return success
+	if request.method == 'POST':
+		item_form = ItemForm(request.POST);
+		if item_form.is_valid():
+			createItem(item_form.cleaned_data);
+			return HttpResponseRedirect('/manager/create_success');
+
+	else:
+		item_form = ItemForm();
+
+	return render(request, 'manager/add_an_item.html', {'item_form':item_form})
+
+
+def createItem(data):
+	item_instance = Item.objects.create(item_name=data['item_name'],\
+	 model_number=data['model_number'], description=data['description'],\
+	 count=data['count']);
+
+	for field_entry in CustomFieldEntry.objects.all():
+		field_type = field_entry.value_type;
+		field = field_entry.field_name;
+		if field_type == 'st':
+			to_change = CustomShortTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+		elif field_type == 'lt':
+			to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+		elif field_type == 'int':
+			to_change = CustomIntTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+		elif field_type == 'float':
+			to_change = CustomFloatTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+		to_change.save();
+
+	for tagPK in data['tags']:
+		item_instance.tags.add(Tag.objects.get(pk=tagPK));
+	item_instance.save();
+
+def create_success(request):
+	return render(request, 'manager/create_success.html');

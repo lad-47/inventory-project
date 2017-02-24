@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from home.models import User, Item, Request, Cart_Request
+from home.models import User, Item, Request, Cart_Request, CustomFieldEntry, Tag
 
 class Command(BaseCommand):
     def handle(self, **options):
@@ -11,16 +11,27 @@ class Command(BaseCommand):
         	name='Can Service Requests', \
         	content_type=ContentType.objects.get_for_model(Request));
         jdk1.user_permissions.add(canService);
+        jdk1.is_superuser=True;
         jdk1.is_staff=True;
         jdk1.save();
         jdk2 = User.objects.create_user(username='jdk2', \
         	password='yellowisacolor2', email=None);
         resistor100ohm = Item.objects.create(item_name="Resistor 100 Ohm", \
-        	total_count=10, total_available=10, model_number="R100", \
-        	description="Resistor", location="Hudson");
+        	count=10, model_number="R100", \
+        	description="Resistor");
         resistor200ohm = Item.objects.create(item_name="Resistor 200 Ohm", \
-        	total_count=10, total_available=10, model_number="R200", \
-        	description="Resistor", location="Hudson");
+        	count=10, model_number="R200", \
+        	description="Resistor");
+
+
+        resistor = Tag.objects.create(tag="Resistor");
+        used = Tag.objects.create(tag="Used");
+        r200ohms = Tag.objects.create(tag="200 ohms");
+
+        resistor100ohm.tags.add(resistor);
+        resistor200ohm.tags.add(resistor);
+        resistor100ohm.tags.add(used);
+        resistor200ohm.tags.add(r200ohms);
         
         #making some cart requests
         cartReq1 = Cart_Request.objects.create(cart_owner=jdk1, \
@@ -56,4 +67,9 @@ class Command(BaseCommand):
             reason="because I need it", status='O', quantity='80', parent_cart=cartReq4);
         jdk2Res200j = Request.objects.create(owner=jdk2, item_id=resistor200ohm, \
             reason="hugh mungus what?", status='O');
+
+        locationField = CustomFieldEntry.objects.create(field_name='Location', \
+            is_private=False, value_type='st');
+        testField = CustomFieldEntry.objects.create(field_name="TEST", \
+            is_private=False, value_type='st');
        

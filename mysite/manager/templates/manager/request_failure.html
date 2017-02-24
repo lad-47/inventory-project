@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h3> Request Approval Failed Due to Insufficient Inventory. </h3>
-<p> Perhaps you'd like to... </p>
-<p> <a href="{% url 'request history' %}"> View Old Requests </a> </p>
-<p> <a href="{% url 'cart requests' %}"> View Outstanding Requests </a></p>
+
+{% include "manager/includes/perhaps_options.html" with message="Request Approval Failed Due to Insufficient Inventory." %}
 
 {% endblock %}

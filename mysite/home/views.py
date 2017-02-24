@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from .models import Item, Request, Tag;
+from .models import Item, Request, Tag, CustomFieldEntry, CustomLongTextField, CustomShortTextField, CustomIntField, CustomFloatField;
 from .forms import ServiceReqForm;
 from .serializers import ItemSerializer
 # chance genereic.Listview stuff to ListView
@@ -32,7 +32,8 @@ def index(request):
             latest_item_list = latest_item_list.filter(model_number__icontains=model_query)
         if tag_query is not None and 'all' not in tag_query:
             for tag in tag_query:
-                latest_item_list = latest_item_list.filter(tag__tag=tag) 
+                tag = Tag.objects.get(tag=tag);
+                latest_item_list = latest_item_list.filter(tags=tag) 
         if extag_query is not None and 'none' not in extag_query:
             for tag in extag_query:
         	       latest_item_list = latest_item_list.exclude(tag__tag=tag)
@@ -47,9 +48,28 @@ def detail(request, item_id):
     if not request.user.is_authenticated():
         return render(request, 'home/detail.html', {'item':item})
     requests = Request.objects.filter(item_id=item.id, owner=request.user)
+    custom_fields = CustomFieldEntry.objects.all()
+    custom_values = []
+    for cf in custom_fields:
+    	if cf.value_type == 'lt': # Long Text
+    		val = CustomLongTextField.objects.filter(parent_item=item.id, field_name=cf.field_name)
+    		custom_values.append(val)
+    	elif cf.value_type == 'st': # Short Text
+    		val = CustomShortTextField.objects.filter(parent_item=item.id, field_name=cf.field_name)
+    		custom_values.append(val)
+    	elif cf.value_type == 'int': # Integer
+    		val = CustomIntField.objects.filter(parent_item=item.id, field_name=cf.field_name)
+    		custom_values.append(val)
+    	elif cf.value_type == 'float': # Float
+    		val = CustomFloatField.objects.filter(parent_item=item.id, field_name=cf.field_name)
+    		custom_values.append(val)
+    	else:
+    		return HttpResponseNotFound('<h1>Custom Field not found<h1>')
+    custom = zip(custom_fields,custom_values)
     context = {
         'item': item,
-        'requests': requests  
+        'requests': requests,
+        'custom': custom
     }
     return render(request, 'home/detail.html', context)
     
@@ -144,6 +164,14 @@ class DeleteRequestView(DeleteView):
     
     def get_success_url(self):
         return reverse('index')
+
+def delete_check(request, item_id):
+    return render(request, 'admin/delete_check.html', {'item_id':item_id})
+
+def delete_item(request, item_id):
+    itemToDelete = get_object_or_404(Item, pk=item_id)
+    itemToDelete.delete();
+    return render(request, 'admin/delete_success.html');
 
 # class ListItemView(ListView):
 #     model=Item
