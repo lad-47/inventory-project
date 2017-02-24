@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Approved Requests</h3>
+	{% include "manager/includes/cart_request_table.html" with cart_requests_and_v=approved color=False %}
+
+	<h3>Denied Requests</h3>
+	{% include "manager/includes/cart_request_table.html" with cart_requests_and_v=denied color=False %}
+
+{% endblock %}
