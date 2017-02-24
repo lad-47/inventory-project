@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
+
+# if we add a field to this, we'll have to go add it to the
+# ItemForm_factory properties dictionary as well, using the same name
 class Item(models.Model):
 	item_name = models.CharField(max_length=100)
 	count = models.IntegerField(default=0)

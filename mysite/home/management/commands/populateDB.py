@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from home.models import User, Item, Request, Cart_Request
+from home.models import User, Item, Request, Cart_Request, CustomFieldEntry, Tag
 
 class Command(BaseCommand):
     def handle(self, **options):
@@ -16,11 +16,17 @@ class Command(BaseCommand):
         jdk2 = User.objects.create_user(username='jdk2', \
         	password='yellowisacolor2', email=None);
         resistor100ohm = Item.objects.create(item_name="Resistor 100 Ohm", \
-        	total_count=10, total_available=10, model_number="R100", \
+        	count=10, model_number="R100", \
         	description="Resistor", location="Hudson");
         resistor200ohm = Item.objects.create(item_name="Resistor 200 Ohm", \
-        	total_count=10, total_available=10, model_number="R200", \
+        	count=10, model_number="R200", \
         	description="Resistor", location="Hudson");
+
+        tag100OhmR = Tag.objects.create(item_id=resistor100ohm, tag="Resistor");
+        tag200OhmR = Tag.objects.create(item_id=resistor200ohm, tag="Resistor");
+        tag100OhmU = Tag.objects.create(item_id=resistor100ohm, tag="Used");
+        tag200OhmU = Tag.objects.create(item_id=resistor200ohm, tag="Used");
+        tag200OhmW = Tag.objects.create(item_id=resistor200ohm, tag="200 ohms");
         
         #making some cart requests
         cartReq1 = Cart_Request.objects.create(cart_owner=jdk1, \
@@ -56,4 +62,7 @@ class Command(BaseCommand):
             reason="because I need it", status='O', quantity='80', parent_cart=cartReq4);
         jdk2Res200j = Request.objects.create(owner=jdk2, item_id=resistor200ohm, \
             reason="hugh mungus what?", status='O');
+
+        locationField = CustomFieldEntry.objects.create(field_name='Location', \
+            is_private=False, value_type='st');
        

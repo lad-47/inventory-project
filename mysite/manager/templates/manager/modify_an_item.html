@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1> Placeholder </h1>
+
+<head>
+  <style type="text/css">
+    .form_layout p { margin-left:10px; 
+    				margin-bottom:10px; }
+  </style>
+</head>
+<form method="POST">
+	{% csrf_token %}
+	<div class="form_layout">
+	{{item_form.as_p}}
+	</div>
+	<input type="submit" value="Update Item">
+</form>
+    
+{% endblock %}
+
+
+<!--
+item_name = forms.CharField(max_length=100)
+	count = forms.IntegerField(min_value=0);
+	model_number = forms.CharField()
+	description = forms.CharField(widget=forms.Textarea); -->
