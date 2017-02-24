@@ -2,21 +2,26 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
+
+class Tag(models.Model):
+	#item_id = models.ForeignKey(Item, related_name='tags', on_delete=models.CASCADE)
+	tag = models.CharField(max_length=100, unique=True);
+
+# if we add a field to this, we'll have to go add it to the
+# ItemForm_factory properties dictionary as well, using the same name
 class Item(models.Model):
-	item_name = models.CharField(max_length=100)
+	item_name = models.CharField(max_length=100, unique=True)
 	count = models.IntegerField(default=0)
 	model_number = models.CharField(max_length=100, null=True)
 	description = models.TextField(null=True)
-	location = models.CharField(max_length=100,null=True)
+	tags = models.ManyToManyField(Tag);
+	#location = models.CharField(max_length=100,null=True)
 	def __str__(self):
 		return self.item_name
 	
 	def get_absolute_url(self):
-		return reverse('detail', kwargs={'item_id': self.id})
-		
-class Tag(models.Model):
-	item_id = models.ForeignKey(Item, related_name='tags', on_delete=models.CASCADE)
-	tag = models.CharField(max_length=100)
+		return reverse('detail', kwargs={'item_id': self.id})	
+
 
 class Cart_Request(models.Model):
 	STATUSES = (
@@ -51,13 +56,18 @@ class Request(models.Model):
 		return "User: " + self.owner.__str__() + ", Item: " + \
 		self.item_id.__str__() + " Reason: " + self.reason;
 
+# This is a valid Custom Field that has been created
+class CustomFieldEntry(models.Model):
+	field_name = models.CharField(max_length=100);
+	is_private = models.BooleanField();
+	value_type = models.CharField(max_length=10); # string key to indicate which type of value (lt,st,int,float)
+
 #custom fields implemented using extra tables in the database
 #in theory, "CustomField" should be an abstract class, but 
 #I'm not totally sure how to implement that funcionality in python
 class CustomField(models.Model):
 	parent_item = models.ForeignKey(Item, on_delete=models.CASCADE);
-	field_name = models.CharField(max_length=100);
-	is_private = models.BooleanField();
+	field_name = models.ForeignKey(CustomFieldEntry, on_delete=models.CASCADE);
 
 class CustomLongTextField(CustomField):
 	field_value = models.TextField();
@@ -67,3 +77,6 @@ class CustomShortTextField(CustomField):
 
 class CustomIntField(CustomField):
 	field_value = models.IntegerField();
+
+class CustomFloatField(CustomField):
+	field_value = models.FloatField();
