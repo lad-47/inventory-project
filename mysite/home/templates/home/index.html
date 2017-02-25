@@ -34,6 +34,11 @@
   <h1>Inventory <small>Item List</small></h1>
 </div>
 
+{% if request.user.is_staff %}
+<h4 style="padding-left: 15px"> 
+<a href = "{% url 'add an item' %}">Add an Item </h4>
+{% endif %}
+
 <ul class="list-group">
   {% for item in items %}
   <li class="list-group-item list-group-item-action flex-column align-items-start">
@@ -75,10 +80,7 @@
   </ul>
 {% endif %}
 
-{% if request.user.is_staff %}
-<h4 style="padding-left: 15px"> 
-<a href = "{% url 'add an item' %}">Add An Item </h4>
-{% endif %}
+
 {% endblock %}
 </body>
 </html>

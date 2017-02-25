@@ -9,8 +9,8 @@ class ServiceForm(forms.Form):
 
 
 class TagModifyForm(forms.Form):
-	old_tag = forms.CharField(max_length=100, required=False);
-	new_tag = forms.CharField(max_length=100);
+	old_name = forms.CharField(max_length=100);
+	new_name = forms.CharField(max_length=100);
 
 class TagCreateForm(forms.Form):
 	current_items = Item.objects.all();

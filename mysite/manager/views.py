@@ -8,6 +8,7 @@ from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
+from django.db import IntegrityError
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -391,21 +392,9 @@ def tag_handler(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	
-	if request.method=='POST':
-		if 'Modify' in request.data:
-			modify_form = TagModifyForm(request.POST);
-			if modify_form.is_valid():
-				pass;
-
-		if 'Create' in request.data:
-			create_form = TagCreateForm(request.POST);
-			if create_form.is_valid():
-				pass;
-
-	else:
-		create_form = TagCreateForm();
-		modify_form = TagModifyForm();
-
+	# on a POST, these definitions will be overwritten before rendering
+	create_form = TagCreateForm();
+	modify_form = TagModifyForm();
 
 	context = {
 		'create_form': create_form,
@@ -414,7 +403,59 @@ def tag_handler(request):
 
 	return render(request, 'manager/tag_handler.html', context);
 
-	
+def create_tag(request):
+	if request.method == 'POST':
+		create_form = TagCreateForm(request.POST);
+		if create_form.is_valid():
+			try:
+				newTag = Tag.objects.create(\
+					tag=create_form.cleaned_data['new_tag_name']);
+			except IntegrityError:
+				context = {
+					'create_form': create_form,
+					'modify_form': TagModifyForm(),
+					}
+				return render(request, 'manager/tag_exists.html', context);
+
+			newTag.save();
+			for itemPK in create_form.cleaned_data['tagged_items']:
+				item = Item.objects.get(pk=itemPK);
+				item.tags.add(newTag);
+				item.save();
+			return HttpResponseRedirect('/manager/tag_success');
+	else:
+		create_form = TagCreateForm();
+	modify_form = TagModifyForm();
+
+	context = {
+		'create_form': create_form,
+		'modify_form': modify_form,
+	}
+
+	return render(request, 'manager/tag_handler.html', context);
+
+
+def modify_tag(request):
+	if request.method=='POST':
+		modify_form = TagModifyForm(request.POST);
+		if modify_form.is_valid():
+			tagToUpdate = Tag.objects.get(\
+				tag=modify_form.cleaned_data['old_name']);
+			tagToUpdate.tag = modify_form.cleaned_data['new_name'];
+			tagToUpdate.save();
+			return HttpResponseRedirect('/manager/tag_success');
+
+	else:
+		modify_form = TagModifyForm();
+	create_form = TagCreateForm();
+
+	context = {
+		'create_form': create_form,
+		'modify_form': modify_form,
+	}
+
+	return render(request, 'manager/tag_handler.html', context);
+
 
 def tag_success(request):
-	render (request, 'manager/tag_success.html');
+	return render (request, 'manager/tag_success.html');

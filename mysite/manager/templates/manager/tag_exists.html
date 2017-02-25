@@ -24,6 +24,7 @@
 <div class="form_layout" >
 <form method="POST" action="{% url 'create tag' %}">
 	{% csrf_token %}
+	<h5 style="color:red"><b>Tag Already Exists</b> </h5>
 	<h4> <b>Create a New Tag </b></h4>
 	{{create_form.as_p}}
 
