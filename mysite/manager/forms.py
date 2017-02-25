@@ -8,6 +8,7 @@ class ServiceForm(forms.Form):
 		choices=CHOICES);
 
 def generate_choices(db_Model, data_display_field):
+	print('in generate choices')
 	first = True;
 	for instance in db_Model.objects.all():
 		if first:
@@ -30,10 +31,25 @@ class TagCreateForm(forms.Form):
 	tagged_items = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
 		required=False, choices=ITEMS, label="Tag Some Items");
 
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+		ITEMS = generate_choices(Item, 'item_name');
+		self.fields['tagged_items'].choices=ITEMS;
+
 class TagDeleteForm(forms.Form):
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+		TAGS = generate_choices(Tag, 'tag');
+		self.fields['to_delete'].choices=TAGS;
+
 	TAGS = generate_choices(Tag, 'tag');
 	to_delete = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
 		choices=TAGS, label="Tags to Delete")
+
+def ItemForm_init(self, *args, **kwargs):
+	super(self.__class__, self).__init__(*args, **kwargs)
+	TAGS = generate_choices(Tag, 'tag');
+	self.fields['tags'].choices=TAGS;
 
 def ItemForm_factory():
 
@@ -50,6 +66,7 @@ def ItemForm_factory():
 		'count': forms.IntegerField(min_value=0),
 		'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
 			choices=TAGS, required=False),
+		'__init__': ItemForm_init,
 	}
 
 	# add more class variables to properties for the custom fields
@@ -69,4 +86,6 @@ def ItemForm_factory():
 
 	# use python's magic 'type' method to create a class
 	return type('ItemForm', (forms.Form,), properties);
+
+
 
