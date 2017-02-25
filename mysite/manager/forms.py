@@ -7,6 +7,15 @@ class ServiceForm(forms.Form):
 	approve_deny = forms.ChoiceField(widget=forms.RadioSelect, \
 		choices=CHOICES);
 
+def generate_choices(db_Model, data_display_field):
+	first = True;
+	for instance in db_Model.objects.all():
+		if first:
+			CHOICES = ((instance.pk, getattr(instance, data_display_field)),);
+			first = False;
+			continue;
+		CHOICES = CHOICES + ((instance.pk, getattr(instance, data_display_field)),);
+	return CHOICES;
 
 class TagModifyForm(forms.Form):
 	old_name = forms.CharField(max_length=100);
@@ -15,28 +24,20 @@ class TagModifyForm(forms.Form):
 class TagCreateForm(forms.Form):
 	current_items = Item.objects.all();
 
-	first = True;
-	for item in current_items:
-		if first:
-			ITEMS = ((item.pk, item.item_name), );
-			first = False;
-			continue;
-		ITEMS = ITEMS + ((item.pk, item.item_name), );
+	ITEMS = generate_choices(Item, 'item_name');
 
 	new_tag_name = forms.CharField(max_length=100, label = "Tag Name");
 	tagged_items = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
 		required=False, choices=ITEMS, label="Tag Some Items");
 
+class TagDeleteForm(forms.Form):
+	TAGS = generate_choices(Tag, 'tag');
+	to_delete = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+		choices=TAGS, label="Tags to Delete")
+
 def ItemForm_factory():
 
-	# this is a hacky way to assemble the tag choices but python tuples are weird
-	first = True;
-	for item_tag in Tag.objects.all():
-		if first:
-			TAGS = ((item_tag.pk, item_tag.tag),);
-			first = False;
-			continue;
-		TAGS = TAGS + ((item_tag.pk, item_tag.tag),);
+	TAGS = generate_choices(Tag, 'tag');
 
 	print('tags: ');
 	print(TAGS);
@@ -68,3 +69,4 @@ def ItemForm_factory():
 
 	# use python's magic 'type' method to create a class
 	return type('ItemForm', (forms.Form,), properties);
+

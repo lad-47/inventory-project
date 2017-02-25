@@ -30,6 +30,16 @@
 
 	<p><input type="submit" value="Create"></p>
 </form>
+</div><br><br>
+
+<div class="form_layout" >
+<form method="POST" action="{% url 'delete tag conf' %}">
+	{% csrf_token %}
+	<h4> <b>Delete Tags </b></h4>
+	{{delete_form.as_p}}
+
+	<p><input type="submit" value="Delete"></p>
+</form>
 </div>
 
 

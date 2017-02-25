@@ -23,6 +23,9 @@ urlpatterns = [
 	url(r'^tag_handler/create/$', views.create_tag, name="create tag"),
 	url(r'^tag_handler/modify/$', views.modify_tag, name="modify tag"),
 	url(r'^tag_success/$', views.tag_success, name="tag success"),
+	url(r'^tag_handler/delete_1/$', views.delete_tag_conf, name="delete tag conf"),
+	url(r'^tag_handler/delete_2/$', views.delete_tag_action, name="delete tag action"),
+	url(r'^tag_delete_success/$', views.tag_delete_success, name="tag delete success"),
 	#url(r'^cart_request/(?P<cart_request_id>[0-9]+$)', \
 		#views.cart_request_details, name="cart request details"),
 ]
