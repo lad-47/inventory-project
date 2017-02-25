@@ -4,10 +4,11 @@ from datetime import date
 from django.contrib.auth.models import User
 from home.models import Request, Cart_Request, User, Item, Log, Tag, CustomFieldEntry, \
 CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField
-from .forms import ServiceForm, ItemForm_factory
+from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
+from django.db import IntegrityError
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -386,3 +387,128 @@ def createItem(data):
 
 def create_success(request):
 	return render(request, 'manager/create_success.html');
+
+def tag_handler(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	
+	# on a POST, these definitions will be overwritten before rendering
+	create_form = TagCreateForm();
+	modify_form = TagModifyForm();
+	delete_form = TagDeleteForm();
+
+	context = {
+		'create_form': create_form,
+		'modify_form': modify_form,
+		'delete_form': delete_form,
+	}
+
+	return render(request, 'manager/tag_handler.html', context);
+
+def create_tag(request):
+	if request.method == 'POST':
+		create_form = TagCreateForm(request.POST);
+		if create_form.is_valid():
+			try:
+				newTag = Tag.objects.create(\
+					tag=create_form.cleaned_data['new_tag_name']);
+			except IntegrityError:
+				context = {
+					'create_form': create_form,
+					'modify_form': TagModifyForm(),
+					}
+				return render(request, 'manager/tag_exists.html', context);
+
+			newTag.save();
+			for itemPK in create_form.cleaned_data['tagged_items']:
+				item = Item.objects.get(pk=itemPK);
+				item.tags.add(newTag);
+				item.save();
+			return HttpResponseRedirect('/manager/tag_success');
+	else:
+		create_form = TagCreateForm();
+	modify_form = TagModifyForm();
+	delete_form = TagDeleteForm();
+
+	context = {
+		'create_form': create_form,
+		'modify_form': modify_form,
+		'delete_form': delete_form,
+	}
+
+	return render(request, 'manager/tag_handler.html', context);
+
+
+def modify_tag(request):
+	if request.method=='POST':
+		modify_form = TagModifyForm(request.POST);
+		if modify_form.is_valid():
+			tagToUpdate = Tag.objects.get(\
+				tag=modify_form.cleaned_data['old_name']);
+			tagToUpdate.tag = modify_form.cleaned_data['new_name'];
+			tagToUpdate.save();
+			return HttpResponseRedirect('/manager/tag_success');
+
+	else:
+		modify_form = TagModifyForm();
+	create_form = TagCreateForm();
+	delete_form = TagDeleteForm();
+
+	context = {
+		'create_form': create_form,
+		'modify_form': modify_form,
+		'delete_form': delete_form,
+	}
+
+	return render(request, 'manager/tag_handler.html', context);
+
+def delete_tag_conf(request):
+	if request.method=='POST':
+		delete_form = TagDeleteForm(request.POST);
+		if delete_form.is_valid():
+			create_form = TagCreateForm();
+			modify_form = TagModifyForm();
+			context = {
+				'delete_form': delete_form,
+				}
+			return render(request, 'manager/delete_confirmation.html', context);
+	else:
+		delete_form = TagDeleteForm();
+	create_form = TagCreateForm();
+	modify_form = TagModifyForm();
+
+	context = {
+		'create_form': create_form,
+		'modify_form': modify_form,
+		'delete_form': delete_form,
+	}
+
+	return render(request, 'manager/tag_handler.html', context);
+
+def delete_tag_action(request):
+	if request.method=='POST':
+		delete_form = TagDeleteForm(request.POST);
+		if delete_form.is_valid():
+			for tagPK in delete_form.cleaned_data['to_delete']:
+				tag = Tag.objects.get(pk=tagPK);
+				tag.delete();
+			return HttpResponseRedirect('/manager/tag_success');
+	else:
+		delete_form = TagDeleteForm();
+	create_form = TagCreateForm();
+	modify_form = TagModifyForm();
+
+	context = {
+		'create_form': create_form,
+		'modify_form': modify_form,
+		'delete_form': delete_form,
+	}
+
+	return render(request, 'manager/tag_handler.html', context);
+
+
+def tag_delete_success(request):
+	return;
+
+def tag_success(request):
+	return render (request, 'manager/tag_success.html');

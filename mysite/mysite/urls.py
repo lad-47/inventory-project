@@ -8,7 +8,6 @@ import mysite.oauth_views as oauth_views
 from django.views.generic import RedirectView
 import home.api_views as api_views
 from rest_framework.urlpatterns import format_suffix_patterns
-from ctypes.test.test_pickling import name
 #from ctypes.test.test_pickling import name
 
 urlpatterns = [

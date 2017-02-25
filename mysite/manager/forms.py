@@ -7,16 +7,37 @@ class ServiceForm(forms.Form):
 	approve_deny = forms.ChoiceField(widget=forms.RadioSelect, \
 		choices=CHOICES);
 
-def ItemForm_factory():
-
-	# this is a hacky way to assemble the tag choices but python tuples are weird
+def generate_choices(db_Model, data_display_field):
 	first = True;
-	for item_tag in Tag.objects.all():
+	for instance in db_Model.objects.all():
 		if first:
-			TAGS = ((item_tag.pk, item_tag.tag),);
+			CHOICES = ((instance.pk, getattr(instance, data_display_field)),);
 			first = False;
 			continue;
-		TAGS = TAGS + ((item_tag.pk, item_tag.tag),);
+		CHOICES = CHOICES + ((instance.pk, getattr(instance, data_display_field)),);
+	return CHOICES;
+
+class TagModifyForm(forms.Form):
+	old_name = forms.CharField(max_length=100);
+	new_name = forms.CharField(max_length=100);
+
+class TagCreateForm(forms.Form):
+	current_items = Item.objects.all();
+
+	ITEMS = generate_choices(Item, 'item_name');
+
+	new_tag_name = forms.CharField(max_length=100, label = "Tag Name");
+	tagged_items = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
+		required=False, choices=ITEMS, label="Tag Some Items");
+
+class TagDeleteForm(forms.Form):
+	TAGS = generate_choices(Tag, 'tag');
+	to_delete = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+		choices=TAGS, label="Tags to Delete")
+
+def ItemForm_factory():
+
+	TAGS = generate_choices(Tag, 'tag');
 
 	print('tags: ');
 	print(TAGS);
@@ -48,3 +69,4 @@ def ItemForm_factory():
 
 	# use python's magic 'type' method to create a class
 	return type('ItemForm', (forms.Form,), properties);
+
