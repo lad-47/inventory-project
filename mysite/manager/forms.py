@@ -7,6 +7,26 @@ class ServiceForm(forms.Form):
 	approve_deny = forms.ChoiceField(widget=forms.RadioSelect, \
 		choices=CHOICES);
 
+
+class TagModifyForm(forms.Form):
+	old_tag = forms.CharField(max_length=100, required=False);
+	new_tag = forms.CharField(max_length=100);
+
+class TagCreateForm(forms.Form):
+	current_items = Item.objects.all();
+
+	first = True;
+	for item in current_items:
+		if first:
+			ITEMS = ((item.pk, item.item_name), );
+			first = False;
+			continue;
+		ITEMS = ITEMS + ((item.pk, item.item_name), );
+
+	new_tag_name = forms.CharField(max_length=100, label = "Tag Name");
+	tagged_items = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
+		required=False, choices=ITEMS, label="Tag Some Items");
+
 def ItemForm_factory():
 
 	# this is a hacky way to assemble the tag choices but python tuples are weird

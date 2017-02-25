@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<head>
+  <style type="text/css">
+    .form_layout p { margin-left:10px; 
+    				margin-bottom:10px; }
+    			h4 { margin-left: 10px; }
+  </style>
+</head>
+
+<div class="form_layout">
+<form method="POST">
+	{% csrf_token %}
+	<h4> <b>Change the Name of a Current Tag </b></h4>
+	{{modify_form.as_p}}
+
+	<p><input type="submit" value="Modify"></p>
+</form>
+</div> <br><br>
+
+<div class="form_layout">
+<form method="POST">
+	{% csrf_token %}
+	<h4> <b>Create a New Tag </b></h4>
+	{{create_form.as_p}}
+
+	<p><input type="submit" value="Create"></p>
+</form>
+</div>
+
+
+{% endblock %}

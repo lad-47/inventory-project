@@ -4,7 +4,7 @@ from datetime import date
 from django.contrib.auth.models import User
 from home.models import Request, Cart_Request, User, Item, Log, Tag, CustomFieldEntry, \
 CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField
-from .forms import ServiceForm, ItemForm_factory
+from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
@@ -386,3 +386,35 @@ def createItem(data):
 
 def create_success(request):
 	return render(request, 'manager/create_success.html');
+
+def tag_handler(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	
+	if request.method=='POST':
+		if 'Modify' in request.data:
+			modify_form = TagModifyForm(request.POST);
+			if modify_form.is_valid():
+				pass;
+
+		if 'Create' in request.data:
+			create_form = TagCreateForm(request.POST);
+			if create_form.is_valid():
+				pass;
+
+	else:
+		create_form = TagCreateForm();
+		modify_form = TagModifyForm();
+
+
+	context = {
+		'create_form': create_form,
+		'modify_form': modify_form,
+	}
+
+	return render(request, 'manager/tag_handler.html', context);
+
+	
+
+def tag_success(request):
+	render (request, 'manager/tag_success.html');

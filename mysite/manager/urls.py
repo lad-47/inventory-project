@@ -19,6 +19,8 @@ urlpatterns = [
 	url(r'^update_success/$', views.update_success, name="update_success"),
 	url(r'^add_an_item/$', views.add_an_item, name="add an item"),
 	url(r'^create_success/$', views.create_success, name="create success"),
+	url(r'^tag_handler/$', views.tag_handler, name="tag handler"),
+	url(r'^tag_success/$', views.tag_success, name="tag success"),
 	#url(r'^cart_request/(?P<cart_request_id>[0-9]+$)', \
 		#views.cart_request_details, name="cart request details"),
 ]
