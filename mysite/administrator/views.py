@@ -20,7 +20,7 @@ def users(request):
                     'error': "User does not exist" }
                 return render(request, 'administrator/users.html', context)
     page = request.GET.get('page', 1)
-    paginator = Paginator(users, 2)
+    paginator = Paginator(users, 10)
     try:
         users = paginator.page(page)
     except PageNotAnInteger:
@@ -53,8 +53,16 @@ def detail_user(request, user_id):
         if request.POST.get('manager_box', None)=='manager':
             user.is_staff=True
             user.save()
+        else:
+            user.is_staff=False
+            user.is_superuser=False
+            user.save()
         if request.POST.get('admin_box', None)=='admin':
             user.is_superuser=True
+            user.is_staff=True
+            user.save()
+        else:
+            user.is_superuser=False
             user.save()
     context = {
         'edit_user': user
