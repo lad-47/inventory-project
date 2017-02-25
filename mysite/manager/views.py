@@ -395,6 +395,7 @@ def tag_handler(request):
 	# on a POST, these definitions will be overwritten before rendering
 	create_form = TagCreateForm();
 	modify_form = TagModifyForm();
+	print('creating delte form');
 	delete_form = TagDeleteForm();
 
 	context = {
