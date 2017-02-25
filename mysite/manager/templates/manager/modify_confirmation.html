@@ -1,0 +1,7 @@
+<{% extends "base.html" %}
+
+{% block content %}
+
+{% include "manager/includes/confirmation.html" with message="Modification of this item will change it in the database." form=item_form action=action submit_button="Yes, Update Item" %}
+
+{% endblock %}

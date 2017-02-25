@@ -9,6 +9,7 @@ class ServiceForm(forms.Form):
 
 def generate_choices(db_Model, data_display_field):
 	print('in generate choices')
+	CHOICES = (());
 	first = True;
 	for instance in db_Model.objects.all():
 		if first:
