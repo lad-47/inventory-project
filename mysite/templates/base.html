@@ -24,6 +24,8 @@
 				<ul class="nav navbar-nav">
 					<li><a>Signed in as {{ user }}</a></li>
 					{% if user.is_staff %}
+      				<li><a href="{% url 'service' %}">Service Requests</a></li>
+      				<li><a href="{% url 'direct-disburse' %}">Direct Disburse</a></li>
       				<li><a href="{% url 'cart requests' %}">Service Requests</a></li>
       				{% if user.is_superuser %}
       				<li><a href="{% url 'users' %}">Manage Users</a></li>
