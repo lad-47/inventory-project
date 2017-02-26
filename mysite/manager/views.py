@@ -535,6 +535,27 @@ def direct_disburse(request):
 			item_request=Request(status='O',reason='direct disbursement',item_id=item,owner=owner,admin_comment=comment,quantity=int(count_set[i]),parent_cart=cart)
 			item_request.save()
 		cart.save()
+		subrequests = Request.objects.filter(parent_cart=cart);
+		valid = True;
+		for subrequest in subrequests:
+			itemToChange = Item.objects.get(id=subrequest.item_id_id);
+			oldQuantity = itemToChange.count;
+			requestAmount = subrequest.quantity;
+			newQuantity = oldQuantity - requestAmount;
+			if newQuantity < 0:
+				valid = False;
+				break;
+		if valid==True:
+			cart.cart_status="A"
+			for subrequest in subrequests:
+				itemToChange = Item.objects.get(id=subrequest.item_id_id);
+				newQuantity = itemToChange.count - subrequest.quantity;
+				itemToChange.count = newQuantity
+				subrequest.status="A"
+				subrequest.save()
+				itemToChange.save()
+			cart.save()
+			
 		return HttpResponseRedirect('/manager/create_success');
 
 	context = {
