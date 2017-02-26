@@ -9,6 +9,7 @@ class ServiceForm(forms.Form):
 
 def generate_choices(db_Model, data_display_field):
 	print('in generate choices')
+	CHOICES = (());
 	first = True;
 	for instance in db_Model.objects.all():
 		if first:
@@ -18,6 +19,7 @@ def generate_choices(db_Model, data_display_field):
 		CHOICES = CHOICES + ((instance.pk, getattr(instance, data_display_field)),);
 	return CHOICES;
 
+# tag handling forms
 class TagModifyForm(forms.Form):
 	old_name = forms.CharField(max_length=100);
 	new_name = forms.CharField(max_length=100);
@@ -46,6 +48,7 @@ class TagDeleteForm(forms.Form):
 	to_delete = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
 		choices=TAGS, label="Tags to Delete")
 
+# the item form; complicated by custom fields
 def ItemForm_init(self, *args, **kwargs):
 	super(self.__class__, self).__init__(*args, **kwargs)
 	TAGS = generate_choices(Tag, 'tag');
@@ -88,4 +91,11 @@ def ItemForm_factory():
 	return type('ItemForm', (forms.Form,), properties);
 
 
-
+# add or remove custom fields
+class CFAddForm(forms.Form):
+	TYPES = (('lt', 'Long Text'), ('st', 'Short Text'), \
+		('int', 'Integer'), ('float', 'Float'));
+	PRIV = ((True, 'Private'), (False, 'Not Private'));
+	value_type = forms.ChoiceField(widget=forms.RadioSelect, choices=TYPES);
+	field_name = forms.CharField(max_length=100);
+	is_private = forms.ChoiceField(widget=forms.RadioSelect, choices=PRIV);

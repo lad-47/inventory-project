@@ -16,6 +16,8 @@ urlpatterns = [
 	url(r'^request_failure/$', views.request_failure, name="request failure"),
 	url(r'^logs/$', views.logs, name="logs"),
 	url(r'^modify_an_item/(?P<item_id>[0-9]+)/$', views.modify_an_item, name="modify_an_item"),
+	url(r'^modify_an_item_action/(?P<item_id>[0-9]+)/$', views.modify_an_item_action,\
+	 name="modify an item action"),
 	url(r'^update_success/$', views.update_success, name="update_success"),
 	url(r'^add_an_item/$', views.add_an_item, name="add an item"),
 	url(r'^create_success/$', views.create_success, name="create success"),

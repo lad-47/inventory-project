@@ -61,7 +61,7 @@ class Request(models.Model):
 
 # This is a valid Custom Field that has been created
 class CustomFieldEntry(models.Model):
-	field_name = models.CharField(max_length=100);
+	field_name = models.CharField(max_length=100, unique=True);
 	is_private = models.BooleanField();
 	value_type = models.CharField(max_length=10); # string key to indicate which type of value (lt,st,int,float)
 
