@@ -543,7 +543,7 @@ def delete_tag_action(request):
 
 
 def tag_delete_success(request):
-	return;
+	return render('manager/tag_success.html');
 
 def tag_success(request):
 	return render (request, 'manager/tag_success.html');
