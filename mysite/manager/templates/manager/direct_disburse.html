@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+<html>
+<head>
+	<title>Inventory</title>
+</head>
+<body>
+
+{% block content %}
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+        var item_input=$('input[name="myItems[]"]');
+        var items = [
+      {% for item in items %}
+          "{{item}}",
+      {%endfor%}
+    ];
+        item_input.autocomplete({
+          source: items,
+          minLength: 2
+        });
+        var user_input=$('input[id="user"]');
+        var users = [
+      {% for user in users %}
+          "{{user}}",
+      {%endfor%}
+    ];
+        user_input.autocomplete({
+          source: users,
+          minLength: 2
+        });
+      } );
+    
+
+    //   keeps same width as box
+      jQuery.ui.autocomplete.prototype._resizeMenu = function () {
+          var ul = this.menu.element;
+          ul.outerWidth(this.element.outerWidth());
+        }
+</script>
+
+<script type="text/javascript">
+  var counter = 1;
+  function addInput(divName){
+          var newdiv = document.createElement('div');
+          newdiv.innerHTML = "Item " + (counter + 1) + ": <input type='text' name='myItems[]'> Quantity: <input type='number' step='1' min='1' name='myCounts[]'>";
+          document.getElementById(divName).appendChild(newdiv);
+          counter++;
+
+          var item_input=$('input[name="myItems[]"]');
+          var items = [
+          {% for item in items %}
+          "{{item}}",
+          {%endfor%}
+          ];
+          item_input.autocomplete({
+          source: items,
+          minLength: 2
+          });
+  }
+</script>
+
+<div class="page-header" style="padding-left: 15px">
+  <h1>Inventory <small>Disburse</small></h1>
+</div>
+
+{% if error %}
+{{error}}
+{% endif %}
+
+<div style="padding-left: 15px">
+<form method="POST">
+  {% csrf_token %}
+     <div id="dynamicInput">
+          Item 1: <input type="text" required name="myItems[]"> Quantity: <input type="number" step="1" min="1" required name="myCounts[]">
+     </div>
+     <input type="button" value="Add another item" onClick="addInput('dynamicInput');"><br><br>
+     <label for="user">User:</label>
+     <input id="user" required name="user" type="text" placeholder="Username">
+     <div>
+     <label for="comment">Comment:</label>
+     <textarea id="comment" style="vertical-align: top" name="comment" placeholder="Comment" rows="3"></textarea>
+     </div>
+     <button id="submit" type="submit" class="btn btn-default">Submit</button>
+</form>
+</div>
+
+{% endblock %}
+</body>
+</html>
