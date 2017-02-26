@@ -3,8 +3,8 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from .models import Item, Request, Tag, CustomFieldEntry, CustomLongTextField, CustomShortTextField, CustomIntField, CustomFloatField;
-from .forms import ServiceReqForm;
+from .models import Item, Request, Tag, CustomFieldEntry, CustomLongTextField, CustomShortTextField, CustomIntField, CustomFloatField, Cart_Request;
+from .forms import CheckoutForm
 from .serializers import ItemSerializer
 # chance genereic.Listview stuff to ListView
 from django.views.generic import View, DetailView, ListView, DeleteView, CreateView, FormView
@@ -125,62 +125,71 @@ class RequestOwnerMixin(object):
 		return obj
 
 class requestsView(LoggedInMixin, RequestOwnerMixin, ListView):
-	model = Request;
+	model = Cart_Request;
 	context_object_name = 'request_list';
-	template_name = 'home/requests.html';
+	template_name = 'home/cart_requests.html';
 
 	def get_queryset(self):
-		return Request.objects.filter(owner=self.request.user);
+		return Cart_Request.objects.filter(cart_owner=self.request.user).exclude(cart_status='P');
 
-class serviceRequestsView(LoggedInMixin, ListView):
-	model = Request;
-	context_object_name = 'request_list';
-
-	template_name = 'home/service.html';
-	def get_queryset(self):
-		return Request.objects.all();
+#class serviceRequestsView(LoggedInMixin, ListView):
+#	model = Request;
+#	context_object_name = 'request_list';
+#
+#	template_name = 'home/service.html';
+#	def get_queryset(self):
+#		return Request.objects.all();
 
 def cannotService(request):
 	return render(request, 'home/notAdmin.html'); 
 	
-def request_details(request, request_id):
-	if not request.user.is_staff:
-		return render(request, 'home/notAdmin.html')
-	current_request = get_object_or_404(Request, pk=request_id)
-	context = {
-		'current_request': current_request 
-	}
-	return render(request, 'home/serviceReq.html', context)
+#def request_details(request, request_id):
+#	if not request.user.is_staff:
+#		return render(request, 'home/notAdmin.html')
+#	current_request = get_object_or_404(Request, pk=request_id)
+#	context = {
+#		'current_request': current_request 
+#	}
+#	return render(request, 'home/serviceReq.html', context)
 
-def service_request(request, request_id):
-	if not request.user.is_staff:
-		return render(request, 'home/notAdmin.html')
-	approve_deny = request.POST.get('select', None);
-	requestToService = get_object_or_404(Request, pk=request_id);
-	if (approve_deny == 'Approve'):
-		itemToChange = Item.objects.get(id=requestToService.item_id_id);
-		oldQuantity = itemToChange.count;
-		requestAmount = requestToService.quantity;
-		newQuantity = oldQuantity - requestAmount;
-		if newQuantity < 0:
-			return render(request, 'home/not_enough.html')
-		itemToChange.count = newQuantity;
-		requestToService.status = 'A';
-		itemToChange.save();
-	else:
-		requestToService.status = 'D';
-	
-	admin_comment_fromReq = request.POST.get('comment', None);
-	requestToService.admin_comment = admin_comment_fromReq;
-	requestToService.save();
-	return render(request, 'home/request_success.html')
+#def service_request(request, request_id):
+#	if not request.user.is_staff:
+#		return render(request, 'home/notAdmin.html')
+#	approve_deny = request.POST.get('select', None);
+#	requestToService = get_object_or_404(Request, pk=request_id);
+#	if (approve_deny == 'Approve'):
+#		itemToChange = Item.objects.get(id=requestToService.item_id_id);
+#		oldQuantity = itemToChange.count;
+#		requestAmount = requestToService.quantity;
+#		newQuantity = oldQuantity - requestAmount;
+#		if newQuantity < 0:
+#			return render(request, 'home/not_enough.html')
+#		itemToChange.count = newQuantity;
+#		requestToService.status = 'A';
+#		itemToChange.save();
+#	else:
+#		requestToService.status = 'D';
+#	
+#	admin_comment_fromReq = request.POST.get('comment', None);
+#	requestToService.admin_comment = admin_comment_fromReq;
+#	requestToService.save();
+#	return render(request, 'home/request_success.html')
 
 def request(request, item_id):
-	item = get_object_or_404(Item, pk=item_id)
-	new_request = Request(owner=request.user, item_id=item, reason=request.POST['reason'], quantity=request.POST['quantity'], status='O')
-	new_request.save()
-	return render(request, 'home/request_success.html')
-	# return HttpResponse("success")
+    item = get_object_or_404(Item, pk=item_id)
+    try:
+        current_cart = Cart_Request.objects.get(cart_owner=request.user, cart_status='P');
+    except Cart_Request.DoesNotExist:
+        current_cart = Cart_Request.objects.create(cart_owner=request.user, cart_status='P', cart_reason="(In Progress)")
+        current_cart.save();
+    try:
+        new_request = Request.objects.get(owner=request.user, item_id=item, status='P');
+        new_request.quantity = request.POST['quantity'];
+    except Request.DoesNotExist:
+        new_request = Request(owner=request.user, item_id=item, quantity=request.POST['quantity'],\
+            status='P', parent_cart=current_cart, reason='(In Progress)');
+    new_request.save()
+    return render(request, 'home/message.html', {'message':"Item Added to Cart"})
 
 class DeleteRequestView(DeleteView):
 	model = Request
@@ -218,6 +227,14 @@ def api_download(request):
 	response['Content-Disposition'] = 'attachment; filename=api_guide.pdf'
 	return response
 
+def cart_request_details(request, cart_request_id):
+    current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
+    subrequests = Request.objects.filter(parent_cart=current_request);
+    context = {
+        'request':current_request,
+        'subrequests':subrequests,
+    }
+    return render(request, 'home/cart_request_details.html', context);
 # class ListItemView(ListView):
 #	 model=Item
 #	 template_name='home/index.html'
@@ -226,4 +243,38 @@ def api_download(request):
 #	 model=Item
 #	 template_name='home/detail.html'
 
+def checkout(request):
+    try:
+        to_checkout = Cart_Request.objects.get(cart_status='P', cart_owner=request.user);
+    except Cart_Request.DoesNotExist:
+        return render(request, 'home/no_active_carts.html');
+    if request.method=='GET':
+        checkout_form = CheckoutForm();
+        subrequests = Request.objects.filter(parent_cart=to_checkout);
+        context = {
+            'subrequests':subrequests,
+            'to_checkout':to_checkout,
+            'checkout_form':checkout_form,
+        }
+        return render(request, 'home/checkout.html', context)
+    else:
+        # request.method == 'POST'
+        checkout_form = CheckoutForm(request.POST);
+        if checkout_form.is_valid():
+            to_checkout.cart_reason = checkout_form.cleaned_data['cart_reason'];
+            to_checkout.cart_status = 'O';
+            to_checkout.save();
+            subrequests = Request.objects.filter(parent_cart=to_checkout);
+            for subrequest in subrequests:
+                subrequest.status = 'O';
+                subrequest.reason = to_checkout.cart_reason;
+                subrequest.save();
+        return HttpResponseRedirect('/checkout_success/')
 
+def checkout_success(request):
+    return render(request, 'home/message.html', {'message':"Request Placed!"})
+
+def remove_request(request, request_id):
+    to_remove = get_object_or_404(Request, pk=request_id);
+    to_remove.delete();
+    return HttpResponseRedirect('/checkout/')

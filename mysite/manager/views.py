@@ -20,7 +20,7 @@ def cart_requests(request):
 		return render(request, 'home/notAdmin.html')
 	#this duplicated code is necessary (I think) because of the
 	#restrictive nature of calling things from a template
-	cart_requests = Cart_Request.objects.filter(is_active_request=True);
+	cart_requests = Cart_Request.objects.exclude(cart_status='P');
 	cart_requestsO = cart_requests.filter(cart_status='O');
 	cart_requestsO_and_v = create_request_info(cart_requestsO);
 	context = {

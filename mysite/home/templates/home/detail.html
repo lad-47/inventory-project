@@ -16,9 +16,9 @@
   <p>Location: {{item.location}}</p>
 </div>
 <div style="padding-left: 15px">
-  <h2>Custom Fields<h2>
+  <h2>Custom Fields</h2>
   {% for cf in custom %}
-    <p>{{cf}}<p>
+    <p>{{cf}}</p>
   {% endfor %}
 </div>
 <hr>
@@ -26,28 +26,22 @@
 <ul class="list-group">
 	{% for request in requests %}
 	{% if request.status == "O" %}
-  	<li class="list-group-item list-group-item-warning">Request Status: Outstanding <br> Reason: {{request.reason}} 
-  	<a href="{% url "request-delete" pk=request.id %}" class="btn btn-danger btn-xs">Delete</a></li>
-  	{% elif request.status == "D" %}
-  	<li class="list-group-item list-group-item-danger">Request Status: Denied <br> Reason: {{request.reason}}</li>
-  	{% elif request.status == "A" %}
-  	<li class="list-group-item list-group-item-success">Request Status: Approved <br> Reason: {{request.reason}}</li>
+  	<li class="list-group-item list-group-item-action flex-column align-items-start">
+    <div class="d-flex w-100 justify-content-between">Reason: {{request.reason}} <span style="margin-left:10px" class="badge">{{request.quantity}}</span></div></li> 
   	{% endif %}
 	{% endfor %}
 </ul>
 
 <hr>
-<h1 style="padding-left: 15px">Request This Item:</h1>
+<h1 style="padding-left: 15px">Add Item to Cart: </h1>
 <div>
 <form class="navbar-form navbar-top" role="search" action="{% url 'request' item.id %}" method="POST">	
   {% csrf_token %}
   <div class="form-group">
-  	<label for="reason">Reason:</label>
-    <input id="reason" name="reason" type="text" class="form-control" placeholder="Reason">
     <label for="quantity">Quantity:</label>
     <input id="quantity" name="quantity" type="number" class="form-control">
   </div>
-  <button id="save_request" type="submit" class="btn btn-default">Submit</button>
+  <button id="save_request" type="submit" class="btn btn-default">Add to Cart</button>
 </form>
 </div>
 

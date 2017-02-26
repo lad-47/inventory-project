@@ -36,7 +36,7 @@ class RequestSerializer(serializers.ModelSerializer):
     admin_comment=serializers.CharField(required=False,allow_blank=True)
     class Meta:
         model = Request
-        fields = ('owner','item_id','reason','admin_comment','quantity','status')
+        fields = ('owner','item_id','reason', 'admin_comment','quantity','status')
         
 class UserSerializer(serializers.ModelSerializer):
     #requests = serializers.PrimaryKeyRelatedField(many=True,queryset=Request.objects.all())
