@@ -30,12 +30,12 @@ class Cart_Request(models.Model):
 	STATUSES = (
 	('O','Outstanding'),
 	('A','Approved'),
-	('D','Denied'))
+	('D','Denied'),
+	('P','In Progress'))
 	cart_owner = models.ForeignKey(User, on_delete=models.CASCADE);
 	cart_reason = models.TextField();
 	cart_admin_comment = models.TextField(default="No Comment");
 	cart_status = models.CharField(max_length=1, choices=STATUSES, default='O');
-	in_progress = models.BooleanField(default=True);
 	
 	def __str__(self):
 		return self.tag
@@ -45,7 +45,8 @@ class Request(models.Model):
 	STATUSES = (
 	('O','Outstanding'),
 	('A','Approved'),
-	('D','Denied'))
+	('D','Denied'),
+	('P','In Progress'))
 	owner = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE, default=1)
 	item_id = models.ForeignKey(Item, on_delete=models.CASCADE, default=1)
 	reason = models.TextField()

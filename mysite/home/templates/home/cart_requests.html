@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if request_list %}
+	<h3>Outstanding Requests</h3>
+	<ul>
+	{% for request in request_list %}
+		{% if request.cart_status == "O" %}
+		<li>
+		<p><a href="{% url 'view request details' cart_request_id=request.id %}"> Reason: {{request.cart_reason}}</a></p>
+		</li>
+		{% endif %}
+	{% endfor %}
+	</ul>
+
+	<h3>Denied Requests</h3>
+	<ul>
+	{% for request in request_list %}
+		{% if request.cart_status == "D" %}
+		<li>
+		<p><a href="{% url 'view request details' cart_request_id=request.id %}">Reason: {{request.cart_reason}}</a> </p>
+		<p>Administrator Comment: {{request.cart_admin_comment}}</p>
+		</li>
+		{% endif %}
+	{% endfor %}
+	</ul>
+
+	<h3>Approved Requests</h3>
+	<ul>
+	{% for request in request_list %}
+		{% if request.cart_status == "A" %}
+		<li>
+		<p><a href="{% url 'view request details' cart_request_id=request.id %}">Reason: {{request.cart_reason}} </a></p>
+		<p>Administrator Comment: {{request.cart_admin_comment}}</p>
+		</li>
+		{% endif %}
+	{% endfor %}
+	</ul>
+
+
+{% else %}
+	<p> No Requests Available </p>
+{% endif %}
+{% endblock%}

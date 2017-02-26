@@ -1,4 +1,5 @@
 from django import forms
+from home.models import CustomFieldEntry, Item, Tag;
 
-class ServiceReqForm(forms.Form):
-	comment = forms.CharField(max_length=200);
+class CheckoutForm(forms.Form):
+	cart_reason = forms.CharField(max_length=100);
