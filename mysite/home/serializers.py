@@ -1,4 +1,4 @@
-from .models import Item,Request,Tag
+from .models import Item,Request,Tag,CustomShortTextField,CustomLongTextField,CustomIntField,CustomFloatField,CustomFieldEntry
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
@@ -50,5 +50,37 @@ class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username','password')
+        
+class CustomFieldEntrySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = CustomFieldEntry
+        fields = ('field_name','is_private','value_type')
+        
+class CustomShortTextFieldSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = CustomShortTextField
+        fields = ('parent_item','field_name','field_value')
+        
+class CustomLongTextFieldSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = CustomLongTextField
+        fields = ('parent_item','field_name','field_value')
+        
+class CustomIntFieldSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = CustomIntField
+        fields = ('parent_item','field_name','field_value')
+        
+class CustomFloatFieldSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = CustomFloatField
+        fields = ('parent_item','field_name','field_value')
+        
+
         
         

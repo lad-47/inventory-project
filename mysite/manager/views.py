@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
 from django.db import IntegrityError
+from rest_framework import status
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -227,10 +228,10 @@ def updateItem(item_instance, data):
 					to_change = CustomLongTextField.objects.get(parent_item=item_instance,\
 						field_name=field_entry)
 				elif field_type == 'int':
-					to_change = CustomIntTextField.objects.get(parent_item=item_instance,\
+					to_change = CustomIntField.objects.get(parent_item=item_instance,\
 						field_name=field_entry)
 				elif field_type == 'float':
-					to_change = CustomFloatTextField.objects.get(parent_item=item_instance,\
+					to_change = CustomFloatField.objects.get(parent_item=item_instance,\
 						field_name=field_entry)
 				print("old value")
 				print(to_change.field_value)
@@ -249,10 +250,10 @@ def updateItem(item_instance, data):
 					to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
 				elif field_type == 'int':
-					to_change = CustomIntTextField.objects.create(parent_item=item_instance,\
+					to_change = CustomIntField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
 				elif field_type == 'float':
-					to_change = CustomFloatTextField.objects.create(parent_item=item_instance,\
+					to_change = CustomFloatField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
 				print("to change field name: ")
 				print(to_change.field_name);
@@ -361,9 +362,9 @@ def item_to_dict(item_instance):
 			elif field_type == 'lt':
 				data_field = CustomLongTextField.objects.get(parent_item=item_instance,field_name=cf);
 			elif field_type == 'int':
-				data_field = CustomIntTextField.objects.get(parent_item=item_instance,field_name=cf);
+				data_field = CustomIntField.objects.get(parent_item=item_instance,field_name=cf);
 			elif field_type == 'float':
-				data_field = CustomFloatTextField.objects.get(parent_item=item_instance,ield_name=cf);
+				data_field = CustomFloatField.objects.get(parent_item=item_instance,field_name=cf);
 			item_dict[cf.field_name] = data_field.field_value;
 		except ObjectDoesNotExist:
 			pass; # no need to do anything to the dictionary
@@ -555,3 +556,53 @@ def tag_delete_success(request):
 
 def tag_success(request):
 	return render (request, 'manager/tag_success.html');
+
+def direct_disburse(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	
+	items = Item.objects.all()
+	users = User.objects.all()
+	# on a post we (print) the data and then return success
+	if request.method == 'POST':
+		items_set = request.POST.getlist('myItems[]',None)
+		count_set = request.POST.getlist('myCounts[]',None)
+		user = request.POST.get('user',None)
+		owner=User.objects.get(username=user)
+		comment = request.POST.get('comment',None)
+		cart = Cart_Request(cart_status='O',cart_reason='direct disbursement',cart_admin_comment=comment,cart_owner=owner)
+		cart.save()
+		for i in range(0,len(items_set)):
+			item = Item.objects.get(item_name=items_set[i])
+			item_request=Request(status='O',reason='direct disbursement',item_id=item,owner=owner,admin_comment=comment,quantity=int(count_set[i]),parent_cart=cart)
+			item_request.save()
+		cart.save()
+		subrequests = Request.objects.filter(parent_cart=cart);
+		valid = True;
+		for subrequest in subrequests:
+			itemToChange = Item.objects.get(id=subrequest.item_id_id);
+			oldQuantity = itemToChange.count;
+			requestAmount = subrequest.quantity;
+			newQuantity = oldQuantity - requestAmount;
+			if newQuantity < 0:
+				valid = False;
+				break;
+		if valid==True:
+			cart.cart_status="A"
+			for subrequest in subrequests:
+				itemToChange = Item.objects.get(id=subrequest.item_id_id);
+				newQuantity = itemToChange.count - subrequest.quantity;
+				itemToChange.count = newQuantity
+				subrequest.status="A"
+				subrequest.save()
+				itemToChange.save()
+			cart.save()
+			
+		return HttpResponseRedirect('/manager/create_success');
+
+	context = {
+		'items': items,
+		'users': users
+		}
+	return render(request, 'manager/direct_disburse.html', context)
+
