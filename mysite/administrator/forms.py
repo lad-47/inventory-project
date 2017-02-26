@@ -19,9 +19,10 @@ class CFAddForm(forms.Form):
 	TYPES = (('lt', 'Long Text'), ('st', 'Short Text'), \
 		('int', 'Integer'), ('float', 'Float'));
 	PRIV = ((True, 'Private'), (False, 'Not Private'));
-	value_type = forms.ChoiceField(widget=forms.RadioSelect, choices=TYPES);
-	field_name = forms.CharField(max_length=100);
-	is_private = forms.ChoiceField(widget=forms.RadioSelect, choices=PRIV);
+	
+	field_name = forms.CharField(max_length=100, label="Field Name");
+	value_type = forms.ChoiceField(widget=forms.RadioSelect, choices=TYPES, label="Field Datatype");
+	is_private = forms.ChoiceField(widget=forms.RadioSelect, choices=PRIV, label="Field Privacy");
 
 class CFDeleteForm(forms.Form):
 	def __init__(self, *args, **kwargs):

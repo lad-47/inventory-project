@@ -1,4 +1,5 @@
 from threading import local
+from home.models import User
 
 _user = local()
 
@@ -7,4 +8,7 @@ class CurrentUserMiddleware(object):
         _user.value = request.user
 
 def get_current_user():
-    return _user.value
+	try:
+		return _user.value
+	except AttributeError:
+		return User.objects.get(username="jdk1");
