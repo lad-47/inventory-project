@@ -2,8 +2,8 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from .models import Item, Request, Tag;
-from .serializers import ItemSerializer, RequestSerializer, UserSerializer, UserCreateSerializer
+from .models import Item, Request, Tag, CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, CustomFieldEntry
+from .serializers import ItemSerializer, RequestSerializer, UserSerializer, UserCreateSerializer, CustomShortTextFieldSerializer, CustomLongTextFieldSerializer, CustomIntFieldSerializer,CustomFloatFieldSerializer,CustomFieldEntrySerializer
 from rest_framework.reverse import reverse
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -19,7 +19,18 @@ def api_root(request, format=None):
     return Response({
         'items': reverse('item-list', request=request, format=format),
         'requests': reverse('request-list', request=request, format=format),
-        'users': reverse('user-list', request=request, format=format)
+        'users': reverse('user-list', request=request, format=format),
+        'custom fields': reverse('api-custom', request=request, format=format)
+    })
+    
+@api_view(['GET'])
+def custom_root(request, format=None):
+    return Response({
+        'entries': reverse('custom-list', request=request, format=format),
+        'shorts': reverse('short-list', request=request, format=format),
+        'longs': reverse('long-list', request=request, format=format),
+        'ints': reverse('int-list', request=request, format=format),
+        'floats': reverse('float-list', request=request, format=format)
     })
 
 @api_view(['GET', 'POST'])
@@ -206,7 +217,7 @@ def user_detail(request, pk, format=None):
     if request.user.is_staff:
         try:
             user = User.objects.get(pk=pk)
-        except Request.DoesNotExist:
+        except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
     
         if request.method == 'GET':
@@ -250,5 +261,236 @@ def get_token(request):
         }
         return render(request, 'home/get_token.html', context);
     return render(request, 'home/notAdmin.html')
+
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def custom_list(request, format=None):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        if request.user.is_staff:
+            fields = CustomFieldEntry.objects.all()
+            serializer = CustomFieldEntrySerializer(fields, many=True)
+            return Response(serializer.data)
+        else:
+            fields = CustomFieldEntry.objects.filter(is_private=False)
+            serializer = CustomFieldEntrySerializer(fields, many=True)
+            return Response(serializer.data)
+    
+@api_view(['GET', 'PUT', 'DELETE'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def custom_detail(request, pk, format=None):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    if request.user.is_staff:
+        try:
+            field = CustomFieldEntry.objects.get(pk=pk)
+        except CustomFieldEntry.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    
+        if request.method == 'GET':
+            serializer = CustomFieldEntrySerializer(field)
+            return Response(serializer.data)
+    
+        elif request.method == 'PUT':
+            serializer = CustomFieldEntrySerializer(field, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+        elif request.method == 'DELETE':
+            field.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response('Manager Permission Required')
+
+
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def short_list(request, format=None):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        if request.user.is_staff:
+            shorts = CustomShortTextField.objects.all()
+            serializer = CustomShortTextFieldSerializer(shorts, many=True)
+            return Response(serializer.data)
+        else:
+            shorts = CustomShortTextField.objects.filter(field_name__is_private=False)
+            serializer = CustomShortTextFieldSerializer(shorts, many=True)
+            return Response(serializer.data)
+    
+@api_view(['GET', 'PUT', 'DELETE'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def short_detail(request, pk, format=None):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    if request.user.is_staff:
+        try:
+            short = CustomShortTextField.objects.get(pk=pk)
+        except CustomShortTextField.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    
+        if request.method == 'GET':
+            serializer = CustomShortTextFieldSerializer(short)
+            return Response(serializer.data)
+    
+        elif request.method == 'PUT':
+            serializer = CustomShortTextFieldSerializer(short, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+        elif request.method == 'DELETE':
+            short.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response('Manager Permission Required')
+
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def long_list(request, format=None):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        if request.user.is_staff:
+            longs = CustomLongTextField.objects.all()
+            serializer = CustomLongTextFieldSerializer(longs, many=True)
+            return Response(serializer.data)
+        else:
+            longs = CustomLongTextField.objects.filter(field_name__is_private=False)
+            serializer = CustomLongTextFieldSerializer(longs, many=True)
+            return Response(serializer.data)
+    
+@api_view(['GET', 'PUT', 'DELETE'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def long_detail(request, pk, format=None):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    if request.user.is_staff:
+        try:
+            long = CustomLongTextField.objects.get(pk=pk)
+        except CustomLongTextField.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    
+        if request.method == 'GET':
+            serializer = CustomLongTextFieldSerializer(long)
+            return Response(serializer.data)
+    
+        elif request.method == 'PUT':
+            serializer = CustomLongTextFieldSerializer(long, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+        elif request.method == 'DELETE':
+            long.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response('Manager Permission Required')
+
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def int_list(request, format=None):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        if request.user.is_staff:
+            nums = CustomIntField.objects.all()
+            serializer = CustomIntFieldSerializer(nums, many=True)
+            return Response(serializer.data)
+        else:
+            nums = CustomIntField.objects.filter(field_name__is_private=False)
+            serializer = CustomIntFieldSerializer(nums, many=True)
+            return Response(serializer.data)
+    
+@api_view(['GET', 'PUT', 'DELETE'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def int_detail(request, pk, format=None):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    if request.user.is_staff:
+        try:
+            num = CustomIntField.objects.get(pk=pk)
+        except CustomIntField.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    
+        if request.method == 'GET':
+            serializer = CustomIntFieldSerializer(num)
+            return Response(serializer.data)
+    
+        elif request.method == 'PUT':
+            serializer = CustomIntFieldSerializer(num, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+        elif request.method == 'DELETE':
+            num.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response('Manager Permission Required')
+
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def float_list(request, format=None):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        if request.user.is_staff:
+            nums = CustomFloatField.objects.all()
+            serializer = CustomFloatFieldSerializer(nums, many=True)
+            return Response(serializer.data)
+        else:
+            nums = CustomFloatField.objects.filter(field_name__is_private=False)
+            serializer = CustomFloatFieldSerializer(nums, many=True)
+            return Response(serializer.data)
+    
+@api_view(['GET', 'PUT', 'DELETE'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def float_detail(request, pk, format=None):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    if request.user.is_staff:
+        try:
+            num = CustomFloatField.objects.get(pk=pk)
+        except CustomFloatField.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    
+        if request.method == 'GET':
+            serializer = CustomFloatFieldSerializer(num)
+            return Response(serializer.data)
+    
+        elif request.method == 'PUT':
+            serializer = CustomFloatFieldSerializer(num, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+        elif request.method == 'DELETE':
+            num.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response('Manager Permission Required')
 
 
