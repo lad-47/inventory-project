@@ -227,10 +227,10 @@ def updateItem(item_instance, data):
 					to_change = CustomLongTextField.objects.get(parent_item=item_instance,\
 						field_name=field_entry)
 				elif field_type == 'int':
-					to_change = CustomIntTextField.objects.get(parent_item=item_instance,\
+					to_change = CustomIntField.objects.get(parent_item=item_instance,\
 						field_name=field_entry)
 				elif field_type == 'float':
-					to_change = CustomFloatTextField.objects.get(parent_item=item_instance,\
+					to_change = CustomFloatField.objects.get(parent_item=item_instance,\
 						field_name=field_entry)
 				print("old value")
 				print(to_change.field_value)
@@ -249,10 +249,10 @@ def updateItem(item_instance, data):
 					to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
 				elif field_type == 'int':
-					to_change = CustomIntTextField.objects.create(parent_item=item_instance,\
+					to_change = CustomIntField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
 				elif field_type == 'float':
-					to_change = CustomFloatTextField.objects.create(parent_item=item_instance,\
+					to_change = CustomFloatField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
 				print("to change field name: ")
 				print(to_change.field_name);
@@ -357,9 +357,9 @@ def item_to_dict(item_instance):
 			elif field_type == 'lt':
 				data_field = CustomLongTextField.objects.get(parent_item=item_instance,field_name=cf);
 			elif field_type == 'int':
-				data_field = CustomIntTextField.objects.get(parent_item=item_instance,field_name=cf);
+				data_field = CustomIntField.objects.get(parent_item=item_instance,field_name=cf);
 			elif field_type == 'float':
-				data_field = CustomFloatTextField.objects.get(parent_item=item_instance,ield_name=cf);
+				data_field = CustomFloatField.objects.get(parent_item=item_instance,field_name=cf);
 			item_dict[cf.field_name] = data_field.field_value;
 		except ObjectDoesNotExist:
 			pass; # no need to do anything to the dictionary
