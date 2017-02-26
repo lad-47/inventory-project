@@ -35,7 +35,7 @@ class Cart_Request(models.Model):
 	cart_reason = models.TextField();
 	cart_admin_comment = models.TextField(default="No Comment");
 	cart_status = models.CharField(max_length=1, choices=STATUSES, default='O');
-	is_active_request = models.BooleanField(default=True);
+	in_progress = models.BooleanField(default=True);
 	
 	def __str__(self):
 		return self.tag

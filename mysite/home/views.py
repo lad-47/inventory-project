@@ -186,10 +186,10 @@ def delete_check(request, item_id):
         'action':action,
         'message':message,
         'item':item,
-        'submit':"Yes, delete " + str(item.item_name)
+        'submit_button':"Yes, delete " + str(item.item_name)
     }
 
-    return render(request, 'admin/delete_check.html', context)
+    return render(request, 'manager/confirmation.html', context)
 
 def delete_item(request, item_id):
     itemToDelete = get_object_or_404(Item, pk=item_id)

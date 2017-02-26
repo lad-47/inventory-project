@@ -274,11 +274,15 @@ def modify_an_item(request, item_id):
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
 			action = "/manager/modify_an_item_action/"+str(item_id) + "/";
+			message="Modification of this item will change it in the database.";
 			context = {
-				'item_form':item_form,
+				'form':item_form,
 				'action':action,
+				'message':message,
+				'submit_button':"Yes, Update Item",
+
 			}
-			return render(request, 'manager/modify_confirmation.html', context)
+			return render(request, 'manager/confirmation.html', context)
 			updateItem(itemToChange, item_form.cleaned_data);
 			#for key in item_form.cleaned_data.keys():
 				#print('key: ' + key)
@@ -502,9 +506,13 @@ def delete_tag_conf(request):
 			create_form = TagCreateForm();
 			modify_form = TagModifyForm();
 			context = {
-				'delete_form': delete_form,
+				'form': delete_form,
+				'message':"Are you sure you want to delete these tags?",
+				'submit_button':"Yes, Delete Tags",
+				'action':'/manager/tag_handler/delete_2/',
+
 				}
-			return render(request, 'manager/delete_confirmation.html', context);
+			return render(request, 'manager/confirmation.html', context);
 	else:
 		delete_form = TagDeleteForm();
 	create_form = TagCreateForm();
