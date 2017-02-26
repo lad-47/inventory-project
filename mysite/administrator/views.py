@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from .forms import CFAddForm, CFDeleteForm
+from home.models import CustomFieldEntry
 
 # Create your views here.
 
@@ -69,4 +71,72 @@ def detail_user(request, user_id):
     }
     return render(request, 'administrator/detail_user.html', context)
 
+def cf_manager(request):
+    delete_form = CFDeleteForm();
+    if request.method == 'POST':
+        add_form = CFAddForm(request.POST);
+        if add_form.is_valid():
+            vt = add_form.cleaned_data['value_type'];
+            fn = add_form.cleaned_data['field_name'];
+            i_p = add_form.cleaned_data['is_private'];
+            new_field = CustomFieldEntry.objects.create(value_type=vt, \
+                field_name=fn, is_private=i_p);
+            new_field.save();
+            return HttpResponseRedirect('/admin/custom_fields/create/success/');
+    else:
+        add_form = CFAddForm();
 
+    context = {
+        'add_form':add_form,
+        'delete_form':delete_form,
+    }
+
+    return render(request, 'administrator/cf_manager.html', context);
+
+def cf_delete_conf(request):
+    # confirm delete of custom fields
+    if request.method == 'POST':
+        delete_form = CFDeleteForm(request.POST);
+        if delete_form.is_valid():
+            message = "Are you sure you want to delete these fields?";
+            submit = "Yes, Delete Fields";
+            action = '/admin/custom_fields/delete_action/';
+            context = {
+                'form':delete_form,
+                'message':message,
+                'submit_button':submit,
+                'action':action,
+            }
+            return render(request, 'manager/confirmation.html', context);
+        else:
+            context = {
+                'delete_form':delete_form,
+                'add_form': CFAddForm(),
+            }
+            return render(request, 'administrator/cf_manager.html', context);
+
+    # we shoudldn't get here with a GET
+    return render(request, 'index.html');
+
+def cf_delete_action(request):
+    if request.method == 'POST':
+        delete_form = CFDeleteForm(request.POST);
+        if delete_form.is_valid():
+            for cfPK in delete_form.cleaned_data['to_delete']:
+                cf = CustomFieldEntry.objects.get(pk=cfPK);
+                cf.delete();
+                return HttpResponseRedirect('/admin/custom_fields/delete/success/');
+        add_form = CFAddForm();
+        context = {
+            'delete_form':delete_form,
+            'add_form':add_form,
+        }
+        return render(request, 'administrator/cf_manager.html', context);
+    # we shoudldn't get here with a GET
+    return render(request, 'index.html');
+
+def cf_delete_success(request):
+    return render(request, 'manager/success.html', {'message':"Fields Successfully Deleted."});
+
+def cf_create_success(request):
+    return render(request, 'manager/success.html', {'message': "Field Successfully Created."})

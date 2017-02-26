@@ -2,19 +2,7 @@
 
 {% block content %}
 
-<h4 style="margin-left:10px"> Are you sure? Tag deletion is permanent. </h4>
-
-<div class="form_layout" style="margin-left:10px">
-<form method="POST" action="{% url 'delete tag action' %}">
-	{% csrf_token %}
-	{{delete_form.as_p}}
-
-	<p>
-	<input type="submit" value="Delete Tags" >
-	<a href="{% url 'index' %}" style="margin-left:15px">Cancel</a>
-	</p>
-</form>
-</div>
+{% include "manager/includes/confirmation.html" with message="Are you sure? Tag deletion is permanent." form=delete_form action='/manager/tag_handler/delete_2/' submit_button="Delete Tags" %}
 
 
 {% endblock %}

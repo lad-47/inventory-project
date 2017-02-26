@@ -274,11 +274,17 @@ def modify_an_item(request, item_id):
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
+			action = "/manager/modify_an_item_action/"+str(item_id) + "/";
+			context = {
+				'item_form':item_form,
+				'action':action,
+			}
+			return render(request, 'manager/modify_confirmation.html', context)
 			updateItem(itemToChange, item_form.cleaned_data);
-			for key in item_form.cleaned_data.keys():
-				print('key: ' + key)
-				print('data: ' + str(item_form.cleaned_data[key]))
-			return HttpResponseRedirect('/manager/update_success');
+			#for key in item_form.cleaned_data.keys():
+				#print('key: ' + key)
+				#print('data: ' + str(item_form.cleaned_data[key]))
+			#return HttpResponseRedirect('/manager/update_success');
 
 	# otherwise, it's a GET, and we init the form using the current data
 	else:
@@ -293,6 +299,26 @@ def modify_an_item(request, item_id):
 		'item_form': item_form,
 	}
 	return render(request, 'manager/modify_an_item.html', context);
+
+def modify_an_item_action(request, item_id):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	itemToChange = get_object_or_404(Item, pk=item_id);
+	ItemForm = ItemForm_factory();
+	if request.method == 'POST':
+		item_form = ItemForm(request.POST);
+		if item_form.is_valid():
+			updateItem(itemToChange, item_form.cleaned_data);
+			return HttpResponseRedirect('/manager/update_success');
+		else:
+			context = {
+				'item_form:':item_form,
+				}	
+			return render(request, '/manager/modify_an_item.html', context)
+
+	# we should never get here with a GET
+	# if we do, just render the home page
+	render(request, 'index.html');
 
 def update_success(request):
 	return render(request, 'manager/update_success.html');
@@ -408,6 +434,8 @@ def tag_handler(request):
 	return render(request, 'manager/tag_handler.html', context);
 
 def create_tag(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
 	if request.method == 'POST':
 		create_form = TagCreateForm(request.POST);
 		if create_form.is_valid():
@@ -442,6 +470,8 @@ def create_tag(request):
 
 
 def modify_tag(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
 	if request.method=='POST':
 		modify_form = TagModifyForm(request.POST);
 		if modify_form.is_valid():
@@ -465,6 +495,8 @@ def modify_tag(request):
 	return render(request, 'manager/tag_handler.html', context);
 
 def delete_tag_conf(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
 	if request.method=='POST':
 		delete_form = TagDeleteForm(request.POST);
 		if delete_form.is_valid():
@@ -488,6 +520,8 @@ def delete_tag_conf(request):
 	return render(request, 'manager/tag_handler.html', context);
 
 def delete_tag_action(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
 	if request.method=='POST':
 		delete_form = TagDeleteForm(request.POST);
 		if delete_form.is_valid():
@@ -510,7 +544,7 @@ def delete_tag_action(request):
 
 
 def tag_delete_success(request):
-	return;
+	return render('manager/tag_success.html');
 
 def tag_success(request):
 	return render (request, 'manager/tag_success.html');

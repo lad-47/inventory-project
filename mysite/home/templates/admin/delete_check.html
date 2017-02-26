@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h3> This is permanent, etc. </h3>
-<a href="{% url 'delete item' item_id=item_id %}"> Delete This Item </a>
-{% endblock %}
+
+
+{% include 'manager/includes/confirmation.html' with message=message action=action submit_button=submit %}
+ 
+ {% endblock %}
