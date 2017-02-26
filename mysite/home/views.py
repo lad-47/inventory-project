@@ -190,18 +190,18 @@ class DeleteRequestView(DeleteView):
 		return reverse('index')
 
 def delete_check(request, item_id):
-	item = get_object_or_404(Item, pk=item_id)
-	action = '/admin/delete_item/' + str(item_id) + "/";
-	message = 'Deletion is permanent.  Are you sure you want to delete ' \
-	+ item.item_name + "?";
-	context = {
-		'action':action,
-		'message':message,
-		'item':item,
-		'submit':"Yes, delete " + str(item.item_name)
-	}
+    item = get_object_or_404(Item, pk=item_id)
+    action = '/admin/delete_item/' + str(item_id) + "/";
+    message = 'Deletion is permanent.  Are you sure you want to delete ' \
+    + item.item_name + "?";
+    context = {
+        'action':action,
+        'message':message,
+        'item':item,
+        'submit_button':"Yes, delete " + str(item.item_name)
+    }
 
-	return render(request, 'admin/delete_check.html', context)
+    return render(request, 'manager/confirmation.html', context)
 
 def delete_item(request, item_id):
 	itemToDelete = get_object_or_404(Item, pk=item_id)
