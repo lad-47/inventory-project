@@ -278,3 +278,22 @@ def remove_request(request, request_id):
     to_remove = get_object_or_404(Request, pk=request_id);
     to_remove.delete();
     return HttpResponseRedirect('/checkout/')
+
+def delete_request(request, cart_request_id):
+    to_delete = get_object_or_404(Cart_Request, pk=cart_request_id);
+    if request.method == 'GET':
+        message = "Are you sure you want to delete this request? \n Reason: "\
+         + to_delete.cart_reason;
+        action='/delete_request/' + str(cart_request_id) + '/';
+        context = {
+            'message':message,
+            'submit_button': "Yes, Delete Request",
+            'action':action,
+        }
+        return render(request, 'manager/confirmation.html', context)
+    else:
+        to_delete.delete();
+        return HttpResponseRedirect('/delete_request_success/')
+
+def delete_request_success(request):
+    return render(request, 'home/message.html', {'message':'Request Removed.'})

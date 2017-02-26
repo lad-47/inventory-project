@@ -8,7 +8,7 @@
 	{% for request in request_list %}
 		{% if request.cart_status == "O" %}
 		<li>
-		<p><a href="{% url 'view request details' cart_request_id=request.id %}"> Reason: {{request.cart_reason}}</a></p>
+		<p><a href="{% url 'view request details' cart_request_id=request.id %}"> Reason: {{request.cart_reason}}</a><b><a style="margin-left:24px" href="{% url 'delete request' request.id%}">Delete Request</a></b></p>
 		</li>
 		{% endif %}
 	{% endfor %}
