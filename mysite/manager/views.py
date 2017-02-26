@@ -31,7 +31,7 @@ def cart_requests(request):
 def request_history(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	cart_requests = Cart_Request.objects.filter(is_active_request=True);
+	cart_requests = Cart_Request.objects.all();
 	cart_requestsA = cart_requests.filter(cart_status='A');
 	cart_requestsD = cart_requests.filter(cart_status='D');
 	cart_requestsA_and_v = create_request_info(cart_requestsA);
