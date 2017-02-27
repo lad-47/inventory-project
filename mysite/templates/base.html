@@ -24,7 +24,7 @@
 				<ul class="nav navbar-nav">
 					<li><a>Signed in as {{ user }}</a></li>
 					{% if user.is_staff %}
-      				<li><a href="{% url 'direct-disburse' %}">Direct Disburse</a></li>
+      				<li><a href="{% url 'direct-disburse' %}">Direct <br > Disburse</a></li>
       				<li><a href="{% url 'cart requests' %}">Service Requests</a></li>
       				{% if user.is_superuser %}
       				<li><a href="{% url 'users' %}">Users</a></li>
@@ -35,6 +35,7 @@
       				{% endif %}
       				<li><a href="{% url 'requests' %}">My Requests</a></li>
       				<li><a href="{% url 'developers' %}">Developers</a></li>
+      				<li><a href="{% url 'checkout' %}">Checkout</a></li>
       				
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
