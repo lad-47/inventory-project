@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h3 style="left-margin:10px"> Add an Item </h1>
+<h3 style="padding-left: 10px"> Add an Item </h1>
 
-<form method="POST">
+<form method="POST" style="padding-left: 15px">
 	{% csrf_token %}
 	<div class="form_layout">
 	{{item_form.as_p}}
