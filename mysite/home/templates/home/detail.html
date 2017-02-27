@@ -16,6 +16,12 @@
   <p>Location: {{item.location}}</p>
 </div>
 <div style="padding-left: 15px">
+  <h2>Tags</h2>
+  {% for tag in tags %}
+    <span class="badge">{{tag}}</span>
+  {% endfor %}
+</div>
+<div style="padding-left: 15px">
   <h2>Custom Fields</h2>
   {% for cf in custom %}
     <p>{{cf}}</p>

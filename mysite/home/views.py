@@ -57,6 +57,7 @@ def index(request):
  	
 def detail(request, item_id):
 	item = get_object_or_404(Item, pk=item_id)
+	tags = item.tags.all()
 	if not request.user.is_authenticated():
 		return render(request, 'home/detail.html', {'item':item})
 	requests = Request.objects.filter(item_id=item.id, owner=request.user)
@@ -92,6 +93,7 @@ def detail(request, item_id):
 				return HttpResponseNotFound('<h1>Custom Field not found<h1>')
 	context = {
 		'item': item,
+		'tags': tags,
 		'requests': requests,
 		'custom': custom_values
 	}
