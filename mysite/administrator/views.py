@@ -66,6 +66,7 @@ def detail_user(request, user_id):
         else:
             user.is_superuser=False
             user.save()
+        return HttpResponseRedirect('/admin/users');
     context = {
         'edit_user': user
     }

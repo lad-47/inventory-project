@@ -11,16 +11,16 @@ def log_item(sender, instance, created, **kwargs):
     user = get_current_user()
     serializer=ItemSerializer(instance)
     if created:
-        log = Log(initiating_user=user.id,involved_item=instance.id,nature='CREATE '+str(serializer.data),timestamp=timezone.now())
+        log = Log(initiating_user=user.id,involved_item=instance.id,nature='CREATE Item'+str(serializer.data),timestamp=timezone.now())
         log.save()
     else:
-        log = Log(initiating_user=user.id,involved_item=instance.id,nature='UPDATE '+str(serializer.data),timestamp=timezone.now())
+        log = Log(initiating_user=user.id,involved_item=instance.id,nature='UPDATE Item'+str(serializer.data),timestamp=timezone.now())
         log.save()
         
 @receiver(pre_delete, sender=Item, dispatch_uid="item_delete")
 def log_item_delete(sender, instance, **kwargs):
     user = get_current_user()
-    log = Log(initiating_user=user.id,involved_item=instance.id,nature='DELETE',timestamp=timezone.now())
+    log = Log(initiating_user=user.id,involved_item=instance.id,nature='DELETE Item',timestamp=timezone.now())
     log.save()
         
 # Updating tags handled in item logs

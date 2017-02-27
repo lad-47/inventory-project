@@ -2,7 +2,6 @@
 {% load staticfiles %}
 <html>
 <head>
-	<title></title>
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 	<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
@@ -24,16 +23,16 @@
 				<ul class="nav navbar-nav">
 					<li><a>Signed in as {{ user }}</a></li>
 					{% if user.is_staff %}
-      				<li><a href="{% url 'direct-disburse' %}">Direct <br > Disburse</a></li>
-      				<li><a href="{% url 'cart requests' %}">Service <br > Requests</a></li>
+      				<li><a href="{% url 'direct-disburse' %}"><div style="text-align: center;">Direct<br>Disburse</div></a></li>
+      				<li><a href="{% url 'cart requests' %}"><div style="text-align: center;">Service<br>Requests</div></a></li>
       				{% if user.is_superuser %}
       				<li><a href="{% url 'users' %}">Users</a></li>
-      				<li><a href="{% url 'custom fields' %}">Custom <br > Fields</a></li>
+      				<li><a href="{% url 'custom fields' %}"><div style="text-align: center;">Custom<br>Fields</div></a></li>
       				{% endif %}
       				<li><a href="{% url 'tag handler' %}">Tags</a></li>
       				<li><a href="{% url 'logs' %}">Logs</a></li>
       				{% endif %}
-      				<li><a href="{% url 'requests' %}">My Requests</a></li>
+      				<li><a href="{% url 'requests' %}"><div style="text-align: center;">My<br>Requests</div></a></li>
       				<li><a href="{% url 'developers' %}">Developers</a></li>
       				<li><a href="{% url 'checkout' %}">Checkout</a></li>
       				
