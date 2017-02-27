@@ -83,7 +83,7 @@ def ItemForm_factory():
 		elif field_type == 'lt':
 			properties[field_name] = forms.CharField(widget=forms.Textarea, required=False);
 		elif field_type == 'int':
-			properties[field_name] = forms.InegerField(required=False);
+			properties[field_name] = forms.IntegerField(required=False);
 		elif field_type == 'float':
 			properties[field_name] = forms.FloatField(required=False);
 

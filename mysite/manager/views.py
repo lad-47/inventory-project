@@ -31,7 +31,7 @@ def cart_requests(request):
 def request_history(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	cart_requests = Cart_Request.objects.filter(is_active_request=True);
+	cart_requests = Cart_Request.objects.all();
 	cart_requestsA = cart_requests.filter(cart_status='A');
 	cart_requestsD = cart_requests.filter(cart_status='D');
 	cart_requestsA_and_v = create_request_info(cart_requestsA);
@@ -249,10 +249,11 @@ def updateItem(item_instance, data):
 				elif field_type == 'lt':
 					to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
-				elif field_type == 'int':
+				elif field_type == 'int' and data[field] is not None:
 					to_change = CustomIntField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
-				elif field_type == 'float':
+				elif field_type == 'float' and data[field] is not None:
+					print(data[field])
 					to_change = CustomFloatField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
 				print("to change field name: ")

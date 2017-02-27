@@ -92,7 +92,7 @@
             <td>{{log.timestamp}}</td>
             <td>
             {% if log.related_request %}
-            <a href="{% url 'service form' log.related_request %}">{{log.related_request}}</a>
+            <a href="{% url 'cart request details' log.related_request %}">{{log.related_request}}</a>
             {% else %}
             {{log.related_request}}
             {% endif %}
