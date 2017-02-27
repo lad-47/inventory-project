@@ -25,10 +25,10 @@
 					<li><a>Signed in as {{ user }}</a></li>
 					{% if user.is_staff %}
       				<li><a href="{% url 'direct-disburse' %}">Direct <br > Disburse</a></li>
-      				<li><a href="{% url 'cart requests' %}">Service Requests</a></li>
+      				<li><a href="{% url 'cart requests' %}">Service <br > Requests</a></li>
       				{% if user.is_superuser %}
       				<li><a href="{% url 'users' %}">Users</a></li>
-      				<li><a href="{% url 'custom fields' %}">Custom Fields</a></li>
+      				<li><a href="{% url 'custom fields' %}">Custom <br > Fields</a></li>
       				{% endif %}
       				<li><a href="{% url 'tag handler' %}">Tags</a></li>
       				<li><a href="{% url 'logs' %}">Logs</a></li>
