@@ -486,10 +486,13 @@ def modify_tag(request):
 	if request.method=='POST':
 		modify_form = TagModifyForm(request.POST);
 		if modify_form.is_valid():
-			tagToUpdate = Tag.objects.get(\
-				tag=modify_form.cleaned_data['old_name']);
-			tagToUpdate.tag = modify_form.cleaned_data['new_name'];
-			tagToUpdate.save();
+			try:
+				tagToUpdate = Tag.objects.get(\
+					tag=modify_form.cleaned_data['old_name']);
+				tagToUpdate.tag = modify_form.cleaned_data['new_name'];
+				tagToUpdate.save();
+			except Tag.DoesNotExist:
+				return render(request, 'manager/success.html', {'message':"Tag does not exist in database."})
 			return HttpResponseRedirect('/manager/tag_success');
 
 	else:
