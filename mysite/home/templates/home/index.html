@@ -13,15 +13,15 @@
     <input id="search_box" name="search_box" type="text" class="form-control" placeholder="Search name">
     <label for="model_box">Search Model:</label>
     <input id="model_box" name="model_box" type="text" class="form-control" placeholder="Search model">
-    <label for="select">Include Tag:</label>
-    <select id="select" multiple name="select">
+    <label for="select" >Include Tag:</label>
+    <select id="select" style="vertical-align: middle" multiple name="select">
     	<option value="all">All</option>
     	{% for tag in tag_list %}
     	<option value="{{tag.tag}}">{{tag.tag}}</option>
     	{% endfor %}
     </select>
     <label for="exselect">Exclude Tag:</label>
-    <select id="exselect" multiple name="exselect">
+    <select id="exselect" style="vertical-align: middle" multiple name="exselect">
       <option value="none">None</option>
       {% for tag in tag_list %}
       <option value="{{tag.tag}}">{{tag.tag}}</option>
