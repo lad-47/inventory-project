@@ -27,7 +27,6 @@
     <p>{{cf}}</p>
   {% endfor %}
 </div>
-<hr>
 
 <ul class="list-group">
 	{% for request in requests %}
@@ -38,7 +37,6 @@
 	{% endfor %}
 </ul>
 
-<hr>
 <h1 style="padding-left: 15px">Add Item to Cart: </h1>
 <div>
 <form class="navbar-form navbar-top" role="search" action="{% url 'request' item.id %}" method="POST">	
