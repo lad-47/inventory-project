@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from .models import Item, Tag, User, CustomFieldEntry,CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, Cart_Request, Request, Log
-from .serializers import ItemSerializer, TagSerializer, RequestSerializer, CustomFieldEntrySerializer, CustomShortTextFieldSerializer, CustomLongTextFieldSerializer, CustomIntFieldSerializer, CustomFloatFieldSerializer
+from .serializers import ItemSerializer, UserSerializer, TagSerializer, RequestSerializer, CustomFieldEntrySerializer, CustomShortTextFieldSerializer, CustomLongTextFieldSerializer, CustomIntFieldSerializer, CustomFloatFieldSerializer
 
     
 @receiver(post_save, sender=Item, dispatch_uid="item_save")
