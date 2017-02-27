@@ -78,6 +78,8 @@ def cart_request_details(request, cart_request_id):
 		return render(request, 'home/notAdmin.html')
 
 	current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
+	if not current_request.cart_status == 'O':
+		return render(request, 'home/message.html', {'message':'Request Not Outstanding'})
 	subrequests = Request.objects.filter(parent_cart_id=cart_request_id);
 	
 	#assemble useful info to pass to template or use for db manipulation
