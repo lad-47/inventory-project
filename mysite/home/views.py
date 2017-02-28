@@ -238,7 +238,7 @@ def cart_request_details(request, cart_request_id):
     current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
     subrequests = Request.objects.filter(parent_cart=current_request);
     context = {
-        'request':current_request,
+        'current_request':current_request,
         'subrequests':subrequests,
     }
     return render(request, 'home/cart_request_details.html', context);
