@@ -20,7 +20,6 @@ import os, sys
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-# item_list() above replaces this view!!!!!!!!!!!!
 def index(request):
 	latest_item_list = Item.objects.all()
 	tag_list = Tag.objects.distinct('tag')
@@ -40,7 +39,8 @@ def index(request):
 				latest_item_list = latest_item_list.filter(tags=tag) 
 		if extag_query is not None and 'none' not in extag_query:
 			for tag in extag_query:
-				   latest_item_list = latest_item_list.exclude(tag__tag=tag)
+				tag = Tag.objects.get(tag=tag)
+				latest_item_list = latest_item_list.exclude(tags=tag)
 	page = request.GET.get('page', 1)
 	paginator = Paginator(latest_item_list, 10)
 	try:
