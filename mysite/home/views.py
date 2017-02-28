@@ -64,7 +64,7 @@ def detail(request, item_id):
 		requests = Request.objects.filter(item_id=item.id, status='O');
 	else:
 		requests = Request.objects.filter(item_id=item.id, owner=request.user, status='O')
-		
+
 	custom_fields = CustomFieldEntry.objects.all()
 	custom_values = []
 	for cf in custom_fields:
@@ -100,7 +100,7 @@ def detail(request, item_id):
 		'tags': tags,
 		'requests': requests,
 		'custom': custom_values,
-		'user':request.user,
+		'user':request.user
 	}
 	return render(request, 'home/detail.html', context)
 	
