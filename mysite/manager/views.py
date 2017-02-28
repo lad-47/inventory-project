@@ -454,6 +454,7 @@ def create_tag(request):
 				context = {
 					'create_form': create_form,
 					'modify_form': TagModifyForm(),
+					'delete_form': TagDeleteForm(),
 					}
 				return render(request, 'manager/tag_exists.html', context);
 
@@ -490,6 +491,13 @@ def modify_tag(request):
 				tagToUpdate.save();
 			except Tag.DoesNotExist:
 				return render(request, 'manager/success.html', {'message':"Tag does not exist in database."})
+			except IntegrityError:
+				context = {
+					'create_form': TagCreateForm(),
+					'modify_form': modify_form,
+					'delete_form': TagDeleteForm(),
+					}
+				return render(request, 'manager/tag_exists.html', context);
 			return HttpResponseRedirect('/manager/tag_success');
 
 	else:

@@ -14,17 +14,18 @@
   <p>Description: {{item.description}}</p>
 </div>
 <div style="padding-left: 15px">
-  <h2>Tags</h2>
-  {% for tag in tags %}
-    <span class="badge">{{tag}}</span>
+  <!--Custom Fields-->
+  {% for cf in custom %}
+    <p>{{cf}}</p>
   {% endfor %}
   {% if tags|length == 0 %}
   <p>None</p>
   {% endif %}
 </div>
 <div style="padding-left: 15px">
-  {% for cf in custom %}
-    <p>{{cf}}</p>
+  <h2>Tags</h2>
+  {% for tag in tags %}
+    <span class="badge">{{tag}}</span>
   {% endfor %}
 </div>
 
@@ -34,7 +35,17 @@
 <ul class="list-group">
 	{% for request in requests %}
   	<li class="list-group-item list-group-item-action flex-column align-items-start">
-    <div class="d-flex w-100 justify-content-between">Reason: {{request.reason}} <span style="margin-left:10px" class="badge">{{request.quantity}}</span></div></li> 
+    <div class="d-flex w-100 justify-content-between">
+    {% if user.is_staff %} 
+      <big>Owner:</big> {{request.parent_cart.cart_owner}}
+    {% endif %}
+    <big style="padding-left: 12px">Reason:</big> 
+    {% if user.is_staff %}
+    <a href="{% url 'cart request details' request.parent_cart.id %}">
+    {% else %}
+    <a href="{% url 'view request details' request.parent_cart.id %}"> 
+    {% endif %}
+    {{request.reason}}</a> <span style="margin-left:10px" class="badge">{{request.quantity}}</span></div></li> 
 	{% endfor %}
 </ul>
 

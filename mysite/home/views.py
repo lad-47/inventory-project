@@ -59,11 +59,12 @@ def detail(request, item_id):
 	item = get_object_or_404(Item, pk=item_id)
 	tags = item.tags.all()
 	if request.user.is_staff:
-		requests = Request.objects.filter(status='O');
-	elif request.user.is_authenticated():
-		requests = Request.objects.filter(item_id=item.id, owner=request.user, status='O')
+		requests = Request.objects.filter(item_id=item.id, status='O');
+		permissions = True
 	else:
-		requests = Request.objects.none()
+		requests = Request.objects.filter(item_id=item.id, owner=request.user, status='O')
+		permissions = False
+
 	custom_fields = CustomFieldEntry.objects.all()
 	custom_values = []
 	for cf in custom_fields:
@@ -98,7 +99,9 @@ def detail(request, item_id):
 		'item': item,
 		'tags': tags,
 		'requests': requests,
-		'custom': custom_values
+		'custom': custom_values,
+		'user':request.user,
+		'permissions': permissions
 	}
 	return render(request, 'home/detail.html', context)
 	
@@ -236,7 +239,7 @@ def cart_request_details(request, cart_request_id):
     current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
     subrequests = Request.objects.filter(parent_cart=current_request);
     context = {
-        'request':current_request,
+        'current_request':current_request,
         'subrequests':subrequests,
     }
     return render(request, 'home/cart_request_details.html', context);
