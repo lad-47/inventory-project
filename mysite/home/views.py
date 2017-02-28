@@ -61,7 +61,7 @@ def detail(request, item_id):
 	if not request.user.is_authenticated():
 		return render(request, 'home/detail.html', {'item':item})
 	if request.user.is_staff:
-		requests = Request.objects.filter(status='O');
+		requests = Request.objects.filter(item_id=item.id, status='O');
 		permissions = True
 	else:
 		requests = Request.objects.filter(item_id=item.id, owner=request.user, status='O')
@@ -102,11 +102,8 @@ def detail(request, item_id):
 		'tags': tags,
 		'requests': requests,
 		'custom': custom_values,
-<<<<<<< HEAD
 		'user':request.user,
-=======
 		'permissions': permissions
->>>>>>> 1beec3c3122aeddf5fec5efbad571846968ee48e
 	}
 	return render(request, 'home/detail.html', context)
 	
