@@ -20,7 +20,8 @@ def log_item(sender, instance, created, **kwargs):
 @receiver(pre_delete, sender=Item, dispatch_uid="item_delete")
 def log_item_delete(sender, instance, **kwargs):
     user = get_current_user()
-    log = Log(initiating_user=user.id,involved_item=instance.id,nature='DELETE Item',timestamp=timezone.now())
+    serializer=ItemSerializer(instance)
+    log = Log(initiating_user=user.id,involved_item=instance.id,nature='DELETE Item'+str(serializer.data),timestamp=timezone.now())
     log.save()
         
 # Updating tags handled in item logs
