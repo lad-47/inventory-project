@@ -24,7 +24,10 @@
     <p>{{cf}}</p>
   {% endfor %}
 </div>
-<h2> Requests with this item: </h2>
+
+{% if requests|length > 0 %}
+<h2 style="padding-left: 15px">Requests for this item</h2>
+{% endif %}
 <ul class="list-group">
 	{% for request in requests %}
   	<li class="list-group-item list-group-item-action flex-column align-items-start">

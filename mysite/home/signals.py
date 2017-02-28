@@ -153,7 +153,7 @@ def log_int_delete(sender, instance, **kwargs):
 @receiver(post_save, sender=CustomFloatField, dispatch_uid="float_save")
 def log_float(sender, instance, created, **kwargs):
     user = get_current_user()
-    serializer=CustomFloatSerializer(instance)
+    serializer=CustomFloatFieldSerializer(instance)
     if created:
         log = Log(initiating_user=user.id,involved_item=instance.parent_item.id,nature='CREATE Float Field'+str(serializer.data),timestamp=timezone.now())
         log.save()
