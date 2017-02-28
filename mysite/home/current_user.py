@@ -11,4 +11,4 @@ def get_current_user():
 	try:
 		return _user.value
 	except AttributeError:
-		return User.objects.get(username="jdk1");
+		return User.objects.get(username="admin");
