@@ -14,14 +14,15 @@
   <p>Description: {{item.description}}</p>
 </div>
 <div style="padding-left: 15px">
-  <h2>Tags</h2>
-  {% for tag in tags %}
-    <span class="badge">{{tag}}</span>
+  <!--Custom Fields-->
+  {% for cf in custom %}
+    <p>{{cf}}</p>
   {% endfor %}
 </div>
 <div style="padding-left: 15px">
-  {% for cf in custom %}
-    <p>{{cf}}</p>
+  <h2>Tags</h2>
+  {% for tag in tags %}
+    <span class="badge">{{tag}}</span>
   {% endfor %}
 </div>
 
