@@ -20,7 +20,6 @@ import os, sys
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-# item_list() above replaces this view!!!!!!!!!!!!
 def index(request):
 	latest_item_list = Item.objects.all()
 	tag_list = Tag.objects.distinct('tag')
@@ -40,7 +39,8 @@ def index(request):
 				latest_item_list = latest_item_list.filter(tags=tag) 
 		if extag_query is not None and 'none' not in extag_query:
 			for tag in extag_query:
-				   latest_item_list = latest_item_list.exclude(tag__tag=tag)
+				tag = Tag.objects.get(tag=tag)
+				latest_item_list = latest_item_list.exclude(tags=tag)
 	page = request.GET.get('page', 1)
 	paginator = Paginator(latest_item_list, 10)
 	try:
@@ -60,7 +60,11 @@ def detail(request, item_id):
 	tags = item.tags.all()
 	if not request.user.is_authenticated():
 		return render(request, 'home/detail.html', {'item':item})
-	requests = Request.objects.filter(item_id=item.id, owner=request.user)
+	if request.user.is_staff:
+		requests = Request.objects.filter(status='O');
+	else:
+		requests = Request.objects.filter(item_id=item.id, owner=request.user, status='O')
+
 	custom_fields = CustomFieldEntry.objects.all()
 	custom_values = []
 	for cf in custom_fields:
@@ -249,7 +253,7 @@ def checkout(request):
     try:
         to_checkout = Cart_Request.objects.get(cart_status='P', cart_owner=request.user);
     except Cart_Request.DoesNotExist:
-        return render(request, 'home/no_active_carts.html');
+        return render(request, 'home/message.html', {'message':"No Active Carts."});
     if request.method=='GET':
         checkout_form = CheckoutForm();
         subrequests = Request.objects.filter(parent_cart=to_checkout);
@@ -278,7 +282,11 @@ def checkout_success(request):
 
 def remove_request(request, request_id):
     to_remove = get_object_or_404(Request, pk=request_id);
+    to_remove_parent = to_remove.parent_cart;
     to_remove.delete();
+    if not Request.objects.filter(parent_cart=to_remove_parent).exists():
+    	to_remove_parent.delete();
+    	return render(request, 'home/message.html', {'message':"No Active Carts"})
     return HttpResponseRedirect('/checkout/')
 
 def delete_request(request, cart_request_id):

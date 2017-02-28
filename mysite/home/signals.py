@@ -58,7 +58,7 @@ def log_request(sender, instance, created, **kwargs):
 @receiver(pre_delete, sender=Cart_Request, dispatch_uid="request_delete")
 def log_request_delete(sender, instance, **kwargs):
     user = get_current_user()
-    log = Log(initiating_user=user.id,nature='DELETE Request',timestamp=timezone.now(), related_request=instance.id, affected_user=instance.owner.id)
+    log = Log(initiating_user=user.id,nature='DELETE Request',timestamp=timezone.now(), related_request=instance.id, affected_user=instance.cart_owner.id)
     log.save()
     
 @receiver(post_save, sender=User, dispatch_uid="user_save")
@@ -155,7 +155,7 @@ def log_int_delete(sender, instance, **kwargs):
 @receiver(post_save, sender=CustomFloatField, dispatch_uid="float_save")
 def log_float(sender, instance, created, **kwargs):
     user = get_current_user()
-    serializer=CustomFloatSerializer(instance)
+    serializer=CustomFloatFieldSerializer(instance)
     if created:
         log = Log(initiating_user=user.id,involved_item=instance.parent_item.id,nature='CREATE Float Field'+str(serializer.data),timestamp=timezone.now())
         log.save()
