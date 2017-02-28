@@ -64,6 +64,8 @@ def log_request_delete(sender, instance, **kwargs):
 @receiver(post_save, sender=User, dispatch_uid="user_save")
 def log_user(sender, instance, created, **kwargs):
     user = get_current_user()
+    if user.is_anonymous==True:
+        user=instance
     serializer=UserSerializer(instance)
     if created:
         log = Log(initiating_user=user.id,nature='CREATE User'+str(serializer.data),timestamp=timezone.now(), affected_user=instance.id)

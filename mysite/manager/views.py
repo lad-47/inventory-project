@@ -44,8 +44,6 @@ def request_history(request):
 
 
 def create_request_info(cart_requests):
-	if not request.user.is_staff:
-		return render(request, 'home/notAdmin.html')
 	cart_requests_and_v = [];
 	for cart_request in cart_requests:
 		subrequests = Request.objects.filter(parent_cart=cart_request);
@@ -62,8 +60,6 @@ def create_request_info(cart_requests):
 	return cart_requests_and_v;
 
 def create_indv_request_info(cart_request):
-	if not request.user.is_staff:
-		return render(request, 'home/notAdmin.html')
 	subrequests = Request.objects.filter(parent_cart=cart_request);
 	#assemble useful info to pass to template or use for db manipulation
 	req_info = [];
