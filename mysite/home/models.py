@@ -51,7 +51,7 @@ class Request(models.Model):
 	item_id = models.ForeignKey(Item, on_delete=models.CASCADE, default=1)
 	reason = models.TextField()
 	admin_comment = models.TextField(default="Unserviced");
-	quantity = models.IntegerField(default=1);
+	quantity = models.PositiveIntegerField(default=1);
 	status = models.CharField(max_length=1, choices=STATUSES, default='O')
 	#testField = models.IntegerField(default=0);
 	parent_cart = models.ForeignKey(Cart_Request, null=True);
