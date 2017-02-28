@@ -5,7 +5,7 @@ from home.models import User, Item, Request, Cart_Request, CustomFieldEntry, Tag
 
 class Command(BaseCommand):
     def handle(self, **options):
-        jdk1 = User.objects.create_user(username='jdk1', \
+        jdk1 = User.objects.create_user(username='admin', \
         	password='yellowisacolor1', email=None);
         canService = Permission.objects.create(codename='can_service', \
         	name='Can Service Requests', \
@@ -35,13 +35,13 @@ class Command(BaseCommand):
         
         #making some cart requests
         cartReq1 = Cart_Request.objects.create(cart_owner=jdk1, \
-            cart_reason="Project Mayhem", is_active_request=True, cart_status='O');
+            cart_reason="Project Mayhem", cart_status='O');
         cartReq2 = Cart_Request.objects.create(cart_owner=jdk2, \
-            cart_reason="Project Runway", is_active_request=True, cart_status='A');
+            cart_reason="Project Runway", cart_status='A');
         cartReq3 = Cart_Request.objects.create(cart_owner=jdk1, \
-            cart_reason="Project MAGA", is_active_request=True, cart_status='O');
+            cart_reason="Project MAGA", cart_status='O');
         cartReq4 = Cart_Request.objects.create(cart_owner=jdk2, \
-            cart_reason="stupid lab", is_active_request=True, cart_status='O');
+            cart_reason="stupid lab", cart_status='O');
 
         #giving said cart requests some subrequests
         #right now there's a bug that if you ask for an item twice
@@ -55,8 +55,6 @@ class Command(BaseCommand):
             reason="because I need it", status='O', quantity='5', parent_cart=cartReq2);
         jdk2Res100d = Request.objects.create(owner=jdk1, item_id=resistor200ohm,\
             reason="because I need it", status='O', quantity='80', parent_cart=cartReq2);
-        jdk2Res200e = Request.objects.create(owner=jdk2, item_id=resistor200ohm, \
-        	reason="hugh mungus what?", status='O');
         jdk1Res100f = Request.objects.create(owner=jdk1, item_id=resistor100ohm,\
             reason="because I need it", status='O', quantity='7', parent_cart=cartReq3);
         jdk1Res100g = Request.objects.create(owner=jdk1, item_id=resistor200ohm,\
@@ -65,8 +63,6 @@ class Command(BaseCommand):
             reason="because I need it", status='O', quantity='5', parent_cart=cartReq4);
         jdk2Res100i = Request.objects.create(owner=jdk1, item_id=resistor200ohm,\
             reason="because I need it", status='O', quantity='80', parent_cart=cartReq4);
-        jdk2Res200j = Request.objects.create(owner=jdk2, item_id=resistor200ohm, \
-            reason="hugh mungus what?", status='O');
 
         locationField = CustomFieldEntry.objects.create(field_name='Location', \
             is_private=False, value_type='st');

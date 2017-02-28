@@ -61,7 +61,7 @@ def detail(request, item_id):
 	if not request.user.is_authenticated():
 		return render(request, 'home/detail.html', {'item':item})
 	if request.user.is_staff:
-		requests = Request.objects.filter(status='O');
+		requests = Request.objects.filter(item_id=item.id, status='O');
 		permissions = True
 	else:
 		requests = Request.objects.filter(item_id=item.id, owner=request.user, status='O')
@@ -102,6 +102,7 @@ def detail(request, item_id):
 		'tags': tags,
 		'requests': requests,
 		'custom': custom_values,
+		'user':request.user,
 		'permissions': permissions
 	}
 	return render(request, 'home/detail.html', context)
@@ -240,7 +241,7 @@ def cart_request_details(request, cart_request_id):
     current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
     subrequests = Request.objects.filter(parent_cart=current_request);
     context = {
-        'request':current_request,
+        'current_request':current_request,
         'subrequests':subrequests,
     }
     return render(request, 'home/cart_request_details.html', context);
