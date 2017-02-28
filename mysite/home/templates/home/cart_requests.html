@@ -40,6 +40,19 @@
 
 
 {% else %}
-	<p> No Requests Available </p>
+	<head>
+  <style type="text/css">
+    .options_layout p { margin-left:10px; 
+    				margin-bottom:10px; }
+  </style>
+</head>
+
+<div class="options_layout">
+<h3 style="margin-left:10px">You Haven't Made Any Requests</h3>
+<p> Perhaps you'd like to... </p>
+<p><a href="{% url 'index' %}">View Inventory</a></p>
+<p><a href="{% url 'checkout' %}">View Your Cart</a></p>
+<p><a href="{% url 'requests' %}">View Your Requests</a></p>
+</div>
 {% endif %}
 {% endblock%}
