@@ -17,11 +17,11 @@
 	        <span class="icon-bar"></span>
 	        <span class="icon-bar"></span>
 	      </button>
-				<a href="{% url 'index' %}" class="navbar-brand">Duke ECE<br >Inventory</a>
+				<a href="{% url 'index' %}" class="navbar-brand">Duke ECE<br>Inventory</a>
 			</div>
 			<div class="collapse navbar-collapse" id="bs-nav-demo">
 				<ul class="nav navbar-nav">
-					<li><a>Signed in as {{ user }}</a></li>
+					<li><a><div style="text-align: center;">Signed in as<br>{{ user }}</div></a></li>
 					{% if user.is_staff %}
       				<li><a href="{% url 'direct-disburse' %}"><div style="text-align: center;">Direct<br>Disburse</div></a></li>
       				<li><a href="{% url 'cart requests' %}"><div style="text-align: center;">Service<br>Requests</div></a></li>

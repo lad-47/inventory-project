@@ -138,7 +138,7 @@ def old_cart_request_details(request, cart_request_id):
 def logs(request, *args, **kwargs):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	logs = Log.objects.all()
+	logs = Log.objects.all().order_by('-timestamp')
 	items = Item.objects.all()
 	users = User.objects.all()
 	page = request.GET.get('page', 1)
@@ -212,8 +212,6 @@ def updateItem(item_instance, data):
 		try:
 			getattr(item_instance, field);
 			setattr(item_instance, field, data[field]);
-			print("setting: ")
-			print(field);
 
 		# AttributeError should mean it's a custom field
 		# I have no idea why it throws ValueError for customs...
@@ -245,22 +243,23 @@ def updateItem(item_instance, data):
 			except ObjectDoesNotExist as ex2:
 				print("Exception: ")
 				print(type(ex2).__name__)
-				if field_type == 'st':
+				if field_type == 'st' and not data[field]=="":
 					to_change = CustomShortTextField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
-				elif field_type == 'lt':
+					to_change.save();
+				elif field_type == 'lt' and not data[field]=="":
 					to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
+					to_change.save();
 				elif field_type == 'int' and data[field] is not None:
 					to_change = CustomIntField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
+					to_change.save();
 				elif field_type == 'float' and data[field] is not None:
-					print(data[field])
 					to_change = CustomFloatField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
-				print("to change field name: ")
-				print(to_change.field_name);
-				to_change.save();
+					to_change.save();
+				
 
 
 	item_instance.save();

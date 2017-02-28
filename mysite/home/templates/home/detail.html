@@ -18,6 +18,9 @@
   {% for tag in tags %}
     <span class="badge">{{tag}}</span>
   {% endfor %}
+  {% if tags|length == 0 %}
+  <p>None</p>
+  {% endif %}
 </div>
 <div style="padding-left: 15px">
   {% for cf in custom %}

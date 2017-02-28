@@ -58,13 +58,12 @@ def index(request):
 def detail(request, item_id):
 	item = get_object_or_404(Item, pk=item_id)
 	tags = item.tags.all()
-	if not request.user.is_authenticated():
-		return render(request, 'home/detail.html', {'item':item})
 	if request.user.is_staff:
 		requests = Request.objects.filter(status='O');
-	else:
+	elif request.user.is_authenticated():
 		requests = Request.objects.filter(item_id=item.id, owner=request.user, status='O')
-
+	else:
+		requests = Request.objects.none()
 	custom_fields = CustomFieldEntry.objects.all()
 	custom_values = []
 	for cf in custom_fields:
