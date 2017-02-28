@@ -28,7 +28,8 @@
 <ul class="list-group">
 	{% for request in requests %}
   	<li class="list-group-item list-group-item-action flex-column align-items-start">
-    <div class="d-flex w-100 justify-content-between">Reason: {{request.reason}} <span style="margin-left:10px" class="badge">{{request.quantity}}</span></div></li> 
+    <div class="d-flex w-100 justify-content-between">
+    {% if user.is_staff %} User: {{request.parent_cart.cart_owner}} {% endif %}  Reason: <a style="margin-left:10px" href="{% url 'cart request details' request.parent_cart.id %}"">{{request.reason}}</a> <span style="margin-left:10px" class="badge">{{request.quantity}}</span></div></li> 
 	{% endfor %}
 </ul>
 

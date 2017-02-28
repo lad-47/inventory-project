@@ -99,7 +99,8 @@ def detail(request, item_id):
 		'item': item,
 		'tags': tags,
 		'requests': requests,
-		'custom': custom_values
+		'custom': custom_values,
+		'user':request.user,
 	}
 	return render(request, 'home/detail.html', context)
 	
