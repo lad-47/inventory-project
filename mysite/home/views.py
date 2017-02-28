@@ -189,6 +189,8 @@ def request(request, item_id):
     except Cart_Request.DoesNotExist:
         current_cart = Cart_Request.objects.create(cart_owner=request.user, cart_status='P', cart_reason="(In Progress)")
         current_cart.save();
+    if int(request.POST['quantity'])<1:
+    		return render(request, 'home/message.html', {'message':"Invalid quantity requested"})
     try:
         new_request = Request.objects.get(owner=request.user, item_id=item, status='P');
         new_request.quantity = request.POST['quantity'];
