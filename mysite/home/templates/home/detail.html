@@ -31,15 +31,14 @@
 {% endif %}
 <ul class="list-group">
 	{% for request in requests %}
-  {% if request.item_id == %}
   	<li class="list-group-item list-group-item-action flex-column align-items-start">
     <div class="d-flex w-100 justify-content-between">
     {% if user.is_staff %} 
-      Owner: {{request.parent_cart.cart_owner}} ,
+      <big>Owner:</big> {{request.parent_cart.cart_owner}}
     {% endif %}
-    Reason: 
+    <big style="padding-left: 12px">Reason:</big> 
     {% if user.is_staff %}
-    <a href="{% url 'cart request details' request.parent_cart.id %}"">
+    <a href="{% url 'cart request details' request.parent_cart.id %}">
     {% else %}
     <a href="{% url 'view request details' request.parent_cart.id %}"> 
     {% endif %}
