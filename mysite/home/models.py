@@ -74,16 +74,16 @@ class CustomField(models.Model):
 	field_name = models.ForeignKey(CustomFieldEntry, on_delete=models.CASCADE);
 
 class CustomLongTextField(CustomField):
-	field_value = models.TextField();
+	field_value = models.TextField(null=True);
 
 class CustomShortTextField(CustomField):
-	field_value = models.CharField(max_length=100);
+	field_value = models.CharField(null=True,max_length=100);
 
 class CustomIntField(CustomField):
-	field_value = models.IntegerField();
+	field_value = models.IntegerField(null=True);
 	
 class CustomFloatField(CustomField):
-	field_value = models.FloatField();
+	field_value = models.FloatField(null=True);
 	
 class Log(models.Model):
 	initiating_user = models.IntegerField(db_index=True)

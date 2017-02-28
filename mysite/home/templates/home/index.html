@@ -36,8 +36,9 @@
 </div>
 
 {% if request.user.is_staff %}
-<h4 style="padding-left: 15px"> 
-<a href = "{% url 'add an item' %}">Add an Item </h4>
+<h4 style="padding-left: 15px;padding-bottom: 10px">
+  <a href = "{% url 'add an item' %}" class="btn btn-primary" role="button">Add an Item</a>
+</h4>
 {% endif %}
 
 <ul class="list-group">
