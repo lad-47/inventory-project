@@ -100,7 +100,7 @@ def cart_request_details(request, cart_request_id):
 					el[4].save();  ##save the item with new quantity
 			else:
 				current_request.cart_status='D';
-			current_request.admin_comment=service_form.cleaned_data['admin_comment'];
+			current_request.cart_admin_comment=service_form.cleaned_data['admin_comment'];
 			current_request.save();
 			return HttpResponseRedirect('/manager/request_success');
 
