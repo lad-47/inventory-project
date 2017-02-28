@@ -18,6 +18,9 @@
   {% for cf in custom %}
     <p>{{cf}}</p>
   {% endfor %}
+  {% if tags|length == 0 %}
+  <p>None</p>
+  {% endif %}
 </div>
 <div style="padding-left: 15px">
   <h2>Tags</h2>

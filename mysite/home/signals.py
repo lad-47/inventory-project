@@ -71,9 +71,11 @@ def log_user(sender, instance, created, **kwargs):
         log = Log(initiating_user=user.id,nature='CREATE User'+str(serializer.data),timestamp=timezone.now(), affected_user=instance.id)
         log.save()
     else:
-        log = Log(initiating_user=user.id,nature='UPDATE User'+str(serializer.data),timestamp=timezone.now(), affected_user=instance.id)
-        log.save()
-        
+#         log = Log(initiating_user=user.id,nature='UPDATE User'+str(serializer.data),timestamp=timezone.now(), affected_user=instance.id)
+#         log.save()
+        pass
+    
+    
 @receiver(pre_delete, sender=User, dispatch_uid="user_delete")
 def log_user_delete(sender, instance, **kwargs):
     user = get_current_user()
