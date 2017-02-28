@@ -2,12 +2,11 @@
 {% extends "base.html" %}
 {% load static %}
 <html>
+{% block content %}
 <head>
 	<title>{{item.item_name}}</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'home/style.css' %}" />
 </head>
 <body>
-{% block content %}
 <div style="padding-left: 15px">
   <h1>{{ item.item_name }}</h1>
   <p>Available: {{item.count}}</p>

@@ -11,16 +11,16 @@ def log_item(sender, instance, created, **kwargs):
     user = get_current_user()
     serializer=ItemSerializer(instance)
     if created:
-        log = Log(initiating_user=user.id,involved_item=instance.id,nature='CREATE '+str(serializer.data),timestamp=timezone.now())
+        log = Log(initiating_user=user.id,involved_item=instance.id,nature='CREATE Item'+str(serializer.data),timestamp=timezone.now())
         log.save()
     else:
-        log = Log(initiating_user=user.id,involved_item=instance.id,nature='UPDATE '+str(serializer.data),timestamp=timezone.now())
+        log = Log(initiating_user=user.id,involved_item=instance.id,nature='UPDATE Item'+str(serializer.data),timestamp=timezone.now())
         log.save()
         
 @receiver(pre_delete, sender=Item, dispatch_uid="item_delete")
 def log_item_delete(sender, instance, **kwargs):
     user = get_current_user()
-    log = Log(initiating_user=user.id,involved_item=instance.id,nature='DELETE',timestamp=timezone.now())
+    log = Log(initiating_user=user.id,involved_item=instance.id,nature='DELETE Item',timestamp=timezone.now())
     log.save()
         
 # Updating tags handled in item logs
@@ -110,6 +110,7 @@ def log_short(sender, instance, created, **kwargs):
 @receiver(pre_delete, sender=CustomShortTextField, dispatch_uid="short_delete")
 def log_short_delete(sender, instance, **kwargs):
     user = get_current_user()
+    serializer=CustomShortTextFieldSerializer(instance)
     log = Log(initiating_user=user.id,involved_item=instance.parent_item.id,nature='DELETE Short Field'+str(serializer.data),timestamp=timezone.now())
     log.save()
     
@@ -127,6 +128,7 @@ def log_long(sender, instance, created, **kwargs):
 @receiver(pre_delete, sender=CustomLongTextField, dispatch_uid="long_delete")
 def log_long_delete(sender, instance, **kwargs):
     user = get_current_user()
+    serializer=CustomLongTextFieldSerializer(instance)
     log = Log(initiating_user=user.id,involved_item=instance.parent_item.id,nature='DELETE Long Field'+str(serializer.data),timestamp=timezone.now())
     log.save()
     
@@ -144,6 +146,7 @@ def log_int(sender, instance, created, **kwargs):
 @receiver(pre_delete, sender=CustomIntField, dispatch_uid="int_delete")
 def log_int_delete(sender, instance, **kwargs):
     user = get_current_user()
+    serializer=CustomIntFieldSerializer(instance)
     log = Log(initiating_user=user.id,involved_item=instance.parent_item.id,nature='DELETE Int Field'+str(serializer.data),timestamp=timezone.now())
     log.save()
     
@@ -161,6 +164,7 @@ def log_float(sender, instance, created, **kwargs):
 @receiver(pre_delete, sender=CustomFloatField, dispatch_uid="float_delete")
 def log_float_delete(sender, instance, **kwargs):
     user = get_current_user()
+    serializer=CustomFloatSerializer(instance)
     log = Log(initiating_user=user.id,involved_item=instance.parent_item.id,nature='DELETE Float Field'+str(serializer.data),timestamp=timezone.now())
     log.save()
     
