@@ -14,14 +14,15 @@
   <p>Description: {{item.description}}</p>
 </div>
 <div style="padding-left: 15px">
-  <h2>Tags</h2>
-  {% for tag in tags %}
-    <span class="badge">{{tag}}</span>
+  <!--Custom Fields-->
+  {% for cf in custom %}
+    <p>{{cf}}</p>
   {% endfor %}
 </div>
 <div style="padding-left: 15px">
-  {% for cf in custom %}
-    <p>{{cf}}</p>
+  <h2>Tags</h2>
+  {% for tag in tags %}
+    <span class="badge">{{tag}}</span>
   {% endfor %}
 </div>
 
@@ -31,7 +32,14 @@
 <ul class="list-group">
 	{% for request in requests %}
   	<li class="list-group-item list-group-item-action flex-column align-items-start">
-    <div class="d-flex w-100 justify-content-between">Reason: {{request.reason}} <span style="margin-left:10px" class="badge">{{request.quantity}}</span></div></li> 
+      <div class="d-flex w-100 justify-content-between">
+        {% if permissions %}
+        <span><big>Requested by:</big> {{request.owner}}</span>
+        {% endif %}
+        <span style="margin-left:10px"><big>Reason:</big> {{request.reason}}</span>
+        <span style="margin-left:10px" class="badge">{{request.quantity}}</span>
+      </div>
+    </li> 
 	{% endfor %}
 </ul>
 
