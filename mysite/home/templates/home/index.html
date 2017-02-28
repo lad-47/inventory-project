@@ -45,7 +45,10 @@
   <li class="list-group-item list-group-item-action flex-column align-items-start">
     <div class="d-flex w-100 justify-content-between">
 
-      <h4 class="mb-1" ><a href="{{ item.get_absolute_url }}" style="margin-right:12px">{{item.item_name}}</a><span class="badge">{{item.count}}</span></h4>
+      <h4 class="mb-1" ><a href="{{ item.get_absolute_url }}" style="margin-right:12px">{{item.item_name}}</a>
+        <span style="margin-right:12px"><small>{{item.model_number}}</small></span>
+        <span class="badge">{{item.count}}</span>
+      </h4>
       {% if request.user.is_staff or request.user.is_superuser %}
         <small>
         <a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"> Modify This Item </a>

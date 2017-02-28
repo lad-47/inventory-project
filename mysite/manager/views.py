@@ -415,7 +415,7 @@ def createItem(data):
 			to_change = CustomIntTextField.objects.create(parent_item=item_instance,\
 				field_name=field_entry, field_value = data[field])
 		elif field_type == 'float':
-			to_change = CustomFloatTextField.objects.create(parent_item=item_instance,\
+			to_change = CustomFloatField.objects.create(parent_item=item_instance,\
 				field_name=field_entry, field_value = data[field])
 		to_change.save();
 
