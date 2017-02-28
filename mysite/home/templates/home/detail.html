@@ -33,14 +33,17 @@
 	{% for request in requests %}
   {% if request.item_id == %}
   	<li class="list-group-item list-group-item-action flex-column align-items-start">
-      <div class="d-flex w-100 justify-content-between">
-        {% if permissions %}
-        <span><big>Requested by:</big> {{request.owner}}</span>
-        {% endif %}
-        <span style="margin-left:10px"><big>Reason:</big> {{request.reason}}</span>
-        <span style="margin-left:10px" class="badge">{{request.quantity}}</span>
-      </div>
-    </li> 
+    <div class="d-flex w-100 justify-content-between">
+    {% if user.is_staff %} 
+      Owner: {{request.parent_cart.cart_owner}} ,
+    {% endif %}
+    Reason: 
+    {% if user.is_staff %}
+    <a href="{% url 'cart request details' request.parent_cart.id %}"">
+    {% else %}
+    <a href="{% url 'view request details' request.parent_cart.id %}"> 
+    {% endif %}
+    {{request.reason}}</a> <span style="margin-left:10px" class="badge">{{request.quantity}}</span></div></li> 
 	{% endfor %}
 </ul>
 

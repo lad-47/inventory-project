@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
+<h3 style="margin-left:10px"> <u>{{current_request.cart_reason}}</u> </h3>
+{% if current_request.cart_status == 'O' %}
+<h3 style="margin-left:10px">Request is Outstanding.</h3>
+{% elif current_request.cart_status == 'D' %}
+<h3 style="margin-left:10px">Request was Denied.</h3>
+<h3 style="margin-left:10px">Admin: {{current_request.cart_admin_comment}}</h3>
+{% elif current_request.cart_status == 'A' %}
+<h3 style="margin-left:10px">Request was Approved.</h3>
+<h3 style="margin-left:10px">Admin: {{current_request.cart_admin_comment}}</h3>
+{% endif %}
 
 <ul class="list-group">
 	{% for subrequest in subrequests %}
