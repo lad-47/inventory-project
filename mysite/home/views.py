@@ -62,8 +62,10 @@ def detail(request, item_id):
 		return render(request, 'home/detail.html', {'item':item})
 	if request.user.is_staff:
 		requests = Request.objects.filter(status='O');
+		permissions = True
 	else:
 		requests = Request.objects.filter(item_id=item.id, owner=request.user, status='O')
+		permissions = False
 
 	custom_fields = CustomFieldEntry.objects.all()
 	custom_values = []
@@ -99,7 +101,8 @@ def detail(request, item_id):
 		'item': item,
 		'tags': tags,
 		'requests': requests,
-		'custom': custom_values
+		'custom': custom_values,
+		'permissions': permissions
 	}
 	return render(request, 'home/detail.html', context)
 	
