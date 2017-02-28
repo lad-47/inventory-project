@@ -58,7 +58,7 @@ def log_request(sender, instance, created, **kwargs):
 @receiver(pre_delete, sender=Cart_Request, dispatch_uid="request_delete")
 def log_request_delete(sender, instance, **kwargs):
     user = get_current_user()
-    log = Log(initiating_user=user.id,nature='DELETE Request',timestamp=timezone.now(), related_request=instance.id, affected_user=instance.owner.id)
+    log = Log(initiating_user=user.id,nature='DELETE Request',timestamp=timezone.now(), related_request=instance.id, affected_user=instance.cart_owner.id)
     log.save()
     
 @receiver(post_save, sender=User, dispatch_uid="user_save")

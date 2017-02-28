@@ -20,21 +20,18 @@
   {% endfor %}
 </div>
 <div style="padding-left: 15px">
-  <h2>Custom Fields</h2>
   {% for cf in custom %}
     <p>{{cf}}</p>
   {% endfor %}
 </div>
 
 {% if requests|length > 0 %}
-<h3 style="padding-left: 15px">Requests</h3>
+<h2 style="padding-left: 15px">Requests for this item</h2>
 {% endif %}
 <ul class="list-group">
 	{% for request in requests %}
-	{% if request.status == "O" %}
   	<li class="list-group-item list-group-item-action flex-column align-items-start">
     <div class="d-flex w-100 justify-content-between">Reason: {{request.reason}} <span style="margin-left:10px" class="badge">{{request.quantity}}</span></div></li> 
-  	{% endif %}
 	{% endfor %}
 </ul>
 
