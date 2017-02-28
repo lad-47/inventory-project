@@ -100,7 +100,7 @@ def cart_request_details(request, cart_request_id):
 					el[4].save();  ##save the item with new quantity
 			else:
 				current_request.cart_status='D';
-			current_request.admin_comment=service_form.cleaned_data['admin_comment'];
+			current_request.cart_admin_comment=service_form.cleaned_data['admin_comment'];
 			current_request.save();
 			return HttpResponseRedirect('/manager/request_success');
 
@@ -402,19 +402,23 @@ def createItem(data):
 	for field_entry in CustomFieldEntry.objects.all():
 		field_type = field_entry.value_type;
 		field = field_entry.field_name;
-		if field_type == 'st':
+		if field_type == 'st' and not data[field]=="":
 			to_change = CustomShortTextField.objects.create(parent_item=item_instance,\
 				field_name=field_entry, field_value = data[field])
-		elif field_type == 'lt':
+			to_change.save();
+		elif field_type == 'lt' and not data[field]=="":
 			to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
 				field_name=field_entry, field_value = data[field])
-		elif field_type == 'int':
-			to_change = CustomIntTextField.objects.create(parent_item=item_instance,\
+			to_change.save();
+		elif field_type == 'int' and data[field] is not None:
+			to_change = CustomIntField.objects.create(parent_item=item_instance,\
 				field_name=field_entry, field_value = data[field])
-		elif field_type == 'float':
+			to_change.save();
+		elif field_type == 'float' and data[field] is not None:
 			to_change = CustomFloatField.objects.create(parent_item=item_instance,\
 				field_name=field_entry, field_value = data[field])
-		to_change.save();
+			to_change.save();
+		
 
 	for tagPK in data['tags']:
 		item_instance.tags.add(Tag.objects.get(pk=tagPK));

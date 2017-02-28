@@ -77,7 +77,7 @@ class CustomLongTextField(CustomField):
 	field_value = models.TextField(null=True);
 
 class CustomShortTextField(CustomField):
-	field_value = models.CharField(null=True,max_length=100);
+	field_value = models.CharField(null=True, max_length=100);
 
 class CustomIntField(CustomField):
 	field_value = models.IntegerField(null=True);
