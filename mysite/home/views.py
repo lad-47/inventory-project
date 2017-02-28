@@ -58,13 +58,13 @@ def index(request):
 def detail(request, item_id):
 	item = get_object_or_404(Item, pk=item_id)
 	tags = item.tags.all()
-	if request.user.is_staff:
+	if request.user.is_anonymous:
+		requests = Request.objects.none()
+	elif request.user.is_staff:
 		requests = Request.objects.filter(item_id=item.id, status='O');
-		permissions = True
 	else:
 		requests = Request.objects.filter(item_id=item.id, owner=request.user, status='O')
-		permissions = False
-
+		
 	custom_fields = CustomFieldEntry.objects.all()
 	custom_values = []
 	for cf in custom_fields:
@@ -101,7 +101,6 @@ def detail(request, item_id):
 		'requests': requests,
 		'custom': custom_values,
 		'user':request.user,
-		'permissions': permissions
 	}
 	return render(request, 'home/detail.html', context)
 	
