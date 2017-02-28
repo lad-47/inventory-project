@@ -26,6 +26,9 @@
   {% endfor %}
 </div>
 
+{% if requests|length > 0 %}
+<h3 style="padding-left: 15px">Requests</h3>
+{% endif %}
 <ul class="list-group">
 	{% for request in requests %}
 	{% if request.status == "O" %}
