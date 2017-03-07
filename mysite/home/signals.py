@@ -9,12 +9,19 @@ from .serializers import ItemSerializer, UserSerializer, TagSerializer, RequestS
 @receiver(post_save, sender=Item, dispatch_uid="item_save")
 def log_item(sender, instance, created, **kwargs):
     user = get_current_user()
-    serializer=ItemSerializer(instance)
+    info = instance.item_name+", count: "+str(instance.count)+", model number: "+instance.model_number+", description: "+instance.description+", tags: "
+    tag_count=0
+    for tag in instance.tags.all():
+        info+=tag.tag+", "
+        tag_count+=1      
+    info=info[:-2]
+    if tag_count==0:
+        info=info[:-6]
     if created:
-        log = Log(initiating_user=user.id,initiating_username=user.username,involved_item=instance.id,involved_item_name=instance.item_name,nature='CREATE Item'+str(serializer.data),timestamp=timezone.now())
+        log = Log(initiating_user=user.id,initiating_username=user.username,involved_item=instance.id,involved_item_name=instance.item_name,nature='CREATE Item '+info,timestamp=timezone.now())
         log.save()
     else:
-        log = Log(initiating_user=user.id,initiating_username=user.username,involved_item=instance.id,involved_item_name=instance.item_name,nature='UPDATE Item'+str(serializer.data),timestamp=timezone.now())
+        log = Log(initiating_user=user.id,initiating_username=user.username,involved_item=instance.id,involved_item_name=instance.item_name,nature='UPDATE Item '+info,timestamp=timezone.now())
         log.save()
         
 @receiver(pre_delete, sender=Item, dispatch_uid="item_delete")
