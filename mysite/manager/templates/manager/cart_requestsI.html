@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-	<h3>Outstanding Requests</h3>
+	<h3 style="margin-left:15px">Outstanding Requests</h3>
 	{% include "manager/includes/cart_request_table.html" with cart_requests_and_v=outstanding color=True %}
 
-	<a href="{% url 'request history' %}"> See Past Requests </a>
+	<a style="margin-left:15px" href="{% url 'request history' %}"> See Past Requests </a>
 
 {% endblock %}

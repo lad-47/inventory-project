@@ -32,13 +32,16 @@ def request_history(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	cart_requests = Cart_Request.objects.all();
-	cart_requestsA = cart_requests.filter(cart_status='A');
+	cart_requestsA = cart_requests.filter(cart_status='A')
+	cart_requestsL = cart_requests.filter(cart_status='L')
 	cart_requestsD = cart_requests.filter(cart_status='D');
 	cart_requestsA_and_v = create_request_info(cart_requestsA);
 	cart_requestsD_and_v = create_request_info(cart_requestsD);
+	cart_requestsL_and_v = create_request_info(cart_requestsL);
 	context = {
 		'approved': cart_requestsA_and_v,
 		'denied': cart_requestsD_and_v,
+		'loaned': cart_requestsL_and_v,
 	}
 	return render(request, 'manager/request_history.html', context);
 
@@ -88,14 +91,16 @@ def cart_request_details(request, cart_request_id):
 	if request.method == 'POST':
 		service_form = ServiceForm(request.POST);
 		if service_form.is_valid():
-			if service_form.cleaned_data['approve_deny'] == 'Approve':
-				current_request.cart_status='A';
+			new_status = service_form.cleaned_data['approve_deny'];
+			if new_status == 'A' or new_status == 'L':
+				current_request.cart_status=new_status;
 				for el in req_info:
 					if not el[3]:
+						#this is a place I could fix things
 						return HttpResponseRedirect('/manager/request_failure');
 				for el in req_info:
 					el[4].count = el[2]-el[1]; ##update item quantity
-					el[0].status='A'; ##subrequest was serviced
+					el[0].status=new_status; ##subrequest was serviced
 					el[0].save();  ##save the subrequest's updated status
 					el[4].save();  ##save the item with new quantity
 			else:
