@@ -193,7 +193,7 @@ def request_detail(request, pk, format=None):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response('Owner Permission Required')
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def user_list(request, format=None):
@@ -262,7 +262,7 @@ def get_token(request):
         return render(request, 'home/get_token.html', context);
     return render(request, 'home/notAdmin.html')
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def custom_list(request, format=None):
@@ -309,7 +309,7 @@ def custom_detail(request, pk, format=None):
     return Response('Manager Permission Required')
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def short_list(request, format=None):
@@ -355,7 +355,7 @@ def short_detail(request, pk, format=None):
             return Response(status=status.HTTP_204_NO_CONTENT)
     return Response('Manager Permission Required')
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def long_list(request, format=None):
@@ -401,7 +401,7 @@ def long_detail(request, pk, format=None):
             return Response(status=status.HTTP_204_NO_CONTENT)
     return Response('Manager Permission Required')
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def int_list(request, format=None):
@@ -447,7 +447,7 @@ def int_detail(request, pk, format=None):
             return Response(status=status.HTTP_204_NO_CONTENT)
     return Response('Manager Permission Required')
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def float_list(request, format=None):

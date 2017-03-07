@@ -16,6 +16,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from django.core.mail import send_mail
+
 import os, sys
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -273,11 +275,14 @@ def checkout(request):
             to_checkout.cart_reason = checkout_form.cleaned_data['cart_reason'];
             to_checkout.cart_status = 'O';
             to_checkout.save();
+            message = 'You have requested:\n'
             subrequests = Request.objects.filter(parent_cart=to_checkout);
             for subrequest in subrequests:
                 subrequest.status = 'O';
                 subrequest.reason = to_checkout.cart_reason;
                 subrequest.save();
+                message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
+            send_mail('Inventory Request',message,'duke.ece.inventory@gmail.com',[request.user.email],fail_silently=False,)
         return HttpResponseRedirect('/checkout_success/')
 
 def checkout_success(request):
