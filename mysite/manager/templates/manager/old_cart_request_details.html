@@ -3,10 +3,13 @@
 {% block content %}
 
 
-<table class="table table-condensed">
+<table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 
 	<tr class="active"> 
 	<th> Item </th><th> Amount Requested </th>
+	{% if current_request.cart_status == 'A' or current_request.cart_status == 'L' %}
+	<th> Loaned/Disbursed </th>
+	{% endif %}
 	</tr>
 
 	<!-- rows for each cart request -->
@@ -25,6 +28,13 @@
 		<!--make the actual tablerow -->
 		<th> <a href='/{{req.4.pk}}'> {{req.0.item_id}} </a> </th>
 		<th> {{req.1}} </th>
+		{% if current_request.cart_status == 'A' or current_request.cart_status == 'L' %}
+		{% if req.5 == 'L' %}
+		<th> Loaned </th>
+		{% elif req.5 == 'A' %}
+		<th> Disbursed </th>
+		{% endif %}
+		{% endif %}
 		</tr>
 	{% endfor %}
 	</table>

@@ -72,7 +72,7 @@ def create_indv_request_info(cart_request):
 		requestAmount = subrequest.quantity;
 		newQuantity = oldQuantity - requestAmount;
 		valid = not (newQuantity < 0)
-		req_info+=[(subrequest, requestAmount, oldQuantity, valid, itemToChange)];
+		req_info+=[(subrequest, requestAmount, oldQuantity, valid, itemToChange, subrequest.status)];
 	return req_info;
 
 
