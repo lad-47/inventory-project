@@ -96,4 +96,14 @@ class Log(models.Model):
 	affected_user = models.IntegerField(null=True, blank=True, db_index=True)
 	affected_username = models.CharField(max_length=150, null=True, blank=True)
 
-
+class SubscribedEmail(models.Model):
+	email=models.EmailField()
+	
+class EmailBody(models.Model):
+	body=models.TextField()
+	
+class EmailTag(models.Model):
+	tag=models.CharField(max_length=50)
+	
+class LoanDate(models.Model):
+	date=models.DateField()

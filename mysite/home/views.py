@@ -16,7 +16,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 
 import os, sys
 
@@ -282,7 +282,15 @@ def checkout(request):
                 subrequest.reason = to_checkout.cart_reason;
                 subrequest.save();
                 message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
-            send_mail('Inventory Request',message,'duke.ece.inventory@gmail.com',[request.user.email],fail_silently=False,)
+            email = EmailMessage(
+			    'Hello',
+			    message,
+			    'from@example.com',
+			    [request.user.email],
+			    ['l.donaldson1995@yahoo.com'],
+			    reply_to=['another@example.com']
+			)
+            email.send()
         return HttpResponseRedirect('/checkout_success/')
 
 def checkout_success(request):
