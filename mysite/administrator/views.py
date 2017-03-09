@@ -141,3 +141,10 @@ def cf_delete_success(request):
 
 def cf_create_success(request):
     return render(request, 'manager/success.html', {'message': "Field Successfully Created."})
+
+def bulk_import(request):
+    if request.method == 'POST':
+        raw_data = request.POST.get('import_data', None);
+        if raw_data is not None:
+            return render(request, 'manager/success.html', {'message':"Data retrieved correctly."})
+    return render(request, 'administrator/bulk_import.html')
