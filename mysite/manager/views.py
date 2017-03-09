@@ -10,6 +10,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
 from django.db import IntegrityError
 from rest_framework import status
+from home.models import SubscribedEmail,EmailBody,EmailTag,LoanDate
+from django.core.mail import EmailMessage
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -88,6 +90,8 @@ def cart_request_details(request, cart_request_id):
 	if request.method == 'POST':
 		service_form = ServiceForm(request.POST);
 		if service_form.is_valid():
+			message = 'Your request for:\n'
+			tag=EmailTag.objects.all()[0].tag
 			if service_form.cleaned_data['approve_deny'] == 'Approve':
 				current_request.cart_status='A';
 				for el in req_info:
@@ -96,15 +100,28 @@ def cart_request_details(request, cart_request_id):
 				for el in req_info:
 					el[4].count = el[2]-el[1]; ##update item quantity
 					el[0].status='A'; ##subrequest was serviced
+					message+=el[0].item_id.item_name+' x'+str(el[0].quantity)+"\n"
 					el[0].save();  ##save the subrequest's updated status
 					el[4].save();  ##save the item with new quantity
+				message+='has been APPROVED'
+				tag+=' Request APPROVED'
 			else:
 				current_request.cart_status='D';
 				for el in req_info:
 					el[0].status='D'; ##subrequest was serviced
+					message+=el[0].item_id.item_name+' x'+str(el[0].quantity)+"\n"
 					el[0].save();
+				message+='has been DENIED'
+				tag+=' Request DENIED'
 			current_request.cart_admin_comment=service_form.cleaned_data['admin_comment'];
 			current_request.save();
+			email = EmailMessage(
+				tag,
+				message,
+				'from@example.com',
+				[current_request.cart_owner.email]
+			)
+			email.send()
 			return HttpResponseRedirect('/manager/request_success');
 
 	##the form that will be sent to the template on a GET
@@ -598,7 +615,7 @@ def direct_disburse(request):
 			item = Item.objects.get(item_name=items_set[i])
 			item_request=Request(status='O',reason='direct disbursement',item_id=item,owner=owner,admin_comment=comment,quantity=int(count_set[i]),parent_cart=cart)
 			item_request.save()
-		cart.save()
+		#cart.save()
 		subrequests = Request.objects.filter(parent_cart=cart);
 		valid = True;
 		for subrequest in subrequests:
@@ -611,15 +628,24 @@ def direct_disburse(request):
 				break;
 		if valid==True:
 			cart.cart_status="A"
+			message = 'You have been directly disbursed:\n'
 			for subrequest in subrequests:
 				itemToChange = Item.objects.get(id=subrequest.item_id_id);
 				newQuantity = itemToChange.count - subrequest.quantity;
 				itemToChange.count = newQuantity
 				subrequest.status="A"
 				subrequest.save()
+				message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
 				itemToChange.save()
 			cart.save()
-			
+			tag=EmailTag.objects.all()[0].tag
+			email = EmailMessage(
+				tag+' Direct Disburse',
+				message,
+				'from@example.com',
+				[owner.email]
+			)
+			email.send()
 		return HttpResponseRedirect('/manager/create_success');
 
 	context = {

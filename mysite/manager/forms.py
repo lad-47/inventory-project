@@ -99,3 +99,6 @@ class CFAddForm(forms.Form):
 	value_type = forms.ChoiceField(widget=forms.RadioSelect, choices=TYPES);
 	field_name = forms.CharField(max_length=100);
 	is_private = forms.ChoiceField(widget=forms.RadioSelect, choices=PRIV);
+
+	
+	

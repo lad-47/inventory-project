@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.conf.urls import include, url
 
-from . import views
+from . import views,email_views
 
 
 urlpatterns = [
@@ -29,6 +29,8 @@ urlpatterns = [
 	url(r'^tag_handler/delete_2/$', views.delete_tag_action, name="delete tag action"),
 	url(r'^tag_delete_success/$', views.tag_delete_success, name="tag delete success"),
 	url(r'^direct_disburse/$', views.direct_disburse, name="direct-disburse"),
+	url(r'^emails/$', email_views.emails, name="emails"),
+	url(r'^emails/(?P<pk>[0-9]+)/$', email_views.delete_loan_date, name="delete-loan-date"),
 	#url(r'^cart_request/(?P<cart_request_id>[0-9]+$)', \
 		#views.cart_request_details, name="cart request details"),
 ]
