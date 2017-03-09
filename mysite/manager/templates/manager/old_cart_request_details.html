@@ -2,13 +2,13 @@
 
 {% block content %}
 
-
+<h3 style="margin-left:15px"> Requested by {{current_request.cart_owner.username}}: "{{current_request.cart_reason}}" </h3>
 <table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 
 	<tr class="active"> 
 	<th> Item </th><th> Amount Requested </th>
 	{% if current_request.cart_status == 'A' or current_request.cart_status == 'L' %}
-	<th> Loaned/Disbursed </th>
+	<th>Item Status</th>
 	{% endif %}
 	</tr>
 
@@ -30,7 +30,8 @@
 		<th> {{req.1}} </th>
 		{% if current_request.cart_status == 'A' or current_request.cart_status == 'L' %}
 		{% if req.5 == 'L' %}
-		<th> Loaned </th>
+		<th> Loaned
+		<a style="margin-left:10px" href="{% url 'disburse loaned' req.0.pk %}"> (Disburse this item)</a> </th>
 		{% elif req.5 == 'A' %}
 		<th> Disbursed </th>
 		{% endif %}

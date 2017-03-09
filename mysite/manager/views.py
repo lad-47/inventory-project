@@ -4,7 +4,8 @@ from datetime import date
 from django.contrib.auth.models import User
 from home.models import Request, Cart_Request, User, Item, Log, Tag, CustomFieldEntry, \
 CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField
-from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm
+from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
+PositiveIntArgMaxForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
@@ -23,8 +24,13 @@ def cart_requests(request):
 	cart_requests = Cart_Request.objects.exclude(cart_status='P');
 	cart_requestsO = cart_requests.filter(cart_status='O');
 	cart_requestsO_and_v = create_request_info(cart_requestsO);
+	cart_requestsL = cart_requests.filter(cart_status='L')
+	cart_requestsL_and_v = create_request_info(cart_requestsL);
+
+
 	context = {
 		'outstanding': cart_requestsO_and_v,
+		'loans': cart_requestsL_and_v,
 	}
 	return render(request, 'manager/cart_requestsI.html', context)
 
@@ -632,4 +638,44 @@ def direct_disburse(request):
 		'users': users
 		}
 	return render(request, 'manager/direct_disburse.html', context)
+
+
+def disburse_loaned(request, request_id):
+	req = get_object_or_404(Request, pk=request_id);
+	parent = req.parent_cart;
+	quantity = req.quantity;
+
+	if request.method == 'POST':
+		form = PositiveIntArgMaxForm(request.POST, max_val=quantity);
+		if form.is_valid():
+			to_disburse = form.cleaned_data['to_disburse'];
+			if (quantity-to_disburse > 0):
+				still_loaned = Request.objects.create(owner=req.owner, status='L',\
+				 quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart);
+				still_loaned.save();
+			disbursed = Request.objects.create(owner=req.owner, status='A',\
+			 quantity=(to_disburse), item_id=req.item_id, parent_cart=req.parent_cart);
+			disbursed.save();
+			req.delete();
+			still_loaned = False;
+			for subreq in Request.objects.filter(parent_cart = parent):
+				if subreq.status == 'L':
+					still_loaned = True;
+			if not still_loaned:
+				parent.cart_status = 'A';
+				parent.save();
+
+
+	else:
+		form = PositiveIntArgMaxForm(max_val=quantity);			
+
+
+	context = {
+		'form': form,
+		'item': req.item_id,
+		'loaned': quantity,
+	}
+	return render(request, 'manager/disburse_loaned.html', context)
+
+
 
