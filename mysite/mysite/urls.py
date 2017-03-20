@@ -42,6 +42,7 @@ urlpatterns = [
     url(r'^api/float/(?P<pk>[0-9]+)$', api_views.float_detail, name='float-detail'),
     url(r'^api/entry$', api_views.custom_list, name='custom-list'),
     url(r'^api/entry/(?P<pk>[0-9]+)$', api_views.custom_detail, name='custom-detail'),
+    url(r'^api/logs$', api_views.log_list, name='log-list'),
     url(r'^token/$', api_views.get_token, name='get-token'),
 ]
 

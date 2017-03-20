@@ -1,4 +1,4 @@
-from .models import Item,Request,Tag,CustomShortTextField,CustomLongTextField,CustomIntField,CustomFloatField,CustomFieldEntry
+from .models import Item,Request,Tag,CustomShortTextField,CustomLongTextField,CustomIntField,CustomFloatField,CustomFieldEntry,Log
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
@@ -81,6 +81,12 @@ class CustomFloatFieldSerializer(serializers.ModelSerializer):
         model = CustomFloatField
         fields = ('parent_item','field_name','field_value')
         
+class LogSerializer(serializers.ModelSerializer):
+    #requests = serializers.PrimaryKeyRelatedField(many=True,queryset=Request.objects.all())
+    
+    class Meta:
+        model = Log
+        fields = ('initiating_user','initiating_username','involved_item','involved_item_name','nature','timestamp','related_request','affected_user','affected_username')
 
         
         
