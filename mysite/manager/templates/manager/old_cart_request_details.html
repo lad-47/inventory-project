@@ -29,12 +29,19 @@
 		<th> <a href='/{{req.4.pk}}'> {{req.0.item_id}} </a> </th>
 		<th> {{req.1}} </th>
 		{% if current_request.cart_status == 'A' or current_request.cart_status == 'L' %}
+		<th>
 		{% if req.5 == 'L' %}
-		<th> Loaned
-		<a style="margin-left:10px" href="{% url 'disburse loaned' req.0.pk %}"> (Disburse this item)</a> </th>
+		Loaned
+		<a style="margin-left:10px" href="{% url 'disburse loaned' req.0.pk %}">Disburse</a>
+		<a style="margin-left:10px" href="{% url 'return loaned' req.0.pk %}">Mark as Returned</a>
 		{% elif req.5 == 'A' %}
-		<th> Disbursed </th>
+		Disbursed
+		{% elif req.5 == 'R' %}
+		Returned
+		{% else %}
+		{{req.5}}
 		{% endif %}
+		</th>
 		{% endif %}
 		</tr>
 	{% endfor %}

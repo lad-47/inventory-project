@@ -106,4 +106,4 @@ class PositiveIntArgMaxForm(forms.Form):
 		max_val = kwargs.pop('max_val');
 		super(self.__class__, self).__init__(*args, **kwargs)
 		#print(kwargs['max_val'])
-		self.fields['to_disburse'] = forms.IntegerField(min_value=1, max_value=max_val)
+		self.fields['Amount'] = forms.IntegerField(min_value=1, max_value=max_val)

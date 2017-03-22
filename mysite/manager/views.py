@@ -640,7 +640,7 @@ def direct_disburse(request):
 	return render(request, 'manager/direct_disburse.html', context)
 
 
-def disburse_loaned(request, request_id):
+def handle_loan(request, request_id, disburse):
 	req = get_object_or_404(Request, pk=request_id);
 	parent = req.parent_cart;
 	quantity = req.quantity;
@@ -648,15 +648,26 @@ def disburse_loaned(request, request_id):
 	if request.method == 'POST':
 		form = PositiveIntArgMaxForm(request.POST, max_val=quantity);
 		if form.is_valid():
-			to_disburse = form.cleaned_data['to_disburse'];
+			to_disburse = form.cleaned_data['Amount'];
+
+			if disburse:
+				new_status = 'A';
+			else:
+				new_status = 'R';
+
 			if (quantity-to_disburse > 0):
 				still_loaned = Request.objects.create(owner=req.owner, status='L',\
 				 quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart);
 				still_loaned.save();
-			disbursed = Request.objects.create(owner=req.owner, status='A',\
+			disbursed = Request.objects.create(owner=req.owner, status=new_status,\
 			 quantity=(to_disburse), item_id=req.item_id, parent_cart=req.parent_cart);
 			disbursed.save();
+			if not disburse:
+				involved_item = req.item_id;
+				involved_item.count = involved_item.count + to_disburse;
+				involved_item.save();
 			req.delete();
+
 			still_loaned = False;
 			for subreq in Request.objects.filter(parent_cart = parent):
 				if subreq.status == 'L':
@@ -665,17 +676,50 @@ def disburse_loaned(request, request_id):
 				parent.cart_status = 'A';
 				parent.save();
 
+			return HttpResponseRedirect('/manager/loan_handle_success');
+
 
 	else:
 		form = PositiveIntArgMaxForm(max_val=quantity);			
 
+	if disburse:
+		heading = "Disbursing";
+	else:
+		heading = "Returning";
 
 	context = {
 		'form': form,
 		'item': req.item_id,
 		'loaned': quantity,
+		'heading': heading,
 	}
 	return render(request, 'manager/disburse_loaned.html', context)
 
+def disburse_loaned(request, request_id):
+	return handle_loan(request, request_id, True);
 
+def return_loaned(request, request_id):
+	return handle_loan(request, request_id, False);
 
+def loan_handle_success(request):
+	return render(request, 'manager/success.html', {'message': 'Loan Status Updated.'})
+
+def loan_handler(request):
+
+	request_list = Request.objects.filter(status='L');
+	# it's a search
+	if request.method == 'POST':
+		if request.POST['username']:
+			# filter request list by user
+			pass;
+		if request.POST['item_name']:
+			# filter request list by item
+			pass;
+
+	return render(request, 'manager/loan_handler.html', {'request_list':request_list})
+
+def assemble_loan_info(request_list):
+	req_info = [];
+	for req in request_list:
+		involved_item = req.item_id;
+	return 0;

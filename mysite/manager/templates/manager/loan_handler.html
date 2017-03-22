@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3 style="margin-left:15px"> Active Loans </h3>
+<table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
+
+	<tr class="active"> 
+	<th> Loan Owner</th><th>Item </th><th> Amount Loaned </th><th> Actions </th>
+	</tr>
+	{% for req in request_list %}
+		<!--make the actual tablerow -->
+		<th>{{req.owner.username}}</a> </th>
+		<th><a href='/{{req.item_id.pk}}'> {{req.item_id}}</a> </th>
+		<th> {{req.quantity}} </th>
+		<th><a style = "margin-right:10px" href="{% url 'disburse loaned' req.pk %}">Disburse</a>
+			<a href="{% url 'return loaned' req.pk %}">Mark as Returned</a></th>
+		</tr>
+	{% endfor %}
+	</table>
+
+{% endblock %}
