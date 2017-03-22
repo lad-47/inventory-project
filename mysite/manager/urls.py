@@ -29,6 +29,13 @@ urlpatterns = [
 	url(r'^tag_handler/delete_2/$', views.delete_tag_action, name="delete tag action"),
 	url(r'^tag_delete_success/$', views.tag_delete_success, name="tag delete success"),
 	url(r'^direct_disburse/$', views.direct_disburse, name="direct-disburse"),
+	url(r'^disburse_loaned/(?P<request_id>[0-9]+)/$', views.disburse_loaned, name="disburse loaned"),
+	url(r'^loan_handle_success/$', views.loan_handle_success, name="loan handle success"),
+	url(r'^loan_handler/$', views.loan_handler, name="loan handler"),
+	url(r'^return_loaned/(?P<request_id>[0-9]+)/$', views.return_loaned, name="return loaned"),
+
+
+
 	#url(r'^cart_request/(?P<cart_request_id>[0-9]+$)', \
 		#views.cart_request_details, name="cart request details"),
 ]
