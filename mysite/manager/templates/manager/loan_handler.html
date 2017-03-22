@@ -2,6 +2,51 @@
 
 {% block content %}
 
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+        var item_input=$('input[id="item_box"]');
+        var items = [
+      {% for item in items %}
+          "{{item}}",
+      {%endfor%}
+    ];
+        item_input.autocomplete({
+          source: items,
+          minLength: 2
+        });
+        var user_input=$('input[id="user_box"]');
+        var users = [
+      {% for user in users %}
+          "{{user}}",
+      {%endfor%}
+    ];
+        user_input.autocomplete({
+          source: users,
+          minLength: 2
+        });
+      } );
+
+    //   keeps same width as box
+      jQuery.ui.autocomplete.prototype._resizeMenu = function () {
+          var ul = this.menu.element;
+          ul.outerWidth(this.element.outerWidth());
+        }
+</script>
+
+<form class="navbar-form navbar-top" role="search" type="GET" action=".">
+  <div class="form-group">
+	<label for="item_box">Search Item:</label>
+	<input id="item_box" name="item_box" type="text" class="form-control" placeholder="Search item">
+	<label for="user_box">Search User:</label>
+	<input id="user_box" name="user_box" type="text" class="form-control" placeholder="Search user">
+	  <button id="search_submit" type="submit" class="btn btn-default">Search</button>
+
+</div>
+</form>
+
 <h3 style="margin-left:15px"> Active Loans </h3>
 <table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 

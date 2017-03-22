@@ -657,10 +657,12 @@ def handle_loan(request, request_id, disburse):
 
 			if (quantity-to_disburse > 0):
 				still_loaned = Request.objects.create(owner=req.owner, status='L',\
-				 quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart);
+				 quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
+				 reason=req.reason);
 				still_loaned.save();
 			disbursed = Request.objects.create(owner=req.owner, status=new_status,\
-			 quantity=(to_disburse), item_id=req.item_id, parent_cart=req.parent_cart);
+			 quantity=(to_disburse), item_id=req.item_id, parent_cart=req.parent_cart, \
+			 reason=req.reason);
 			disbursed.save();
 			if not disburse:
 				involved_item = req.item_id;
@@ -706,17 +708,35 @@ def loan_handle_success(request):
 
 def loan_handler(request):
 
-	request_list = Request.objects.filter(status='L');
+	request_list = Request.objects.all().filter(status='L');
 	# it's a search
-	if request.method == 'POST':
-		if request.POST['username']:
-			# filter request list by user
-			pass;
-		if request.POST['item_name']:
-			# filter request list by item
-			pass;
+	if request.method == 'GET':
+		search_user = request.GET.get('user_box', None)
+		search_item = request.GET.get('item_box', None)
 
-	return render(request, 'manager/loan_handler.html', {'request_list':request_list})
+		if search_user:
+			try:
+				user = User.objects.get(username=search_user);
+				request_list = request_list.filter(owner=user);
+			except User.DoesNotExist:
+				request_list = None;
+
+		if search_item:
+			try:
+				item = Item.objects.get(item_name=search_item);
+				request_list = request_list.filter(item_id=item);
+			except Item.DoesNotExist:
+				request_list = None;
+
+	items = Item.objects.all();
+	users = User.objects.all();
+	context = {
+		'request_list': request_list,
+		'items':items,
+		'users':users,
+
+	}
+	return render(request, 'manager/loan_handler.html',context)
 
 def assemble_loan_info(request_list):
 	req_info = [];
