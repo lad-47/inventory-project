@@ -149,7 +149,11 @@ def bulk_import(request):
         if raw_data is not None:
             # process/import data and show success/failure to user
             status = import_data(raw_data)
-            return render(request, 'manager/success.html', {'message':"Data retrieved correctly."})
+            print(str(status))
+            if status:
+                return render(request, 'manager/success.html', {'message':"Data retrieved correctly."})
+            else:
+                return render(request, 'manager/success.html', {'message':"Data was entered incorrectly."})
         else:
             return render(request, 'manager/success.html', {'message':"Data was not retrieved correctly."})
     return render(request, 'administrator/bulk_import.html')
