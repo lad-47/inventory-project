@@ -667,6 +667,8 @@ def direct_disburse(request):
 
 
 def handle_loan(request, request_id, disburse):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
 	req = get_object_or_404(Request, pk=request_id);
 	parent = req.parent_cart;
 	quantity = req.quantity;
@@ -752,7 +754,8 @@ def loan_handle_success(request):
 	return render(request, 'manager/success.html', {'message': 'Loan Status Updated.'})
 
 def loan_handler(request):
-
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
 	request_list = Request.objects.all().filter(status='L');
 	# it's a search
 	if request.method == 'GET':
