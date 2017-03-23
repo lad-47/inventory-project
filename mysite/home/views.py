@@ -62,8 +62,10 @@ def detail(request, item_id):
 		requests = Request.objects.none()
 	elif request.user.is_staff:
 		requests = Request.objects.filter(item_id=item.id, status='O');
+		requests = requests | Request.objects.filter(item_id=item.id, status='L')
 	else:
 		requests = Request.objects.filter(item_id=item.id, owner=request.user, status='O')
+		requests = requests | Request.objects.filter(item_id=item.id, status='L')
 
 	custom_fields = CustomFieldEntry.objects.all()
 	custom_values = []

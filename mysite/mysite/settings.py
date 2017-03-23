@@ -92,11 +92,11 @@ DATABASES = {
          }
      }
 
-## LOCALHOST 
+# LOCALHOST 
 #DATABASES = {
 #    'default': {
 #        'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': 'inventory',
+#       'NAME': 'inventory',
 #        'USER': '',
 #        'PASSWORD': '',
 #        'HOST': '127.0.0.1',
