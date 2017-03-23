@@ -2,8 +2,8 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from .models import Item, Request, Tag, CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, CustomFieldEntry
-from .serializers import ItemSerializer, RequestSerializer, UserSerializer, UserCreateSerializer, CustomShortTextFieldSerializer, CustomLongTextFieldSerializer, CustomIntFieldSerializer,CustomFloatFieldSerializer,CustomFieldEntrySerializer
+from .models import Item, Request, Tag, CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, CustomFieldEntry, Log
+from .serializers import ItemSerializer, RequestSerializer, UserSerializer, UserCreateSerializer, CustomShortTextFieldSerializer, CustomLongTextFieldSerializer, CustomIntFieldSerializer,CustomFloatFieldSerializer,CustomFieldEntrySerializer,LogSerializer
 from rest_framework.reverse import reverse
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -20,7 +20,8 @@ def api_root(request, format=None):
         'items': reverse('item-list', request=request, format=format),
         'requests': reverse('request-list', request=request, format=format),
         'users': reverse('user-list', request=request, format=format),
-        'custom fields': reverse('api-custom', request=request, format=format)
+        'custom fields': reverse('api-custom', request=request, format=format),
+        'logs': reverse('log-list', request=request, format=format)
     })
     
 @api_view(['GET'])
@@ -193,7 +194,7 @@ def request_detail(request, pk, format=None):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response('Owner Permission Required')
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def user_list(request, format=None):
@@ -262,7 +263,7 @@ def get_token(request):
         return render(request, 'home/get_token.html', context);
     return render(request, 'home/notAdmin.html')
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def custom_list(request, format=None):
@@ -309,7 +310,7 @@ def custom_detail(request, pk, format=None):
     return Response('Manager Permission Required')
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def short_list(request, format=None):
@@ -355,7 +356,7 @@ def short_detail(request, pk, format=None):
             return Response(status=status.HTTP_204_NO_CONTENT)
     return Response('Manager Permission Required')
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def long_list(request, format=None):
@@ -401,7 +402,7 @@ def long_detail(request, pk, format=None):
             return Response(status=status.HTTP_204_NO_CONTENT)
     return Response('Manager Permission Required')
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def int_list(request, format=None):
@@ -447,7 +448,7 @@ def int_detail(request, pk, format=None):
             return Response(status=status.HTTP_204_NO_CONTENT)
     return Response('Manager Permission Required')
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def float_list(request, format=None):
@@ -494,3 +495,16 @@ def float_detail(request, pk, format=None):
     return Response('Manager Permission Required')
 
 
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def log_list(request, format=None):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        if request.user.is_staff:
+            logs = Log.objects.all()
+            serializer = LogSerializer(logs, many=True)
+            return Response(serializer.data)
+        return Response('Manager Permission Required')

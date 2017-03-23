@@ -48,7 +48,8 @@ class Request(models.Model):
 	('A','Approved'),
 	('D','Denied'),
 	('P','In Progress'),
-	('L','Loaned'))
+	('L','Loaned'),
+	('R','Returned'))
 	owner = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE, default=1)
 	item_id = models.ForeignKey(Item, on_delete=models.CASCADE, default=1)
 	reason = models.TextField()
@@ -89,10 +90,23 @@ class CustomFloatField(CustomField):
 	
 class Log(models.Model):
 	initiating_user = models.IntegerField(db_index=True)
+	initiating_username = models.CharField(max_length=150)
 	involved_item = models.IntegerField(null=True, blank=True, db_index=True)
+	involved_item_name = models.CharField(max_length=100, null=True, blank=True)
 	nature = models.TextField()
 	timestamp = models.DateTimeField()
 	related_request = models.IntegerField(null=True, blank=True, db_index=True)
 	affected_user = models.IntegerField(null=True, blank=True, db_index=True)
+	affected_username = models.CharField(max_length=150, null=True, blank=True)
 
-
+class SubscribedEmail(models.Model):
+	email=models.EmailField()
+	
+class EmailBody(models.Model):
+	body=models.TextField()
+	
+class EmailTag(models.Model):
+	tag=models.CharField(max_length=50)
+	
+class LoanDate(models.Model):
+	date=models.DateField()

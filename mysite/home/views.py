@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from .models import Item, Request, Tag, CustomFieldEntry, CustomLongTextField, CustomShortTextField, CustomIntField, CustomFloatField, Cart_Request;
+from .models import Item, Request, Tag, CustomFieldEntry, CustomLongTextField, CustomShortTextField, CustomIntField, CustomFloatField, Cart_Request,SubscribedEmail,EmailTag;
 from .forms import CheckoutForm
 from .serializers import ItemSerializer
 # chance genereic.Listview stuff to ListView
@@ -15,6 +15,8 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
+from django.core.mail import EmailMessage
 
 import os, sys
 
@@ -185,22 +187,22 @@ def cannotService(request):
 #	return render(request, 'home/request_success.html')
 
 def request(request, item_id):
-    item = get_object_or_404(Item, pk=item_id)
-    try:
-        current_cart = Cart_Request.objects.get(cart_owner=request.user, cart_status='P');
-    except Cart_Request.DoesNotExist:
-        current_cart = Cart_Request.objects.create(cart_owner=request.user, cart_status='P', cart_reason="(In Progress)")
-        current_cart.save();
-    if int(request.POST['quantity'])<1:
-    		return render(request, 'home/message.html', {'message':"Invalid quantity requested"})
-    try:
-        new_request = Request.objects.get(owner=request.user, item_id=item, status='P');
-        new_request.quantity = request.POST['quantity'];
-    except Request.DoesNotExist:
-        new_request = Request(owner=request.user, item_id=item, quantity=request.POST['quantity'],\
-            status='P', parent_cart=current_cart, reason='(In Progress)');
-    new_request.save()
-    return render(request, 'home/message.html', {'message':"Item Added to Cart"})
+	item = get_object_or_404(Item, pk=item_id)
+	try:
+		current_cart = Cart_Request.objects.get(cart_owner=request.user, cart_status='P');
+	except Cart_Request.DoesNotExist:
+		current_cart = Cart_Request.objects.create(cart_owner=request.user, cart_status='P', cart_reason="(In Progress)")
+		current_cart.save();
+	if int(request.POST['quantity'])<1:
+			return render(request, 'home/message.html', {'message':"Invalid quantity requested"})
+	try:
+		new_request = Request.objects.get(owner=request.user, item_id=item, status='P');
+		new_request.quantity = request.POST['quantity'];
+	except Request.DoesNotExist:
+		new_request = Request(owner=request.user, item_id=item, quantity=request.POST['quantity'],\
+			status='P', parent_cart=current_cart, reason='(In Progress)');
+	new_request.save()
+	return render(request, 'home/message.html', {'message':"Item Added to Cart"})
 
 class DeleteRequestView(DeleteView):
 	model = Request
@@ -210,18 +212,18 @@ class DeleteRequestView(DeleteView):
 		return reverse('index')
 
 def delete_check(request, item_id):
-    item = get_object_or_404(Item, pk=item_id)
-    action = '/admin/delete_item/' + str(item_id) + "/";
-    message = 'Deletion is permanent.  Are you sure you want to delete ' \
-    + item.item_name + "?";
-    context = {
-        'action':action,
-        'message':message,
-        'item':item,
-        'submit_button':"Yes, delete " + str(item.item_name)
-    }
+	item = get_object_or_404(Item, pk=item_id)
+	action = '/admin/delete_item/' + str(item_id) + "/";
+	message = 'Deletion is permanent.  Are you sure you want to delete ' \
+	+ item.item_name + "?";
+	context = {
+		'action':action,
+		'message':message,
+		'item':item,
+		'submit_button':"Yes, delete " + str(item.item_name)
+	}
 
-    return render(request, 'manager/confirmation.html', context)
+	return render(request, 'manager/confirmation.html', context)
 
 def delete_item(request, item_id):
 	itemToDelete = get_object_or_404(Item, pk=item_id)
@@ -239,13 +241,13 @@ def api_download(request):
 	return response
 
 def cart_request_details(request, cart_request_id):
-    current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
-    subrequests = Request.objects.filter(parent_cart=current_request);
-    context = {
-        'current_request':current_request,
-        'subrequests':subrequests,
-    }
-    return render(request, 'home/cart_request_details.html', context);
+	current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
+	subrequests = Request.objects.filter(parent_cart=current_request);
+	context = {
+		'current_request':current_request,
+		'subrequests':subrequests,
+	}
+	return render(request, 'home/cart_request_details.html', context);
 # class ListItemView(ListView):
 #	 model=Item
 #	 template_name='home/index.html'
@@ -255,60 +257,88 @@ def cart_request_details(request, cart_request_id):
 #	 template_name='home/detail.html'
 
 def checkout(request):
-    try:
-        to_checkout = Cart_Request.objects.get(cart_status='P', cart_owner=request.user);
-    except Cart_Request.DoesNotExist:
-        return render(request, 'home/message.html', {'message':"No Active Carts."});
-    if request.method=='GET':
-        checkout_form = CheckoutForm();
-        subrequests = Request.objects.filter(parent_cart=to_checkout);
-        context = {
-            'subrequests':subrequests,
-            'to_checkout':to_checkout,
-            'checkout_form':checkout_form,
-        }
-        return render(request, 'home/checkout.html', context)
-    else:
-        # request.method == 'POST'
-        checkout_form = CheckoutForm(request.POST);
-        if checkout_form.is_valid():
-            to_checkout.cart_reason = checkout_form.cleaned_data['cart_reason'];
-            to_checkout.cart_status = 'O';
-            to_checkout.save();
-            subrequests = Request.objects.filter(parent_cart=to_checkout);
-            for subrequest in subrequests:
-                subrequest.status = 'O';
-                subrequest.reason = to_checkout.cart_reason;
-                subrequest.save();
-        return HttpResponseRedirect('/checkout_success/')
+	try:
+		to_checkout = Cart_Request.objects.get(cart_status='P', cart_owner=request.user);
+	except Cart_Request.DoesNotExist:
+		return render(request, 'home/message.html', {'message':"No Active Carts."});
+	if request.method=='GET':
+		checkout_form = CheckoutForm();
+		subrequests = Request.objects.filter(parent_cart=to_checkout);
+		context = {
+			'subrequests':subrequests,
+			'to_checkout':to_checkout,
+			'checkout_form':checkout_form,
+		}
+		return render(request, 'home/checkout.html', context)
+	else:
+		# request.method == 'POST'
+		checkout_form = CheckoutForm(request.POST);
+		if checkout_form.is_valid():
+			to_checkout.cart_reason = checkout_form.cleaned_data['cart_reason'];
+			to_checkout.cart_status = 'O';
+			to_checkout.save();
+			message = 'You have requested:\n'
+			subrequests = Request.objects.filter(parent_cart=to_checkout);
+			for subrequest in subrequests:
+				subrequest.status = 'O';
+				subrequest.reason = to_checkout.cart_reason;
+				subrequest.save();
+				message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
+			tag=EmailTag.objects.all()[0].tag
+			subscribed_emails=SubscribedEmail.objects.all()
+			bcc=[]
+			for email in subscribed_emails:
+				bcc.append(email.email)
+			email = EmailMessage(
+				tag+' Request',
+				message,
+				'from@example.com',
+				[request.user.email],
+				bcc
+			)
+			email.send()
+		return HttpResponseRedirect('/checkout_success/')
 
 def checkout_success(request):
-    return render(request, 'home/message.html', {'message':"Request Placed!"})
+	return render(request, 'home/message.html', {'message':"Request Placed!"})
 
 def remove_request(request, request_id):
-    to_remove = get_object_or_404(Request, pk=request_id);
-    to_remove_parent = to_remove.parent_cart;
-    to_remove.delete();
-    if not Request.objects.filter(parent_cart=to_remove_parent).exists():
-    	to_remove_parent.delete();
-    	return render(request, 'home/message.html', {'message':"No Active Carts"})
-    return HttpResponseRedirect('/checkout/')
+	to_remove = get_object_or_404(Request, pk=request_id);
+	to_remove_parent = to_remove.parent_cart;
+	to_remove.delete();
+	if not Request.objects.filter(parent_cart=to_remove_parent).exists():
+		to_remove_parent.delete();
+		return render(request, 'home/message.html', {'message':"No Active Carts"})
+	return HttpResponseRedirect('/checkout/')
 
 def delete_request(request, cart_request_id):
-    to_delete = get_object_or_404(Cart_Request, pk=cart_request_id);
-    if request.method == 'GET':
-        message = "Are you sure you want to delete this request? \n Reason: "\
-         + to_delete.cart_reason;
-        action='/delete_request/' + str(cart_request_id) + '/';
-        context = {
-            'message':message,
-            'submit_button': "Yes, Delete Request",
-            'action':action,
-        }
-        return render(request, 'manager/confirmation.html', context)
-    else:
-        to_delete.delete();
-        return HttpResponseRedirect('/delete_request_success/')
+	to_delete = get_object_or_404(Cart_Request, pk=cart_request_id);
+	if request.method == 'GET':
+		message = "Are you sure you want to delete this request? \n Reason: "\
+		 + to_delete.cart_reason;
+		action='/delete_request/' + str(cart_request_id) + '/';
+		context = {
+			'message':message,
+			'submit_button': "Yes, Delete Request",
+			'action':action,
+		}
+		return render(request, 'manager/confirmation.html', context)
+	else:
+		message = 'You have deleted your request for:\n'
+		subrequests = Request.objects.filter(parent_cart=to_delete);
+		for subrequest in subrequests:
+			message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
+			# subrequest.delete() ?
+		to_delete.delete();
+		tag=EmailTag.objects.all()[0].tag
+		email = EmailMessage(
+			tag+' Delete Request',
+			message,
+			'from@example.com',
+			[request.user.email]
+		)
+		email.send()
+		return HttpResponseRedirect('/delete_request_success/')
 
 def delete_request_success(request):
-    return render(request, 'home/message.html', {'message':'Request Removed.'})
+	return render(request, 'home/message.html', {'message':'Request Removed.'})
