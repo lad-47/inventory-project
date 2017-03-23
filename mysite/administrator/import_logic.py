@@ -166,19 +166,26 @@ def valid_customs(custom_fields):
             existing_cf = CustomFieldEntry.objects.get(field_name=cf_name)
             field_type = existing_cf.value_type
             if field_type == "st":
-                pass
+                # Short Text
+                if not isinstance(cf_value, str):
+                    return False
             elif field_type == "lt":
-                pass
+                # Long Text
+                if not isinstance(cf_value, str):
+                    return False
             elif field_type == "int":
-                pass
+                # Integer
+                if not isinstance(cf_value, int):
+                    return False
             elif field_type == "float":
-                pass
+                # Float
+                if not isinstance(cf_value, float):
+                    return False
             else:
                 print("Data integrity error. CustomFieldEntry.field_type is illegal in database.")
         except CustomFieldEntry.DoesNotExist:
             print("Error: Custom field, "+cf_name+", does not exist.")
             return False
-        pass
     return True
 
 def check_name_conflicts(items):
