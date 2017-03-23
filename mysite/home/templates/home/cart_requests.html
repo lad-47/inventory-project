@@ -14,24 +14,36 @@
 	{% endfor %}
 	</ul>
 
-	<h3>Denied Requests</h3>
+	<h3>Approved for Loan</h3>
 	<ul>
 	{% for request in request_list %}
-		{% if request.cart_status == "D" %}
+		{% if request.cart_status == "L" %}
 		<li>
-		<p><a href="{% url 'view request details' cart_request_id=request.id %}">Reason: {{request.cart_reason}}</a> </p>
+		<p><a href="{% url 'view request details' cart_request_id=request.id %}">Reason: {{request.cart_reason}} </a></p>
 		<p>Administrator Comment: {{request.cart_admin_comment}}</p>
 		</li>
 		{% endif %}
 	{% endfor %}
 	</ul>
 
-	<h3>Approved Requests</h3>
+	<h3>Approved for Disbursment</h3>
 	<ul>
 	{% for request in request_list %}
 		{% if request.cart_status == "A" %}
 		<li>
 		<p><a href="{% url 'view request details' cart_request_id=request.id %}">Reason: {{request.cart_reason}} </a></p>
+		<p>Administrator Comment: {{request.cart_admin_comment}}</p>
+		</li>
+		{% endif %}
+	{% endfor %}
+	</ul>
+
+	<h3>Denied Requests</h3>
+	<ul>
+	{% for request in request_list %}
+		{% if request.cart_status == "D" %}
+		<li>
+		<p><a href="{% url 'view request details' cart_request_id=request.id %}">Reason: {{request.cart_reason}}</a> </p>
 		<p>Administrator Comment: {{request.cart_admin_comment}}</p>
 		</li>
 		{% endif %}
