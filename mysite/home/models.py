@@ -48,7 +48,8 @@ class Request(models.Model):
 	('A','Approved'),
 	('D','Denied'),
 	('P','In Progress'),
-	('L','Loaned'))
+	('L','Loaned'),
+	('R','Returned'))
 	owner = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE, default=1)
 	item_id = models.ForeignKey(Item, on_delete=models.CASCADE, default=1)
 	reason = models.TextField()

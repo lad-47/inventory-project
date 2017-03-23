@@ -683,13 +683,32 @@ def handle_loan(request, request_id, disburse):
 
 			if (quantity-to_disburse > 0):
 				still_loaned = Request.objects.create(owner=req.owner, status='L',\
-				 quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
-				 reason=req.reason);
+				quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
+				reason=req.reason);
 				still_loaned.save();
+			
 			disbursed = Request.objects.create(owner=req.owner, status=new_status,\
-			 quantity=(to_disburse), item_id=req.item_id, parent_cart=req.parent_cart, \
-			 reason=req.reason);
+			quantity=(to_disburse), item_id=req.item_id, parent_cart=req.parent_cart, \
+			reason=req.reason);
 			disbursed.save();
+			
+			tag=EmailTag.objects.all()[0].tag
+			message=""
+			
+			if disburse:	
+				message = "You have been disbursed "+str(to_disburse)+" x "+str(req.item_id)+" from your previous loan"
+				tag += " Disbursement"
+			else:
+				message = "You have returned "+str(to_disburse)+" x "+str(req.item_id)
+				tag += " Loan Returned"
+			
+			email = EmailMessage(
+				tag,
+				message,
+				'from@example.com',
+				[req.owner.email]
+			)
+			email.send()
 			if not disburse:
 				involved_item = req.item_id;
 				involved_item.count = involved_item.count + to_disburse;
