@@ -31,7 +31,8 @@ class Cart_Request(models.Model):
 	('O','Outstanding'),
 	('A','Approved'),
 	('D','Denied'),
-	('P','In Progress'))
+	('P','In Progress'),
+	('L','Loaned'))
 	cart_owner = models.ForeignKey(User, on_delete=models.CASCADE);
 	cart_reason = models.TextField();
 	cart_admin_comment = models.TextField(default="No Comment");
@@ -46,11 +47,12 @@ class Request(models.Model):
 	('O','Outstanding'),
 	('A','Approved'),
 	('D','Denied'),
-	('P','In Progress'))
+	('P','In Progress'),
+	('L','Loaned'))
 	owner = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE, default=1)
 	item_id = models.ForeignKey(Item, on_delete=models.CASCADE, default=1)
 	reason = models.TextField()
-	admin_comment = models.TextField(default="Unserviced");
+	admin_comment = models.TextField(default="No Comment");
 	quantity = models.PositiveIntegerField(default=1);
 	status = models.CharField(max_length=1, choices=STATUSES, default='O')
 	#testField = models.IntegerField(default=0);

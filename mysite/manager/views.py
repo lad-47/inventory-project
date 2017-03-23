@@ -4,7 +4,8 @@ from datetime import date
 from django.contrib.auth.models import User
 from home.models import Request, Cart_Request, User, Item, Log, Tag, CustomFieldEntry, \
 CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField
-from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm
+from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
+PositiveIntArgMaxForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
@@ -25,8 +26,13 @@ def cart_requests(request):
 	cart_requests = Cart_Request.objects.exclude(cart_status='P');
 	cart_requestsO = cart_requests.filter(cart_status='O');
 	cart_requestsO_and_v = create_request_info(cart_requestsO);
+	cart_requestsL = cart_requests.filter(cart_status='L')
+	cart_requestsL_and_v = create_request_info(cart_requestsL);
+
+
 	context = {
 		'outstanding': cart_requestsO_and_v,
+		'loans': cart_requestsL_and_v,
 	}
 	return render(request, 'manager/cart_requestsI.html', context)
 
@@ -34,13 +40,16 @@ def request_history(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	cart_requests = Cart_Request.objects.all();
-	cart_requestsA = cart_requests.filter(cart_status='A');
+	cart_requestsA = cart_requests.filter(cart_status='A')
+	cart_requestsL = cart_requests.filter(cart_status='L')
 	cart_requestsD = cart_requests.filter(cart_status='D');
 	cart_requestsA_and_v = create_request_info(cart_requestsA);
 	cart_requestsD_and_v = create_request_info(cart_requestsD);
+	cart_requestsL_and_v = create_request_info(cart_requestsL);
 	context = {
 		'approved': cart_requestsA_and_v,
 		'denied': cart_requestsD_and_v,
+		'loaned': cart_requestsL_and_v,
 	}
 	return render(request, 'manager/request_history.html', context);
 
@@ -71,7 +80,7 @@ def create_indv_request_info(cart_request):
 		requestAmount = subrequest.quantity;
 		newQuantity = oldQuantity - requestAmount;
 		valid = not (newQuantity < 0)
-		req_info+=[(subrequest, requestAmount, oldQuantity, valid, itemToChange)];
+		req_info+=[(subrequest, requestAmount, oldQuantity, valid, itemToChange, subrequest.status)];
 	return req_info;
 
 
@@ -92,15 +101,17 @@ def cart_request_details(request, cart_request_id):
 		if service_form.is_valid():
 			message = 'Your request for:\n'
 			tag=EmailTag.objects.all()[0].tag
-			if service_form.cleaned_data['approve_deny'] == 'Approve':
-				current_request.cart_status='A';
+			new_status = service_form.cleaned_data['approve_deny'];
+			if new_status == 'A' or new_status == 'L':
+				current_request.cart_status=new_status;
 				for el in req_info:
 					if not el[3]:
+						#this is a place I could fix things
 						return HttpResponseRedirect('/manager/request_failure');
 				for el in req_info:
 					el[4].count = el[2]-el[1]; ##update item quantity
-					el[0].status='A'; ##subrequest was serviced
 					message+=el[0].item_id.item_name+' x'+str(el[0].quantity)+"\n"
+					el[0].status=new_status; ##subrequest was serviced
 					el[0].save();  ##save the subrequest's updated status
 					el[4].save();  ##save the item with new quantity
 				message+='has been APPROVED'
@@ -654,3 +665,107 @@ def direct_disburse(request):
 		}
 	return render(request, 'manager/direct_disburse.html', context)
 
+
+def handle_loan(request, request_id, disburse):
+	req = get_object_or_404(Request, pk=request_id);
+	parent = req.parent_cart;
+	quantity = req.quantity;
+
+	if request.method == 'POST':
+		form = PositiveIntArgMaxForm(request.POST, max_val=quantity);
+		if form.is_valid():
+			to_disburse = form.cleaned_data['Amount'];
+
+			if disburse:
+				new_status = 'A';
+			else:
+				new_status = 'R';
+
+			if (quantity-to_disburse > 0):
+				still_loaned = Request.objects.create(owner=req.owner, status='L',\
+				 quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
+				 reason=req.reason);
+				still_loaned.save();
+			disbursed = Request.objects.create(owner=req.owner, status=new_status,\
+			 quantity=(to_disburse), item_id=req.item_id, parent_cart=req.parent_cart, \
+			 reason=req.reason);
+			disbursed.save();
+			if not disburse:
+				involved_item = req.item_id;
+				involved_item.count = involved_item.count + to_disburse;
+				involved_item.save();
+			req.delete();
+
+			still_loaned = False;
+			for subreq in Request.objects.filter(parent_cart = parent):
+				if subreq.status == 'L':
+					still_loaned = True;
+			if not still_loaned:
+				parent.cart_status = 'A';
+				parent.save();
+
+			return HttpResponseRedirect('/manager/loan_handle_success');
+
+
+	else:
+		form = PositiveIntArgMaxForm(max_val=quantity);			
+
+	if disburse:
+		heading = "Disbursing";
+	else:
+		heading = "Returning";
+
+	context = {
+		'form': form,
+		'item': req.item_id,
+		'loaned': quantity,
+		'heading': heading,
+	}
+	return render(request, 'manager/disburse_loaned.html', context)
+
+def disburse_loaned(request, request_id):
+	return handle_loan(request, request_id, True);
+
+def return_loaned(request, request_id):
+	return handle_loan(request, request_id, False);
+
+def loan_handle_success(request):
+	return render(request, 'manager/success.html', {'message': 'Loan Status Updated.'})
+
+def loan_handler(request):
+
+	request_list = Request.objects.all().filter(status='L');
+	# it's a search
+	if request.method == 'GET':
+		search_user = request.GET.get('user_box', None)
+		search_item = request.GET.get('item_box', None)
+
+		if search_user:
+			try:
+				user = User.objects.get(username=search_user);
+				request_list = request_list.filter(owner=user);
+			except User.DoesNotExist:
+				request_list = None;
+
+		if search_item:
+			try:
+				item = Item.objects.get(item_name=search_item);
+				request_list = request_list.filter(item_id=item);
+			except Item.DoesNotExist:
+				request_list = None;
+
+	items = Item.objects.all();
+	users = User.objects.all();
+	context = {
+		'request_list': request_list,
+		'items':items,
+		'users':users,
+
+	}
+	return render(request, 'manager/loan_handler.html',context)
+
+def assemble_loan_info(request_list):
+	req_info = [];
+	for req in request_list:
+		involved_item = req.item_id;
+	return 0;

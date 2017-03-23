@@ -31,6 +31,11 @@ urlpatterns = [
 	url(r'^direct_disburse/$', views.direct_disburse, name="direct-disburse"),
 	url(r'^emails/$', email_views.emails, name="emails"),
 	url(r'^emails/(?P<pk>[0-9]+)/$', email_views.delete_loan_date, name="delete-loan-date"),
+	url(r'^disburse_loaned/(?P<request_id>[0-9]+)/$', views.disburse_loaned, name="disburse loaned"),
+	url(r'^loan_handle_success/$', views.loan_handle_success, name="loan handle success"),
+	url(r'^loan_handler/$', views.loan_handler, name="loan handler"),
+	url(r'^return_loaned/(?P<request_id>[0-9]+)/$', views.return_loaned, name="return loaned"),
+
 	#url(r'^cart_request/(?P<cart_request_id>[0-9]+$)', \
 		#views.cart_request_details, name="cart request details"),
 ]
