@@ -34,6 +34,7 @@
 					{% if user.is_staff %}
       				<li><a href="{% url 'direct-disburse' %}"><div style="text-align: center;">Direct<br>Disburse</div></a></li>
       				<li><a href="{% url 'cart requests' %}"><div style="text-align: center;">Service<br>Requests</div></a></li>
+      				<li><a href="{% url 'emails' %}"><div style="text-align: center;">Emails</div></a></li>
       				{% if user.is_superuser %}
       				<li><a href="{% url 'users' %}">Users</a></li>
       				<li><a href="{% url 'custom fields' %}"><div style="text-align: center;">Custom<br>Fields</div></a></li>
