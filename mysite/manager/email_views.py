@@ -8,7 +8,7 @@ def emails(request):
     subscribed_emails = SubscribedEmail.objects.all()
     subscribed=False
     for email in subscribed_emails:
-        if request.user.email==email:
+        if request.user.email==email.email:
             subscribed=True
     body=EmailBody.objects.all()[0]
     tag=EmailTag.objects.all()[0]
@@ -19,7 +19,7 @@ def emails(request):
         'dates':dates,
         'subscribed':subscribed
     }
-    
+    print(subscribed)
     if request.method == 'POST':
         body_input = request.POST.get('body',None)
         tag_input = request.POST.get('tag',None)
@@ -39,10 +39,15 @@ def emails(request):
             if new:
                 date.save()
         if subscribed and request.POST.get('subscribed', None)!='subscribed':
+            print('start delete')
             email = SubscribedEmail.objects.get(email=request.user.email)
+            print(request.user.email)
+            print(email)
             email.delete()
+            print('deleted')
             subscribed=False
         elif not subscribed and request.POST.get('subscribed', None)=='subscribed':
+            print('add')
             email = SubscribedEmail(email=request.user.email)
             email.save()
             subscribed=True
