@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3 style="margin-left:15px"> Requested by {{current_request.cart_owner.username}}: "{{current_request.cart_reason}}", for {{current_request.get_suggestion_display}}</h3>
+<table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
+
+	<tr class="active"> 
+	<th> Item </th><th> Amount Requested </th><th> In Stock </th>
+	</tr>
+
+	<!-- rows for each cart request -->
+	{% for req in req_info %}
+	{% if current_request.cart_status == 'O' %}
+		<!-- color the row based on validity -->
+		{% if req.3 %}
+		<tr class="success">
+		{% else %}
+		<tr class="danger">
+		{% endif %}
+
+	{% else %}
+	<tr>
+	{% endif %}
+		<!--make the actual tablerow -->
+		<th><a href='/{{req.4.pk}}'> {{req.0.item_id}}</a> </th>
+		<th> {{req.1}} </th>
+		<th> {{req.2}} </th>
+		</tr>
+	{% endfor %}
+	</table>
+
+<form method=POST>
+	{% csrf_token %}
+
+	{{ service_form.non_field_errors }}
+<div class="fieldWrapper">
+    {{ service_form.admin_comment.errors }}
+    <label for="{{ form.admin_comment.id_for_label }}">Leave a Comment:</label>
+    {{ service_form.admin_comment }}
+</div>
+<div class="fieldWrapper">
+    <label for="{{ form.approve_deny.id_for_label }}">Service Request:</label>
+    {{ service_form.approve_deny }}
+</div>
+<input type="submit" value="Service">
+	
+</form>
+
+{% endblock %}

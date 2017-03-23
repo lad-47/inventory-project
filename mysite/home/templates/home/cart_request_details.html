@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3 style="margin-left:12px"> <u>{{current_request.cart_reason}}</u> </h3>
+{% if current_request.cart_status == 'O' %}
+<h3 style="margin-left:12px">Request is Outstanding.</h3>
+{% elif current_request.cart_status == 'D' %}
+<h3 style="margin-left:12px">Request was Denied.</h3>
+<h3 style="margin-left:12px">Admin: {{current_request.cart_admin_comment}}</h3>
+{% elif current_request.cart_status == 'A' %}
+<h3 style="margin-left:12px">Request was Approved.</h3>
+<h3 style="margin-left:12px">Admin: {{current_request.cart_admin_comment}}</h3>
+{% endif %}
+
+<ul class="list-group">
+	{% for subrequest in subrequests %}
+	<li class="list-group-item list-group-item-action flex-column align-items-start">
+	<div class="d-flex w-100 justify-content-between">
+
+      <h4 class="mb-1" ><a href="{{ subrequest.item_id.get_absolute_url }}" style="margin-right:12px">{{subrequest.item_id.item_name}}</a><span style="margin-right:12px" class="badge">{{subrequest.quantity}}</span>
+      {% if subrequest.status == 'A' %}
+      Disbursed
+      {% elif subrequest.status == 'L' %}
+      Loaned
+      {% elif subrequest.status == 'R' %}
+      Returned
+      {% endif %}
+      </h4></div></li>
+{% endfor %}
+</ul>
+
+{% endblock %}
