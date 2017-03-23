@@ -19,7 +19,6 @@ def emails(request):
         'dates':dates,
         'subscribed':subscribed
     }
-    print(subscribed)
     if request.method == 'POST':
         body_input = request.POST.get('body',None)
         tag_input = request.POST.get('tag',None)
