@@ -8,7 +8,7 @@ def emails(request):
     subscribed_emails = SubscribedEmail.objects.all()
     subscribed=False
     for email in subscribed_emails:
-        if request.user.email==email:
+        if request.user.email==email.email:
             subscribed=True
     body=EmailBody.objects.all()[0]
     tag=EmailTag.objects.all()[0]
