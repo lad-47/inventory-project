@@ -260,7 +260,7 @@ def checkout(request):
 	try:
 		to_checkout = Cart_Request.objects.get(cart_status='P', cart_owner=request.user);
 	except Cart_Request.DoesNotExist:
-		return render(request, 'home/message.html', {'message':"No Active Carts."});
+		return render(request, 'home/message.html', {'message':"Cart Empty."});
 	if request.method=='GET':
 		checkout_form = CheckoutForm();
 		subrequests = Request.objects.filter(parent_cart=to_checkout);
@@ -276,6 +276,7 @@ def checkout(request):
 		if checkout_form.is_valid():
 			to_checkout.cart_reason = checkout_form.cleaned_data['cart_reason'];
 			to_checkout.cart_status = 'O';
+			to_checkout.suggestion = checkout_form.cleaned_data['loan_disburse'];
 			to_checkout.save();
 			message = 'You have requested:\n'
 			subrequests = Request.objects.filter(parent_cart=to_checkout);

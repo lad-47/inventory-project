@@ -33,10 +33,13 @@ class Cart_Request(models.Model):
 	('D','Denied'),
 	('P','In Progress'),
 	('L','Loaned'))
+	SUGG = (('D', 'Disbursement'), ('L', 'Loan'))
 	cart_owner = models.ForeignKey(User, on_delete=models.CASCADE);
 	cart_reason = models.TextField();
 	cart_admin_comment = models.TextField(default="No Comment");
 	cart_status = models.CharField(max_length=1, choices=STATUSES, default='O');
+	suggestion = models.CharField(max_length=1, choices=SUGG, default='D')
+
 	
 	def __str__(self):
 		return self.tag
