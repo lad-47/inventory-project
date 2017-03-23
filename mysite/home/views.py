@@ -286,7 +286,7 @@ def checkout(request):
 			subscribed_emails=SubscribedEmail.objects.all()
 			bcc=[]
 			for email in subscribed_emails:
-				bcc+=email.email
+				bcc.append(email.email)
 			email = EmailMessage(
 				tag+' Request',
 				message,
