@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^checkout_success/$', views.checkout_success, name='checkout success'),
     url(r'^checkout/$', views.checkout, name='checkout'),
     url(r'^remove_request/(?P<request_id>[0-9]+)/$', views.remove_request, name='remove subrequest'),
+    url(r'^loan_viewer/$', views.loan_viewer, name='loan viewer'),
 
     #url(r'^request/(?P<request_id>[0-9]+)/$', views.request_details, name='service form'),
     #url(r'^request/(?P<request_id>[0-9]+)/service/$', views.service_request, \

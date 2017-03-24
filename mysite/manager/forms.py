@@ -106,4 +106,5 @@ class PositiveIntArgMaxForm(forms.Form):
 		super(self.__class__, self).__init__(*args, **kwargs)
 		#print(kwargs['max_val'])
 		self.fields['Amount'] = forms.IntegerField(min_value=1, max_value=max_val)
+		self.fields['Comment'] = forms.CharField(initial='No Comment', required=False);
 

@@ -8,7 +8,10 @@
 <h3 style="margin-left:12px">Request was Denied.</h3>
 <h3 style="margin-left:12px">Admin: {{current_request.cart_admin_comment}}</h3>
 {% elif current_request.cart_status == 'A' %}
-<h3 style="margin-left:12px">Request was Approved.</h3>
+<h3 style="margin-left:12px">Request was Approved for Disbursement.</h3>
+<h3 style="margin-left:12px">Admin: {{current_request.cart_admin_comment}}</h3>
+{% elif current_request.cart_status == 'L' %}
+<h3 style="margin-left:12px">Request was Approved for Loan.</h3>
 <h3 style="margin-left:12px">Admin: {{current_request.cart_admin_comment}}</h3>
 {% endif %}
 
@@ -25,7 +28,7 @@
       {% elif subrequest.status == 'R' %}
       Returned
       {% endif %}
-      </h4></div></li>
+      </h4><small style="margin-left:12px"> Admin: {{subrequest.admin_comment}}</small></div></li>
 {% endfor %}
 </ul>
 

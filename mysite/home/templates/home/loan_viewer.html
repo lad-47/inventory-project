@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3 style="margin-left:15px">Your Active Loans</h3>
+<table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
+
+	<tr class="active"> 
+	<th>Item</th><th>Amount Loaned</th><th>Manager Comment</th><th>Action</th>
+	</tr>
+	{% for req in loan_list %}
+		<!--make the actual tablerow -->
+		<tr>
+		<th><a href='/{{req.item_id.pk}}'> {{req.item_id}}</a> </th>
+		<th> {{req.quantity}} </th>
+		<th> {{req.admin_comment}} </th>
+		<th> <a href="{% url 'view request details' req.parent_cart.pk %}">View</a></th>
+		</tr>
+	{% endfor %}
+	</table>
+
+{% endblock %}

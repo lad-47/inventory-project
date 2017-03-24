@@ -341,5 +341,9 @@ def delete_request(request, cart_request_id):
 		email.send()
 		return HttpResponseRedirect('/delete_request_success/')
 
+def loan_viewer(request):
+	loan_list = Request.objects.filter(owner=request.user, status='L');
+	return render(request, 'home/loan_viewer.html', {'loan_list':loan_list})
+
 def delete_request_success(request):
 	return render(request, 'home/message.html', {'message':'Request Removed.'})
