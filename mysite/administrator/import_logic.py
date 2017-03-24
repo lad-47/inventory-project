@@ -1,5 +1,5 @@
 import json
-from home.models import Item,CustomFieldEntry
+from home.models import Item,Tag,CustomFieldEntry
 
 def import_data(raw):
     """ This function parses JSON data and attempts to import items into the system.
@@ -111,8 +111,10 @@ def valid_tags(tags):
         if tag_name:
             try:
                 existing_tag = Tag.objects.get(tag=tag_name)
+                #print("Tag "+tag_name+" was found.")
             except Tag.DoesNotExist:
                 new_tag = Tag.objects.create(tag=tag_name)
+                #print("Tag "+tag_name+" was created!")
         else:
             return "Format: User needs to provide tag name."
     return "OK"
@@ -176,11 +178,16 @@ def save_items(items):
         # Create cfs
         if item.get('custom_fields',None):
             save_cfs(item['custom_fields'])
+        # Attempt to save item instance
+        try:
+            item_instance.save()
+        except:
+            return "Item with name "+item['item_name']+" failed to save correctly."
         # Create non-existing tags.
         if item.get('tags',None):
             for tag_name in item['tags']:
                 try:
-                    item_instance.tags.add(Tag.objects.get(tag=tag_name))
+                    item_instance.tags.add(Tag.objects.get(tag=tag_name['tag']))
                 except Tag.DoesNotExist:
                     # Create new tag
                     new_tag = Tag.objects.create(tag=tag_name)
