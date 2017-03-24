@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import CFAddForm, CFDeleteForm
 from home.models import CustomFieldEntry
+from .import_logic import import_data
 
 # Create your views here.
 
@@ -142,3 +143,20 @@ def cf_delete_success(request):
 
 def cf_create_success(request):
     return render(request, 'manager/success.html', {'message': "Field Successfully Created."})
+
+def bulk_import(request):
+    if not request.user.is_superuser:
+        return render(request, 'home/notAdmin.html')
+    if request.method == 'POST':
+        raw_data = request.POST.get('import_data', None);
+        if raw_data is not None:
+            # process/import data and show success/failure to user
+            status = import_data(raw_data)
+            #print(str(status))
+            if status:
+                return render(request, 'manager/success.html', {'message':"Data retrieved correctly."})
+            else:
+                return render(request, 'manager/success.html', {'message':"Data was entered incorrectly."})
+        else:
+            return render(request, 'manager/success.html', {'message':"Data was not retrieved correctly."})
+    return render(request, 'administrator/bulk_import.html')

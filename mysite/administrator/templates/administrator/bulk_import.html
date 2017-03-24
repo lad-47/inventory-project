@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 style="margin-left:12px">Bulk Import</h1>
+
+<p style="margin-left:10px">
+  Use this tool for the bulk import of many items at once. Please refer to the
+  style guide below for formatting.
+</p>
+
+<div class="form-group" style="margin-left:10px">
+  <form method="POST" id="import">
+    {% csrf_token %}
+    <div>
+      <label for="import_data">Data:</label>
+    </div>
+    <div>
+      <textarea label="import_data" name="import_data" id="import_data" rows="10" cols="50"></textarea>
+    </div>
+    <div>
+      <input type="submit" value="Import">
+    <div>
+  </form>
+</div>
+
+<div style="margin-left:10px">
+  <h3>Format</h3>
+  <p>Item:</p>
+  <p>
+    {
+      <div style="margin-left:10px">
+        <p>'item_name': "Short Text",</p>
+        <p>'count': int,</p>
+        <p>'model_number': "Short Text",</p>
+        <p>'description': "Long Text",</p>
+        <p>'tags': [<div style="margin-left:10px">{<div style="margin-left:10px">'tag':"Short Text"</div>},<p>{},...<p style="margin-left:-10px">],</p></p></div></p>
+        <p>'custom_fields':[{'field_name':"ShortText",'field_value':int/float/"Short/Long Text"}]</p>
+      </div>
+    }
+  </p>
+</div>
+
+{% endblock %}

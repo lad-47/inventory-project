@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^custom_fields/delete_action/$', views.cf_delete_action, name='cf delete action'),
     url(r'^custom_fields/create/success/$', views.cf_create_success, name='cf create success'),
     url(r'^custom_fields/delete/success/$', views.cf_delete_success, name='cf delete success'),
+    url(r'^import/$', views.bulk_import, name='import'),
 ]
