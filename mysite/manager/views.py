@@ -617,6 +617,7 @@ def direct_disburse(request):
 	if request.method == 'POST':
 		items_set = request.POST.getlist('myItems[]',None)
 		count_set = request.POST.getlist('myCounts[]',None)
+		type = request.POST.get('select','Disburse')
 		user = request.POST.get('user',None)
 		owner=User.objects.get(username=user)
 		comment = request.POST.get('comment',None)
@@ -638,13 +639,18 @@ def direct_disburse(request):
 				valid = False;
 				break;
 		if valid==True:
-			cart.cart_status="A"
-			message = 'You have been directly disbursed:\n'
+			letter="A"
+			word="disbursed"
+			if type=='Loan':
+				letter="L"
+				word="loaned"
+			cart.cart_status=letter
+			message = 'You have been directly '+word+':\n'
 			for subrequest in subrequests:
 				itemToChange = Item.objects.get(id=subrequest.item_id_id);
 				newQuantity = itemToChange.count - subrequest.quantity;
 				itemToChange.count = newQuantity
-				subrequest.status="A"
+				subrequest.status=letter
 				subrequest.save()
 				message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
 				itemToChange.save()
