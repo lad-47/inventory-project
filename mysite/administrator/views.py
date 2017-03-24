@@ -145,12 +145,14 @@ def cf_create_success(request):
     return render(request, 'manager/success.html', {'message': "Field Successfully Created."})
 
 def bulk_import(request):
+    if not request.user.is_superuser:
+        return render(request, 'home/notAdmin.html')
     if request.method == 'POST':
         raw_data = request.POST.get('import_data', None);
         if raw_data is not None:
             # process/import data and show success/failure to user
             status = import_data(raw_data)
-            print(str(status))
+            #print(str(status))
             if status:
                 return render(request, 'manager/success.html', {'message':"Data retrieved correctly."})
             else:
