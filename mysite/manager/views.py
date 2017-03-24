@@ -691,6 +691,10 @@ def handle_loan(request, request_id, disburse):
 				new_status = 'R';
 
 			if (quantity-to_disburse > 0):
+				signal_logs = Request.objects.create(owner=req.owner, status='Z',\
+				quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
+				reason=req.reason, admin_coment=comment);
+				signal_logs.delete();
 				still_loaned = Request.objects.create(owner=req.owner, status='L',\
 				quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
 				reason=req.reason, admin_coment=comment);
