@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 style="padding-left: 15px"> Emails </h2>
+
+<div style="padding-left: 15px">
+<p>Loan Reminder Body: {{body}}</p>
+<p>Email Subject Line Tag: {{tag}}</p>
+{% if subscribed %}
+<p>You are currently subscribed to system emails</p>
+{% else %}
+<p>You are not currently subscribed to system emails</p> 
+{% endif %}
+<h3>Loan Reminder Dates:</h3>
+{% for date in dates %}
+<p>{{date.date}}</p>
+    <form method="POST" action="{% url 'delete-loan-date' date.id %}" style="padding-left: 15px">
+	{% csrf_token %}
+	<input type="submit" value="Delete">
+</form>
+{% endfor %}
+</div>
+
+<form method="POST" style="padding-left: 15px">
+	{% csrf_token %}
+	<div class="form_layout">
+	{% if subscribed %}
+    <label for="subscribed">Subscribed:</label>
+    <input id="subscribed" name="subscribed" type="checkbox" checked value="subscribed"><br>
+    {% else %}
+    <label for="subscribed">Subscribed:</label>
+    <input id="subscribed" name="subscribed" type="checkbox" value="subscribed"><br>
+    {% endif %}
+    <label for="tag">Email Subject Tag:</label>
+    <input id="tag" name="tag" type="text" placeholder="{{tag}}"><br>
+    <label for="body">Body:</label>
+    <textarea id="body" style="vertical-align: top" name="body" placeholder="{{body}}" rows="3"></textarea><br>
+    <label for="date">Add Reminder Date:</label>
+    <input id="date" name="date" type="date" value="" />
+	</div>
+	<input type="submit" value="Update">
+</form>
+
+{% endblock %}

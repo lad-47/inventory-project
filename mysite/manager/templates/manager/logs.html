@@ -8,7 +8,7 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
   <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
   <script type="text/javascript">
@@ -81,12 +81,12 @@
         {% for log in logs %}
         <tr>
             <th scope="row">{{log.id}}</th>
-            <td>{{log.initiating_user}}</td>
+            <td>{{log.initiating_username}}</td>
             <td>
             {% if log.involved_item %}
-            <a href="{% url 'detail' log.involved_item %}">{{log.involved_item}}</a>
+            <a href="{% url 'detail' log.involved_item %}">{{log.involved_item_name}}</a>
             {% else %}
-            {{log.involved_item}}
+            {{log.involved_item_name}}
             {% endif %}</td>
             <td style="width: 30%">{{log.nature}}</td>
             <td>{{log.timestamp}}</td>
@@ -97,7 +97,7 @@
             {{log.related_request}}
             {% endif %}
             </td>
-            <td>{{log.affected_user}}</td>
+            <td>{{log.affected_username}}</td>
         </tr>
         {% endfor %}
     </tbody>

@@ -2,8 +2,8 @@
 
 {% block content %}
 
-
-<table class="table table-condensed">
+<h3 style="margin-left:15px"> Requested by {{current_request.cart_owner.username}}: "{{current_request.cart_reason}}", for {{current_request.get_suggestion_display}}</h3>
+<table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 
 	<tr class="active"> 
 	<th> Item </th><th> Amount Requested </th><th> In Stock </th>

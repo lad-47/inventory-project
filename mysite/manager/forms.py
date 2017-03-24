@@ -2,7 +2,7 @@ from django import forms
 from home.models import CustomFieldEntry, Item, Tag;
 
 class ServiceForm(forms.Form):
-	CHOICES = (('Approve', 'Approve'), ('Deny', 'Deny'));
+	CHOICES = (('A', 'Approve for Disbursment'), ('L', 'Approve for Loan'), ('D', 'Deny'));
 	admin_comment = forms.CharField(max_length=200, required=False);
 	approve_deny = forms.ChoiceField(widget=forms.RadioSelect, \
 		choices=CHOICES);
@@ -99,3 +99,11 @@ class CFAddForm(forms.Form):
 	value_type = forms.ChoiceField(widget=forms.RadioSelect, choices=TYPES);
 	field_name = forms.CharField(max_length=100);
 	is_private = forms.ChoiceField(widget=forms.RadioSelect, choices=PRIV);
+
+class PositiveIntArgMaxForm(forms.Form):
+	def __init__(self, *args, **kwargs):
+		max_val = kwargs.pop('max_val');
+		super(self.__class__, self).__init__(*args, **kwargs)
+		#print(kwargs['max_val'])
+		self.fields['Amount'] = forms.IntegerField(min_value=1, max_value=max_val)
+

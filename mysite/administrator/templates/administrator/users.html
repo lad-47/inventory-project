@@ -60,6 +60,7 @@
         <tr>
             <th>#</th>
             <th>User</th>
+            <th>Email</th>
             <th>Manager</th>
             <th>Admin</th>
         </tr>
@@ -69,6 +70,7 @@
         <tr>
             <th scope="row">{{user.id}}</th>
             <td><a href="{% url 'detail-user' user.id %}">{{user.username}}</a></td>
+            <td>{{user.email}}</td>
             <td>{{user.is_staff}}</td>
             <td>{{user.is_superuser}}</td>
         </tr>

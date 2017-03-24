@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 import dj_database_url
-from django.conf.global_settings import MIDDLEWARE_CLASSES
+from django.conf.global_settings import MIDDLEWARE_CLASSES, EMAIL_USE_SSL
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -83,14 +83,14 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 # SERVER
 # DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.postgresql',
-#             'NAME': 'inventory',
-#             'USER': 'postgres',
-#             'PASSWORD': '',
-#             'PORT': '5432'
-#         }
-#     }
+#           'default': {
+#               'ENGINE': 'django.db.backends.postgresql',
+#               'NAME': 'inventory',
+#              'USER': 'postgres',
+#               'PASSWORD': '',
+#               'PORT': '5432'
+#           }
+#       }
 
 ## LOCALHOST 
 DATABASES = {
@@ -173,3 +173,10 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication'
     )
 }
+
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_PORT=587
+EMAIL_HOST_USER='duke.ece.inventory@gmail.com'
+EMAIL_HOST_PASSWORD='ece12345'
+EMAIL_USE_TLS=True

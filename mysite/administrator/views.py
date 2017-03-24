@@ -41,8 +41,9 @@ def create_user(request):
     # on a post we (print) the data and then return success
     if request.method == 'POST':
         username = request.POST.get('username_box', None)
+        email = request.POST.get('email_box', None)
         password = request.POST.get('password_box', None)
-        user = User.objects.create_user(username=username,password=password)
+        user = User.objects.create_user(username=username,email=email,password=password)
         user.save()
         return HttpResponseRedirect('/manager/create_success');
 
