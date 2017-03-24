@@ -7,20 +7,16 @@ def import_data(raw):
             - 'OK': Data was imported and saved to the database
             - otherwise, the function returns an error message
     """
-    items = create_items_from_json(raw)
-    print(str(items))
+    if not raw or raw == "":
+        return "Format: Please enter some text."
+    try:
+        items = create_items_from_json(raw)
+    except json.decoder.JSONDecodeError:
+        return "Format: Please format JSON correctly."
+    #print(str(items))
     status = check_valid_items(items)
-    if status == 'OK':
+    if status == "OK":
         save_items(items)
-        """return status
-    elif status == True:
-        # A bit messy currently due to the discrepancy between returning useful
-        # feedback vs. simply True/False....CHANGE!
-        save_items(items)
-        return True
-    else:
-        # TODO: Return useful feedback to user depending on what went wrong
-        return status"""
     return status
 
 def create_items_from_json(json_items):
@@ -37,60 +33,10 @@ def check_valid_items(items_from_json):
     # If one item is not valid, the whole import fails
     for item in items_from_json:
         item_is_valid = valid_item(item)
-        if not item_is_valid:
-            return "Format: an item entered was not valid. "+str(item)
+        if item_is_valid != "OK":
+            return item_is_valid
     #print("All Items Valid.")
     return "OK"
-
-def save_items(items):
-    for item in items:
-        # Create the item_instance, cfs, and tags, with save()
-        item_instance = Item(item_name=item['item_name'],\
-            model_number=item.get('model_number',""),\
-            description=item.get('description',""), count=item['count'])
-        # Create cfs
-        if item.get('custom_fields',None):
-            save_cfs(item['custom_fields'])
-        # Create non-existing tags.
-        if item.get('tags',None):
-            for tag_name in item['tags']:
-                try:
-                    item_instance.tags.add(Tag.objects.get(tag=tag_name))
-                except Tag.DoesNotExist:
-                    # Create new tag
-                    new_tag = Tag.objects.create(tag=tag_name)
-                    new_tag.save()
-                    item_instance.tags.add(new_tag)
-        # Create item instance
-        item_instance.save()
-
-def save_cfs(custom_fields):
-    for cf in custom_fields:
-        cf_name = cf['field_name']
-        cf_value = cf['field_value']
-        for field_entry in CustomFieldEntry.objects.all():
-            if cf_name == field_entry.field_name:
-                field_type = field_entry.value_type
-                if field_type == "st":
-                    new_cf = CustomShortTextField.objects.create(\
-                                parent_item=item_instance,\
-                                field_name=cf_name, field_value = cf_value)
-                    new_cf.save();
-                elif field_type == "lt":
-                    new_cf = CustomLongTextField.objects.create(\
-                                parent_item=item_instance,\
-                                field_name=cf_name, field_value = cf_value)
-                    new_cf.save();
-                elif field_type == "int":
-                    new_cf = CustomIntField.objects.create(\
-                                parent_item=item_instance,\
-                                field_name=cf_name, field_value = cf_value)
-                    new_cf.save();
-                elif field_type == "float":
-                    new_cf = CustomFloatField.objects.create(\
-                                parent_item=item_instance,\
-                                field_name=cf_name, field_value = cf_value)
-                    new_cf.save();
 
 def valid_item(item):
     """ checks if a single item is valid """
@@ -99,7 +45,8 @@ def valid_item(item):
         keys.append(key)
         if key == 'item_name':
             name_is_valid = valid_name(value)
-            if not name_is_valid == "OK":
+            #print(str(name_is_valid))
+            if name_is_valid != "OK":
                 return name_is_valid
         elif key == 'count':
             count_is_valid = valid_count(value)
@@ -140,6 +87,7 @@ def valid_name(name):
             return "An item with name, "+name+", already exists!"
         except Item.DoesNotExist:
             pass
+    #print("Name "+name+" is valid.")
     return "OK"
 
 def valid_count(count):
@@ -218,3 +166,56 @@ def check_name_conflicts(items):
         else:
             return "Format: item JSON data needs an 'item_name' field"
     return "OK"
+
+def save_items(items):
+    for item in items:
+        # Create the item_instance, cfs, and tags, with save()
+        item_instance = Item(item_name=item['item_name'],\
+            model_number=item.get('model_number',""),\
+            description=item.get('description',""), count=item['count'])
+        # Create cfs
+        if item.get('custom_fields',None):
+            save_cfs(item['custom_fields'])
+        # Create non-existing tags.
+        if item.get('tags',None):
+            for tag_name in item['tags']:
+                try:
+                    item_instance.tags.add(Tag.objects.get(tag=tag_name))
+                except Tag.DoesNotExist:
+                    # Create new tag
+                    new_tag = Tag.objects.create(tag=tag_name)
+                    new_tag.save()
+                    item_instance.tags.add(new_tag)
+        # Create item instance
+        try:
+            item_instance.save()
+        except:
+            return "Item with name "+item['item_name']+" failed to save correctly."
+
+def save_cfs(custom_fields):
+    for cf in custom_fields:
+        cf_name = cf['field_name']
+        cf_value = cf['field_value']
+        for field_entry in CustomFieldEntry.objects.all():
+            if cf_name == field_entry.field_name:
+                field_type = field_entry.value_type
+                if field_type == "st":
+                    new_cf = CustomShortTextField.objects.create(\
+                                parent_item=item_instance,\
+                                field_name=cf_name, field_value = cf_value)
+                    new_cf.save();
+                elif field_type == "lt":
+                    new_cf = CustomLongTextField.objects.create(\
+                                parent_item=item_instance,\
+                                field_name=cf_name, field_value = cf_value)
+                    new_cf.save();
+                elif field_type == "int":
+                    new_cf = CustomIntField.objects.create(\
+                                parent_item=item_instance,\
+                                field_name=cf_name, field_value = cf_value)
+                    new_cf.save();
+                elif field_type == "float":
+                    new_cf = CustomFloatField.objects.create(\
+                                parent_item=item_instance,\
+                                field_name=cf_name, field_value = cf_value)
+                    new_cf.save();
