@@ -29,7 +29,7 @@
     </select>
 
   </div>
-  <button id="search_submit" type="submit" class="btn btn-default">Submit</button>
+  <button id="search_submit" type="submit" class="btn btn-default">Search<span style="margin-left:5px" class="glyphicon glyphicon-search" aria-hidden="true"> </span></button>
 </form>
 <div class="page-header" style="padding-left: 15px">
   <h1>Inventory <small>Item List</small></h1>
@@ -48,16 +48,14 @@
 
       <h4 class="mb-1" ><a href="{{ item.get_absolute_url }}" style="margin-right:12px">{{item.item_name}}</a>
         <span style="margin-right:12px"><small>{{item.model_number}}</small></span>
-        <span class="badge">{{item.count}}</span>
-      </h4>
+        <span class="badge" style="margin-right:50px">{{item.count}}</span>
       {% if request.user.is_staff or request.user.is_superuser %}
-        <small>
-        <a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"> Modify This Item </a>
+        <a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span style="margin-left:5px; color:green" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
         {% if request.user.is_superuser %}
-          <a href="{% url 'delete check' item_id=item.id %}" > Delete This Item </a>
+          <a href="{% url 'delete check' item_id=item.id %}" ><span style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" aria-hidden="true"> </span></a>
         {% endif %}
-        </small>
       {% endif %}
+      </h4>
     </div>
   </li>
   {% endfor %}
