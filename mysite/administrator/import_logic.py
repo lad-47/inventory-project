@@ -10,10 +10,9 @@ def import_data(raw):
     items = create_items_from_json(raw)
     print(str(items))
     status = check_valid_items(items)
-    if status == 'valid':
-        # TODO: Save the items to the database and let the user know
+    if status == 'OK':
         save_items(items)
-        return True
+        """return status
     elif status == True:
         # A bit messy currently due to the discrepancy between returning useful
         # feedback vs. simply True/False....CHANGE!
@@ -21,7 +20,8 @@ def import_data(raw):
         return True
     else:
         # TODO: Return useful feedback to user depending on what went wrong
-        return False
+        return status"""
+    return status
 
 def create_items_from_json(json_items):
     # Returns a list of items from json input
@@ -32,15 +32,15 @@ def check_valid_items(items_from_json):
     # If more than one item with the same name is input, import fails
     name_is_valid = check_name_conflicts(items_from_json)
     if not name_is_valid == "OK":
-        print("Name conflicts occurred when checking input.")
+        #print("Name conflicts occurred when checking input.")
         return name_is_valid
     # If one item is not valid, the whole import fails
     for item in items_from_json:
-        if not valid_item(item):
-            print("An item entered was not valid. "+str(item))
-            return False
-    print("All Items Valid.")
-    return True
+        item_is_valid = valid_item(item)
+        if not item_is_valid:
+            return "Format: an item entered was not valid. "+str(item)
+    #print("All Items Valid.")
+    return "OK"
 
 def save_items(items):
     for item in items:
@@ -98,87 +98,83 @@ def valid_item(item):
     for key,value in item.items():
         keys.append(key)
         if key == 'item_name':
-            if not valid_name(value):
-                return False
+            name_is_valid = valid_name(value)
+            if not name_is_valid == "OK":
+                return name_is_valid
         elif key == 'count':
-            if not valid_count(value):
-                return False
+            count_is_valid = valid_count(value)
+            if not count_is_valid == "OK":
+                return count_is_valid
         elif key == 'model_number':
             if not isinstance(value, str):
-                print("Format: Item model number should be a str.")
-                return False
+                return "Format: Item model_number should be a str."
         elif key == 'description':
             if not isinstance(value, str):
-                print("Format: Item description should be a str.")
-                return False
+                return "Format: Item description should be a str."
         elif key == 'tags':
-            if not valid_tags(value):
-                return False
+            tags_is_valid = valid_tags(value)
+            if not tags_is_valid == "OK":
+                return tags_is_valid
         elif key == 'custom_fields':
-            if not valid_customs(value):
-                return False
+            cfs_is_valid = valid_customs(value)
+            if not cfs_is_valid == "OK":
+                return cfs_is_valid
         else:
-            print("Format: Illegal JSON key name.")
-            return False
-    print(str(keys))
+            return "Format: Illegal JSON key name. Accepted tags are: "+\
+                    "item_name, count, model_number, description, tags, and custom_fields."
+    #print(str(keys))
     if not 'item_name' in keys or not 'count' in keys:
-        print("Format: Need item_name and count in JSON")
-        return False
-    return True
+        return "Format: Need item_name and count in JSON item data."
+    return "OK"
 
 def valid_name(name):
     if not isinstance(name, str):
-        print("Format: Item name should be a str.")
-        return False
+        return "Format: item_name should be a str."
     # An item needs a name
     if not name or name == "":
-        return False
+        return "Format: User needs to provide a value for 'item_name'."
     else:
         # Check to make sure an item with that name does not already exist!
         try:
             existing_item = Item.objects.get(item_name=name)
-            print("An item with name, "+name+", already exists!")
-            return False
+            return "An item with name, "+name+", already exists!"
         except Item.DoesNotExist:
             pass
-    return True
+    return "OK"
 
 def valid_count(count):
     # Check positive count
     if not isinstance(count, int):
-        print("Format: Item count should be an int.")
-        return False
+        return "Format: Item count should be an int."
     if not count:
-        print("Format: Item needs a count")
-        return False
+        return "Format: User needs to provide a count"
     if count < 0:
-        print("Format: An item count was negative.")
-        return False
-    print("Count is Valid.")
-    return True
+        return "Format: An item count was negative."
+    #print("Count is Valid.")
+    return "OK"
 
 def valid_tags(tags):
     if not isinstance(tags, list):
-        print("Format: Item tags should be in a list.")
-        return False
+        return "Format: Item tags should be in a list."
     # Check tags
     for tag in tags:
         # if tag DNE, create it
-        tag_name = tag['tag']
-        try:
-            existing_tag = Tag.objects.get(tag=tag_name)
-        except Tag.DoesNotExist:
-            new_tag = Tag.objects.create(tag=tag_name)
-    return True
+        tag_name = tag.get('tag',None)
+        if tag_name:
+            try:
+                existing_tag = Tag.objects.get(tag=tag_name)
+            except Tag.DoesNotExist:
+                new_tag = Tag.objects.create(tag=tag_name)
+        else:
+            return "Format: User needs to provide tag name."
+    return "OK"
 
 def valid_customs(custom_fields):
     if not isinstance(custom_fields, list):
-        print("Format: Custom fields should be in a list.")
-        return False
+        return "Format: Custom fields should be in a list."
     # Should have "field_name" and "field_value". Reject non-existing CFs.
     for cf in custom_fields:
-        # TODO: Check name exists
-        # Make sure type matches
+        # Check name exists. Make sure type matches
         cf_name = cf['field_name']
         cf_value = cf['field_value']
         try:
@@ -187,25 +183,25 @@ def valid_customs(custom_fields):
             if field_type == "st":
                 # Short Text
                 if not isinstance(cf_value, str):
-                    return False
+                    return "Format: Short text field should be of type str."
             elif field_type == "lt":
                 # Long Text
                 if not isinstance(cf_value, str):
-                    return False
+                    return "Format: Long text field should be of type str."
             elif field_type == "int":
                 # Integer
                 if not isinstance(cf_value, int):
-                    return False
+                    return "Format: Integer field should be of type int."
             elif field_type == "float":
                 # Float
                 if not isinstance(cf_value, float):
-                    return False
+                    return "Format: Float field should be of type float."
             else:
-                print("Data integrity error. CustomFieldEntry.field_type is illegal in database.")
+                return "Database has been corrupted. An unexpected Custom Field"+\
+                    " type was encountered: CustomFieldEntry.field_type is illegal."
         except CustomFieldEntry.DoesNotExist:
-            print("Error: Custom field, "+cf_name+", does not exist.")
-            return False
-    return True
+            return "Error: Custom field, "+cf_name+", does not exist."
+    return "OK"
 
 def check_name_conflicts(items):
     """ checks unique names have been given in the input data """
@@ -220,5 +216,5 @@ def check_name_conflicts(items):
             else:
                 return "Found duplicate item name "+name+" in JSON input."
         else:
-            return "Data format incorrect: needs an item_name"
+            return "Format: item JSON data needs an 'item_name' field"
     return "OK"
