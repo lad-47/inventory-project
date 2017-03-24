@@ -51,17 +51,17 @@ def log_request(sender, instance, created, **kwargs):
     user = get_current_user()
     to_log=False
     if instance.status=='Z':
-        info = 'loan of '+instance.item_id.item_name+" x"+str(instance.quantity)+" converted to disbursement"
+        info = 'Loan of '+instance.item_id.item_name+" x"+str(instance.quantity)+" converted to disbursement"
         to_log=True
     elif instance.status=='R':
-        info = 'loan of '+instance.item_id.item_name+" x"+str(instance.quantity)+" returned"
+        info = 'Loan of '+instance.item_id.item_name+" x"+str(instance.quantity)+" returned"
         to_log=True
     if to_log:
         log = Log(initiating_user=user.id,initiating_username=user.username,involved_item=instance.item_id.id,involved_item_name=instance.item_id.item_name,nature=info,timestamp=timezone.now(), related_request=instance.parent_cart.id, affected_user=instance.owner.id, affected_username=instance.owner.username)
         log.save()
     
 @receiver(post_save, sender=Cart_Request, dispatch_uid="cart_request_save")
-def log_request(sender, instance, created, **kwargs):
+def log_cart_request(sender, instance, created, **kwargs):
     user = get_current_user()
     subrequests = Request.objects.filter(parent_cart=instance)
     info = "for "+instance.cart_owner.username+": "

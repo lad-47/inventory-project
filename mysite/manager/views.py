@@ -663,13 +663,19 @@ def direct_disburse(request):
 				[owner.email]
 			)
 			email.send()
-		return HttpResponseRedirect('/manager/create_success');
+		if type=='Disburse':
+			return HttpResponseRedirect('/manager/disburse_success/Disbursed');
+		else:
+			return HttpResponseRedirect('/manager/disburse_success/Loaned');
 
 	context = {
 		'items': items,
 		'users': users
 		}
 	return render(request, 'manager/direct_disburse.html', context)
+
+def disburse_success(request, message):
+	return render(request, 'manager/success.html', {'message': message})
 
 
 def handle_loan(request, request_id, disburse):
@@ -693,17 +699,17 @@ def handle_loan(request, request_id, disburse):
 			if (quantity-to_disburse > 0):
 				signal_logs = Request.objects.create(owner=req.owner, status='Z',\
 				quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
-				reason=req.reason, admin_coment=comment);
+				reason=req.reason, admin_comment=comment);
 				signal_logs.delete();
 				still_loaned = Request.objects.create(owner=req.owner, status='L',\
 				quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
-				reason=req.reason, admin_coment=comment);
+				reason=req.reason, admin_comment=comment);
 				still_loaned.save();
 			
 			disbursed = Request.objects.create(owner=req.owner, status=new_status,\
 			quantity=(to_disburse), item_id=req.item_id, parent_cart=req.parent_cart, \
 			reason=req.reason, admin_comment=comment);
-			disbursed.save();
+			#disbursed.save(); .create already saves
 			
 			tag=EmailTag.objects.all()[0].tag
 			message=""
