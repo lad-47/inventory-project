@@ -45,6 +45,7 @@
       				{% endif %}
       				{% if not user.is_anonymous %}
       				<li><a href="{% url 'requests' %}"><div style="text-align: center;">My Requests</div></a></li>
+      				<li><a href="{% url 'loan viewer' %}">My Loans</a></li>
       				{% endif %}
       				<li><a href="{% url 'developers' %}">Developers</a></li>
       				{% if not user.is_anonymous %}
