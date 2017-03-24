@@ -677,6 +677,7 @@ def handle_loan(request, request_id, disburse):
 		form = PositiveIntArgMaxForm(request.POST, max_val=quantity);
 		if form.is_valid():
 			to_disburse = form.cleaned_data['Amount'];
+			comment = form.cleaned_data['Comment']
 
 			if disburse:
 				new_status = 'A';
@@ -684,14 +685,18 @@ def handle_loan(request, request_id, disburse):
 				new_status = 'R';
 
 			if (quantity-to_disburse > 0):
+				signal_logs = Request.objects.create(owner=req.owner, status='Z',\
+				quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
+				reason=req.reason, admin_coment=comment);
+				signal_logs.delete();
 				still_loaned = Request.objects.create(owner=req.owner, status='L',\
 				quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
-				reason=req.reason);
+				reason=req.reason, admin_coment=comment);
 				still_loaned.save();
 			
 			disbursed = Request.objects.create(owner=req.owner, status=new_status,\
 			quantity=(to_disburse), item_id=req.item_id, parent_cart=req.parent_cart, \
-			reason=req.reason);
+			reason=req.reason, admin_comment=comment);
 			disbursed.save();
 			
 			tag=EmailTag.objects.all()[0].tag
