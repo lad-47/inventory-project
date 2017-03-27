@@ -24,7 +24,7 @@
           minLength: 2
         });
       } );
-    
+
 
     //   keeps same width as box
       jQuery.ui.autocomplete.prototype._resizeMenu = function () {
@@ -42,8 +42,8 @@
 {{error}}
 {% endif %}
 
-<div style="padding-left: 15px">
-  <a href="{% url 'create-user' %}">Create New User</a>
+<div>
+  <a class="btn btn-link" href="{% url 'create-user' %}">Create New User</a>
 </div>
 
 <form class="navbar-form navbar-top" role="search" type="get" action=".">
