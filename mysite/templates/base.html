@@ -30,7 +30,7 @@
 			</div>
 			<div class="collapse navbar-collapse" id="bs-nav-demo">
 				<ul class="nav navbar-nav">
-					<li><a><div style="text-align: center;">Signed in as<br>{{ user }}</div></a></li>
+					<li><div style="text-align: center;">Signed in as<br>{{ user }}</div></li>
 					{% if user.is_staff %}
 					<li class="dropdown">
 			          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Manager<span class="caret"></span></a>
@@ -68,7 +68,7 @@
 					{% if user.is_anonymous %}
       				<li><a href="{% url 'login' %}">Login<span style="margin-left:5px" class="glyphicon glyphicon-log-in" aria-hidden="true"> </span></a></li>
       				{% else %}
-      				<li><a href="{% url 'logout' %}">Logout<span style="margin-left:5px" class="glyphicon glyphicon-log-out" aria-hidden="true"> </span></a></li>
+      				<li><a href="{% url 'logout' %}?next={% url 'index' %}">Logout<span style="margin-left:5px" class="glyphicon glyphicon-log-out" aria-hidden="true"> </span></a></li>
       				{% endif %}
 				</ul>
 			</div>
