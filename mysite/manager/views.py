@@ -624,9 +624,13 @@ def direct_disburse(request):
 		cart = Cart_Request(cart_status='O',cart_reason='direct disbursement',cart_admin_comment=comment,cart_owner=owner)
 		cart.save()
 		for i in range(0,len(items_set)):
-			item = Item.objects.get(item_name=items_set[i])
-			item_request=Request(status='O',reason='direct disbursement',item_id=item,owner=owner,admin_comment=comment,quantity=int(count_set[i]),parent_cart=cart)
-			item_request.save()
+			if items_set[i]!='':
+				try:
+					item = Item.objects.get(item_name=items_set[i])
+					item_request=Request(status='O',reason='direct disbursement',item_id=item,owner=owner,admin_comment=comment,quantity=int(count_set[i]),parent_cart=cart)
+					item_request.save()
+				except Item.DoesNotExist:
+					return render(request, 'manager/success.html',{'message':'Invalid item name entered: '+items_set[i]})
 		#cart.save()
 		subrequests = Request.objects.filter(parent_cart=cart);
 		valid = True;
