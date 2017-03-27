@@ -156,7 +156,6 @@ def bulk_import(request):
             if status == "OK":
                 return render(request, 'manager/success.html', {'message':"Data was imported and saved correctly."})
             else:
-                # TODO: Create a different template to show Import Failure
                 return render(request, 'administrator/import_failure.html', {'message':str(status)})
         else:
             return render(request, 'administrator/import_failure.html', {'message':"Data was not retrieved correctly."})
