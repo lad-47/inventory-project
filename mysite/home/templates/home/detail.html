@@ -75,7 +75,7 @@
   {% csrf_token %}
   <div class="form-group">
     <label for="quantity">Quantity:</label>
-    <input id="quantity" name="quantity" type="number" class="form-control">
+    <input id="quantity" name="quantity" type="number" required step="1" min="1" class="form-control">
   </div>
   <button id="save_request" type="submit" class="btn btn-default">Add to Cart</button>
 </form>
