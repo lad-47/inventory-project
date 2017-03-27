@@ -45,7 +45,7 @@ def create_user(request):
         password = request.POST.get('password_box', None)
         user = User.objects.create_user(username=username,email=email,password=password)
         user.save()
-        return HttpResponseRedirect('/manager/create_success');
+        return render(request, 'manager/success.html', {'message':"User was created successfully."});
 
     return render(request, 'administrator/create_user.html')
 
