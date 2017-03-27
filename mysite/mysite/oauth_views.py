@@ -50,7 +50,9 @@ def callback(request):
             user = User.objects.get(username=netid)
         except User.DoesNotExist:
             user = User.objects.create_user(netid, netid+'@duke.edu', 'password')
+            user.password='none'
             user.save()
-        user = authenticate(username=netid, password='password')
+        #user = authenticate(username=netid, password='password')
+        user = User.objects.get(username=netid)
         login(request,user)
         return HttpResponse('<a href="https://colab-sbx-44.oit.duke.edu">Logged In!</a>')
