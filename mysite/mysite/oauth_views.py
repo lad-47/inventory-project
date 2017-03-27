@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
+from django.shortcuts import redirect
 
 #def redirect(request):
 #    url='https://oauth.oit.duke.edu/oauth/authorize.php'
@@ -50,8 +51,9 @@ def callback(request):
             user = User.objects.get(username=netid)
         except User.DoesNotExist:
             user = User.objects.create_user(netid, netid+'@duke.edu', 'password')
+            user.password='none'
             user.save()
-        user = authenticate(username=netid, password='password')
+        #user = authenticate(username=netid, password='password')
+        user = User.objects.get(username=netid)
         login(request,user)
-        #return HttpResponse('<a href="https://colab-sbx-44.oit.duke.edu">Logged In!</a>')
-        return redirect('https://colab-sbx-44.oit.duke.edu')
+        return redirect("https://colab-sbx-379.oit.duke.edu")
