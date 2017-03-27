@@ -77,8 +77,16 @@
 	<tbody>
 		{% for item in items %}
 			<tr>
-				<td style="font-size:larger;font-weight:bold;vertical-align:middle"><a href="{{ item.get_absolute_url }}">{{item.item_name}}</a></td>
-				<td style="font-size:smaller;vertical-align:middle">{{item.model_number}}</td>
+				<td style="font-size:larger;font-weight:bold;vertical-align:middle">
+					<a href="{{ item.get_absolute_url }}">{{item.item_name}}</a>
+				</td>
+				<td style="font-size:smaller;vertical-align:middle">
+					{% if item.model_number %}
+						{{item.model_number}}
+					{% else %}
+						N/A
+					{% endif %}
+				</td>
 				<td><span class="badge">{{item.count}}</span></td>
 				{% if request.user.is_staff or request.user.is_superuser %}
 					<td style="vertical-align:middle">
