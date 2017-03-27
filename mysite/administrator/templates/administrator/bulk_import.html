@@ -19,23 +19,35 @@
       <textarea label="import_data" name="import_data" id="import_data" rows="10" cols="50"></textarea>
     </div>
     <div>
-      <input type="submit" value="Import">
+      <input class="btn btn-primary" type="submit" value="Import Data">
     <div>
   </form>
 </div>
 
 <div style="margin-left:10px">
-  <h3>Format</h3>
-  <p>Item:</p>
+  <h3>Format - JSON</h3>
+  <p>
+    Import multiple items by following JSON conventions, i.e., enclosing
+    comma-separated JSON objects in square brackets (i.e., [{item 1},{item 2},{item 3},...]).
+  </p>
+  <p>
+    A sample JSON item is shown below. The acceptable tags are: 'item_name',
+    'count', 'model_number', 'description', 'tags', 'custom_fields'.
+  </p>
+  <p>
+    NOTE: 'item_name' and 'count' are required, and 'count' must be a positive integer.
+    If a tag which does not exist is input, it will be created in the system. However,
+    if a custom field which does not exist is input, an error will occur.
+  </p>
   <p>
     {
       <div style="margin-left:10px">
-        <p>'item_name': "Short Text",</p>
+        <p>'item_name': "str",</p>
         <p>'count': int,</p>
-        <p>'model_number': "Short Text",</p>
-        <p>'description': "Long Text",</p>
-        <p>'tags': [<div style="margin-left:10px">{<div style="margin-left:10px">'tag':"Short Text"</div>},<p>{},...<p style="margin-left:-10px">],</p></p></div></p>
-        <p>'custom_fields':[{'field_name':"ShortText",'field_value':int/float/"Short/Long Text"}]</p>
+        <p>'model_number': "str",</p>
+        <p>'description': "str",</p>
+        <p>'tags': [<div style="margin-left:10px">{<div style="margin-left:10px">'tag':"str"</div>},<p>{<div style="margin-left:10px">'tag':"str"</div>},...<p style="margin-left:-10px">],</p></p></div></p>
+        <p>'custom_fields': [<div style="margin-left:10px">{<div style="margin-left:10px">'field_name':"str",<p>'field_value':int/float/"str"</p></div>},...</div>]</p>
       </div>
     }
   </p>

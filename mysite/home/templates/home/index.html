@@ -41,6 +41,7 @@
 </h4>
 {% endif %}
 
+<!-- This List has been scrapped for the Table format below, due to variable spacing in List.
 <ul class="list-group">
   {% for item in items %}
   <li class="list-group-item list-group-item-action flex-column align-items-start">
@@ -60,6 +61,45 @@
   </li>
   {% endfor %}
 </ul>
+-->
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Item Name</th>
+			<th>Model Number</th>
+			<th>Quantity</th>
+			{% if request.user.is_staff or request.user.is_superuser %}
+				<th>Actions</th>
+			{% endif %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for item in items %}
+			<tr>
+				<td style="font-size:larger;font-weight:bold;vertical-align:middle">
+					<a href="{{ item.get_absolute_url }}">{{item.item_name}}</a>
+				</td>
+				<td style="font-size:smaller;vertical-align:middle">
+					{% if item.model_number %}
+						{{item.model_number}}
+					{% else %}
+						N/A
+					{% endif %}
+				</td>
+				<td><span class="badge">{{item.count}}</span></td>
+				{% if request.user.is_staff or request.user.is_superuser %}
+					<td style="vertical-align:middle">
+						<a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span style="margin-left:5px; color:green" title="Modify" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
+		        {% if request.user.is_superuser %}
+		          <a href="{% url 'delete check' item_id=item.id %}" ><span style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" title="Delete" aria-hidden="true"> </span></a>
+		        {% endif %}
+					</td>
+				{% endif %}
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
 
 {% if items.has_other_pages %}
   <ul class="pagination" style="padding-left: 15px">

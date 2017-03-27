@@ -38,11 +38,12 @@ def index(request):
 		if tag_query is not None and 'all' not in tag_query:
 			for tag in tag_query:
 				tag = Tag.objects.get(tag=tag);
-				latest_item_list = latest_item_list.filter(tags=tag) 
+				latest_item_list = latest_item_list.filter(tags=tag)
 		if extag_query is not None and 'none' not in extag_query:
 			for tag in extag_query:
 				tag = Tag.objects.get(tag=tag)
 				latest_item_list = latest_item_list.exclude(tags=tag)
+		latest_item_list = sorted(latest_item_list, key=lambda item: item.item_name)
 	page = request.GET.get('page', 1)
 	paginator = Paginator(latest_item_list, 10)
 	try:
@@ -56,7 +57,7 @@ def index(request):
 		'tag_list': tag_list
 	}
 	return render(request, 'home/index.html', context)
- 	
+
 def detail(request, item_id):
 	item = get_object_or_404(Item, pk=item_id)
 	tags = item.tags.all()
@@ -107,7 +108,7 @@ def detail(request, item_id):
 		'user':request.user
 	}
 	return render(request, 'home/detail.html', context)
-	
+
 def developers(request):
 	return render(request, 'home/developers.html')
 
@@ -152,14 +153,14 @@ class requestsView(LoggedInMixin, RequestOwnerMixin, ListView):
 #		return Request.objects.all();
 
 def cannotService(request):
-	return render(request, 'home/notAdmin.html'); 
-	
+	return render(request, 'home/notAdmin.html');
+
 #def request_details(request, request_id):
 #	if not request.user.is_staff:
 #		return render(request, 'home/notAdmin.html')
 #	current_request = get_object_or_404(Request, pk=request_id)
 #	context = {
-#		'current_request': current_request 
+#		'current_request': current_request
 #	}
 #	return render(request, 'home/serviceReq.html', context)
 
@@ -180,7 +181,7 @@ def cannotService(request):
 #		itemToChange.save();
 #	else:
 #		requestToService.status = 'D';
-#	
+#
 #	admin_comment_fromReq = request.POST.get('comment', None);
 #	requestToService.admin_comment = admin_comment_fromReq;
 #	requestToService.save();
@@ -207,7 +208,7 @@ def request(request, item_id):
 class DeleteRequestView(DeleteView):
 	model = Request
 	template_name = 'home/delete_request.html'
-	
+
 	def get_success_url(self):
 		return reverse('index')
 
@@ -251,7 +252,7 @@ def cart_request_details(request, cart_request_id):
 # class ListItemView(ListView):
 #	 model=Item
 #	 template_name='home/index.html'
-# 
+#
 # class ItemDetailView(DetailView):
 #	 model=Item
 #	 template_name='home/detail.html'
