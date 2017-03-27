@@ -750,14 +750,17 @@ def handle_loan(request, request_id, disburse):
 
 	if disburse:
 		heading = "Disbursing";
+		button = "Disburse";
 	else:
 		heading = "Returning";
+		button = "Mark as Returned";
 
 	context = {
 		'form': form,
 		'item': req.item_id,
 		'loaned': quantity,
 		'heading': heading,
+		'button':button,
 	}
 	return render(request, 'manager/disburse_loaned.html', context)
 
