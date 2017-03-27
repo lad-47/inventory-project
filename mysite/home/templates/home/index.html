@@ -77,11 +77,11 @@
 	<tbody>
 		{% for item in items %}
 			<tr>
-				<td><big><b><a href="{{ item.get_absolute_url }}">{{item.item_name}}</a></b></big></td>
-				<td><small>{{item.model_number}}</small></td>
+				<td style="font-size:larger;font-weight:bold;vertical-align:middle"><a href="{{ item.get_absolute_url }}">{{item.item_name}}</a></td>
+				<td style="font-size:smaller;vertical-align:middle">{{item.model_number}}</td>
 				<td><span class="badge">{{item.count}}</span></td>
 				{% if request.user.is_staff or request.user.is_superuser %}
-					<td>
+					<td style="vertical-align:middle">
 						<a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span style="margin-left:5px; color:green" title="Modify" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
 		        {% if request.user.is_superuser %}
 		          <a href="{% url 'delete check' item_id=item.id %}" ><span style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" title="Delete" aria-hidden="true"> </span></a>
