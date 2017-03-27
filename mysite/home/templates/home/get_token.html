@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% load static %}
+<html>
+<head>
+	<title>Developers</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'home/style.css' %}" />
+</head>
+<body>
+{% block content %}
+<div style="padding-left: 15px">
+<h1>API Token</h1>
+<p>Your Token: {{token}}</p>
+</div>
+
+
+{% endblock %}
+</body>
+</html>

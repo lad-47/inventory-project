@@ -2,49 +2,85 @@
 {% extends "base.html" %}
 {% load static %}
 <html>
+{% block content %}
 <head>
 	<title>{{item.item_name}}</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'home/style.css' %}" />
 </head>
 <body>
-{% block content %}
 <div style="padding-left: 15px">
-<h1>{{ item.item_name }}</h1>
-<p>Available: {{item.total_available}} out of {{item.total_count}} total</p>
-<p>Model: {{item.model_number}}</p>
-<p>Description: {{item.description}}</p>
-<p>Location: {{item.location}}</p>
+  <h1>{{ item.item_name }}{% if request.user.is_staff or request.user.is_superuser %}
+        <small><a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span title="Modify" style="margin-left:15px; color:green" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
+        {% if request.user.is_superuser %}
+          <a href="{% url 'delete check' item_id=item.id %}" ><span title="Delete" style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" aria-hidden="true"> </span></a>
+        {% endif %}</small>{% endif %}</h1>
+  <p>Available: {{item.count}}</p>
+  <p>Model: {{item.model_number}}</p>
+  <p>Description: {{item.description}}</p>
 </div>
-<hr>
+<div style="padding-left: 15px">
+  <!--Custom Fields-->
+  {% for cf in custom %}
+    <p>{{cf}}</p>
+  {% endfor %}
+</div>
+<div style="padding-left: 15px">
+  <h2>Tags</h2>
+  {% for tag in tags %}
+    <span class="badge">{{tag}}</span>
+  {% endfor %}
+  {% if tags|length == 0 %}
+  <p>None</p>
+  {% endif %}
+</div>
 
+{% if requests|length > 0 %}
+<h2 style="padding-left: 15px">Requests with this item</h2>
+{% endif %}
 <ul class="list-group">
 	{% for request in requests %}
-	{% if request.status == "O" %}
-  	<li class="list-group-item list-group-item-warning">Request Status: Outstanding <br> Reason: {{request.reason}} 
-  	<a href="{% url "request-delete" pk=request.id %}" class="btn btn-danger btn-xs">Delete</a></li>
-  	{% elif request.status == "D" %}
-  	<li class="list-group-item list-group-item-danger">Request Status: Denied <br> Reason: {{request.reason}}</li>
-  	{% elif request.status == "A" %}
-  	<li class="list-group-item list-group-item-success">Request Status: Approved <br> Reason: {{request.reason}}</li>
-  	{% endif %}
+  	<li class="list-group-item list-group-item-action flex-column align-items-start">
+    <div class="d-flex w-100 justify-content-between">
+    {% if request.status == 'O' %}
+    {% if user.is_staff %} 
+      <big>Owner:</big> {{request.owner}}
+    {% endif %}
+    <big style="padding-left: 12px">Reason:</big> 
+    {% if user.is_staff %}
+    <a href="{% url 'cart request details' request.parent_cart.id %}">
+    {% else %}
+    <a href="{% url 'view request details' request.parent_cart.id %}"> 
+    {% endif %}
+    {{request.reason}}</a> <span style="margin-left:10px" class="badge">{{request.quantity}}</span>
+    <big>Requested</big></div></li> 
+
+    {% elif request.status == 'L' %}
+    {% if user.is_staff %} 
+      <big>Owner:</big> {{request.owner}}
+    {% endif %}
+    <big style="padding-left: 12px">Reason:</big> 
+    {% if user.is_staff %}
+    <a href="{% url 'cart request details' request.parent_cart.id %}">
+    {% else %}
+    <a href="{% url 'view request details' request.parent_cart.id %}"> 
+    {% endif %}
+    {{request.reason}}</a> <span style="margin-left:10px; margin-right:20px" class="badge">{{request.quantity}}</span><big>Loaned</big></div></li> 
+    {% endif %}
 	{% endfor %}
 </ul>
 
-<hr>
-<h1 style="padding-left: 15px">Request This Item:</h1>
+{% if not user.is_anonymous %}
+<h1 style="padding-left: 15px">Add Item to Cart: </h1>
 <div>
 <form class="navbar-form navbar-top" role="search" action="{% url 'request' item.id %}" method="POST">	
   {% csrf_token %}
   <div class="form-group">
-  	<label for="reason">Reason:</label>
-    <input id="reason" name="reason" type="text" class="form-control" placeholder="Reason">
     <label for="quantity">Quantity:</label>
     <input id="quantity" name="quantity" type="number" class="form-control">
   </div>
-  <button id="save_request" type="submit" class="btn btn-default">Submit</button>
+  <button id="save_request" type="submit" class="btn btn-default">Add to Cart</button>
 </form>
 </div>
-
+{% endif %}
 {% endblock %}
 </body>
 </html>

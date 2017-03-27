@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% load static %}
+<html>
+<head>
+	<title>Developers</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'home/style.css' %}" />
+</head>
+<body>
+{% block content %}
+<div style="padding-left: 15px">
+<h1>Developers</h1>
+<p><a href="{% url 'api' %}">API Explorer<span style="margin-left:5px" class="glyphicon glyphicon-globe" aria-hidden="true"> </span></a></p>
+<p><a href="{% url 'get-token' %}">Get your API Token<span style="margin-left:5px" class="glyphicon glyphicon-lock" aria-hidden="true"> </span></a></p>
+<p><a href="{% url 'api-download' %}">Download the API Guide<span style="margin-left:5px" class="glyphicon glyphicon-download-alt" aria-hidden="true"> </span></a></p>
+</div>
+
+
+{% endblock %}
+</body>
+</html>

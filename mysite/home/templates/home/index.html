@@ -13,31 +13,109 @@
     <input id="search_box" name="search_box" type="text" class="form-control" placeholder="Search name">
     <label for="model_box">Search Model:</label>
     <input id="model_box" name="model_box" type="text" class="form-control" placeholder="Search model">
-    <label for="select">Include Tag:</label>
-    <select id="select" multiple name="select">
+    <label for="select" >Include Tag:</label>
+    <select id="select" style="vertical-align: middle" multiple name="select">
     	<option value="all">All</option>
     	{% for tag in tag_list %}
     	<option value="{{tag.tag}}">{{tag.tag}}</option>
     	{% endfor %}
     </select>
     <label for="exselect">Exclude Tag:</label>
-    <select id="exselect" multiple name="exselect">
+    <select id="exselect" style="vertical-align: middle" multiple name="exselect">
       <option value="none">None</option>
       {% for tag in tag_list %}
       <option value="{{tag.tag}}">{{tag.tag}}</option>
       {% endfor %}
     </select>
+
   </div>
-  <button id="search_submit" type="submit" class="btn btn-default">Submit</button>
+  <button id="search_submit" type="submit" class="btn btn-default">Search<span style="margin-left:5px" class="glyphicon glyphicon-search" aria-hidden="true"> </span></button>
 </form>
 <div class="page-header" style="padding-left: 15px">
   <h1>Inventory <small>Item List</small></h1>
 </div>
-<div class="list-group">
-  	{% for item in latest_item_list %}
-  	<a href="{{ item.get_absolute_url }}" class="list-group-item">{{ item.item_name }}</a>
+
+{% if request.user.is_staff %}
+<h4 style="padding-left: 15px;padding-bottom: 10px">
+  <a href = "{% url 'add an item' %}" class="btn btn-primary" role="button">Add an Item</a>
+</h4>
+{% endif %}
+
+<!-- This List has been scrapped for the Table format below, due to variable spacing in List.
+<ul class="list-group">
+  {% for item in items %}
+  <li class="list-group-item list-group-item-action flex-column align-items-start">
+    <div class="d-flex w-100 justify-content-between">
+
+      <h4 class="mb-1" ><a href="{{ item.get_absolute_url }}" style="margin-right:12px">{{item.item_name}}</a>
+        <span style="margin-right:12px"><small>{{item.model_number}}</small></span>
+        <span class="badge" style="margin-right:50px">{{item.count}}</span>
+      {% if request.user.is_staff or request.user.is_superuser %}
+        <a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span style="margin-left:5px; color:green" title="Modify" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
+        {% if request.user.is_superuser %}
+          <a href="{% url 'delete check' item_id=item.id %}" ><span style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" title="Delete" aria-hidden="true"> </span></a>
+        {% endif %}
+      {% endif %}
+      </h4>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+-->
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Item Name</th>
+			<th>Model Number</th>
+			<th>Quantity</th>
+			{% if request.user.is_staff or request.user.is_superuser %}
+				<th>Actions</th>
+			{% endif %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for item in items %}
+			<tr>
+				<td style="font-size:larger;font-weight:bold;vertical-align:middle"><a href="{{ item.get_absolute_url }}">{{item.item_name}}</a></td>
+				<td style="font-size:smaller;vertical-align:middle">{{item.model_number}}</td>
+				<td><span class="badge">{{item.count}}</span></td>
+				{% if request.user.is_staff or request.user.is_superuser %}
+					<td style="vertical-align:middle">
+						<a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span style="margin-left:5px; color:green" title="Modify" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
+		        {% if request.user.is_superuser %}
+		          <a href="{% url 'delete check' item_id=item.id %}" ><span style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" title="Delete" aria-hidden="true"> </span></a>
+		        {% endif %}
+					</td>
+				{% endif %}
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% if items.has_other_pages %}
+  <ul class="pagination" style="padding-left: 15px">
+    {% if items.has_previous %}
+      <li><a href="?page={{ items.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in items.paginator.page_range %}
+      {% if items.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
     {% endfor %}
-</div>
+    {% if items.has_next %}
+      <li><a href="?page={{ items.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
+
+
 {% endblock %}
 </body>
 </html>

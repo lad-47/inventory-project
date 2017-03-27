@@ -1,0 +1,19 @@
+{% block content %}
+<head>
+  <style type="text/css">
+    .options_layout p { margin-left:10px; 
+    				margin-bottom:10px; }
+  </style>
+</head>
+<h3 style="margin-left:10px"> {{message}} </h3>
+<div class="options_layout">
+<p> Perhaps you'd like to... </p>
+<p><a href="{% url 'cart requests' %}">Service Requests</a></p>
+<p><a href="{% url 'request history' %}">View Old Requests</a></p>
+<p><a href="{% url 'logs' %}">View Logs</a></p>
+<p><a href="{% url 'index' %}">View Inventory</a><p>
+<p><a href="{% url 'tag handler' %}">Manage Tags</a></p>
+
+</div>
+
+{% endblock %}

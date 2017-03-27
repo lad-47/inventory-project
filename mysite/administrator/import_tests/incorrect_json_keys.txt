@@ -1,0 +1,17 @@
+Needs item_name and count fields:
+[{"item_name":"RLED001","count":345},{"firetruck":"red"}]
+
+Needs item_name and count fields:
+[{"item_name":"RLED002","count":268},{"item_name":"RLED003"}]
+
+Illegal JSON key name:
+[{"item_name":"RLED001","count":345,"lt":"st"},{"item_name":"RLED002","count":375}]
+
+Illegal JSON format:
+{"item_name":"RLED002","count":268},{"item_name":"RLED003","count":375}
+
+Negative count:
+[{"item_name":"RLED002","count":-10},{"item_name":"RLED003","count":375}]
+
+Tags:
+[{"item_name":"RLED002","count":10},{"item_name":"RLED003","count":375,"tags":[{"tag":"Circuits"},{"tag":"Red"}]}]
