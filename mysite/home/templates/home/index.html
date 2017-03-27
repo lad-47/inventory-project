@@ -78,7 +78,7 @@
 		{% for item in items %}
 			<tr>
 				<td style="font-size:larger;font-weight:bold;vertical-align:middle">
-					<a href="{{ item.get_absolute_url }}">{{item.item_name}}</a>
+					<a style="font-weight:bold" class="btn btn-link" href="{{ item.get_absolute_url }}">{{item.item_name}}</a>
 				</td>
 				<td style="font-size:smaller;vertical-align:middle">
 					{% if item.model_number %}
@@ -87,7 +87,7 @@
 						N/A
 					{% endif %}
 				</td>
-				<td><span class="badge">{{item.count}}</span></td>
+				<td style="vertical-align:middle"><span class="badge">{{item.count}}</span></td>
 				{% if request.user.is_staff or request.user.is_superuser %}
 					<td style="vertical-align:middle">
 						<a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span style="margin-left:5px; color:green" title="Modify" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
