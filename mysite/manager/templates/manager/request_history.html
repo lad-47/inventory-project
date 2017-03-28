@@ -8,13 +8,13 @@
 </head>
 
 <div class="table_title">
-<h3>Requets with Active Loans</h3>
+<h3>Requests with Active Loans</h3>
 	{% include "manager/includes/cart_request_table.html" with cart_requests_and_v=loaned color=False %}
 
-<h3>Approved For Disbursment</h3>
+<h3>Approved, Inactive Requests</h3>
 	{% include "manager/includes/cart_request_table.html" with cart_requests_and_v=approved color=False %}
 
-<h3>Denied</h3>
+<h3>Denied Requests</h3>
 	{% include "manager/includes/cart_request_table.html" with cart_requests_and_v=denied color=False %}
 </div>
 {% endblock %}

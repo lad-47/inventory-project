@@ -15,3 +15,11 @@ Negative count:
 
 Tags:
 [{"item_name":"RLED002","count":10},{"item_name":"RLED003","count":375,"tags":[{"tag":"Circuits"},{"tag":"Red"}]}]
+
+Illegal Key again
+[{"item_name": "test_1", "item)name": "test_1", "count":555}]
+
+Missing End "{"
+[{"item_name": "test_2", "count": 100, "tags":[{"tag":"test_item"}, {"tag": "test_tag"}]]
+
+[{{{]
