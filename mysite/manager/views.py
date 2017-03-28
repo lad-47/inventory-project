@@ -92,7 +92,7 @@ def cart_request_details(request, cart_request_id):
 	if not current_request.cart_status == 'O':
 		return render(request, 'home/message.html', {'message':'Request Not Outstanding'})
 	subrequests = Request.objects.filter(parent_cart_id=cart_request_id);
-	
+
 	#assemble useful info to pass to template or use for db manipulation
 	req_info = create_indv_request_info(current_request);
 	##handle the data from the form on a post
@@ -211,7 +211,7 @@ def logs(request, *args, **kwargs):
 				return render(request, 'manager/logs.html', context)
 		if time_query is not None and not time_query=="":
 			date_string = time_query.split("-")
-			logs = logs.filter(timestamp__date__gte=date(int(date_string[0]),int(date_string[1]),int(date_string[2]))) 
+			logs = logs.filter(timestamp__date__gte=date(int(date_string[0]),int(date_string[1]),int(date_string[2])))
 	paginator = Paginator(logs, 10)
 	try:
 		logs = paginator.page(page)
@@ -230,7 +230,7 @@ def logs(request, *args, **kwargs):
 
 def updateItem(item_instance, data):
 	for field in data.keys():
-		
+
 		# we have to parse the tags by hand
 		if field == 'tags':
 			for tag in Tag.objects.all():
@@ -290,7 +290,7 @@ def updateItem(item_instance, data):
 					to_change = CustomFloatField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
 					to_change.save();
-				
+
 
 
 	item_instance.save();
@@ -330,7 +330,7 @@ def modify_an_item(request, item_id):
 
 	#item_form = ItemForm(item_dict);
 	#item_form=ItemForm();
-	
+
 	#print(item_to_dict(itemToChange));
 	context = {
 		'item_form': item_form,
@@ -350,7 +350,7 @@ def modify_an_item_action(request, item_id):
 		else:
 			context = {
 				'item_form:':item_form,
-				}	
+				}
 			return render(request, '/manager/modify_an_item.html', context)
 
 	# we should never get here with a GET
@@ -449,7 +449,7 @@ def createItem(data):
 			to_change = CustomFloatField.objects.create(parent_item=item_instance,\
 				field_name=field_entry, field_value = data[field])
 			to_change.save();
-		
+
 
 	for tagPK in data['tags']:
 		item_instance.tags.add(Tag.objects.get(pk=tagPK));
@@ -461,17 +461,20 @@ def create_success(request):
 def tag_handler(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	
+
 	# on a POST, these definitions will be overwritten before rendering
 	create_form = TagCreateForm();
 	modify_form = TagModifyForm();
 	print('creating delte form');
 	delete_form = TagDeleteForm();
 
+	tags = Tag.objects.all()
+
 	context = {
 		'create_form': create_form,
 		'modify_form': modify_form,
 		'delete_form': delete_form,
+		'tags': tags
 	}
 
 	return render(request, 'manager/tag_handler.html', context);
@@ -610,7 +613,7 @@ def tag_success(request):
 def direct_disburse(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	
+
 	items = Item.objects.all()
 	users = User.objects.all()
 	# on a post we (print) the data and then return success
@@ -717,22 +720,22 @@ def handle_loan(request, request_id, disburse):
 				quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
 				reason=req.reason, admin_comment=comment);
 				still_loaned.save();
-			
+
 			disbursed = Request.objects.create(owner=req.owner, status=new_status,\
 			quantity=(to_disburse), item_id=req.item_id, parent_cart=req.parent_cart, \
 			reason=req.reason, admin_comment=comment);
 			#disbursed.save(); .create already saves
-			
+
 			tag=EmailTag.objects.all()[0].tag
 			message=""
-			
-			if disburse:	
+
+			if disburse:
 				message = "You have been disbursed "+str(to_disburse)+" x "+str(req.item_id)+" from your previous loan"
 				tag += " Disbursement"
 			else:
 				message = "You have returned "+str(to_disburse)+" x "+str(req.item_id)
 				tag += " Loan Returned"
-			
+
 			email = EmailMessage(
 				tag,
 				message,
@@ -758,7 +761,7 @@ def handle_loan(request, request_id, disburse):
 
 
 	else:
-		form = PositiveIntArgMaxForm(max_val=quantity);			
+		form = PositiveIntArgMaxForm(max_val=quantity);
 
 	if disburse:
 		heading = "Disbursing";
