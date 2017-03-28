@@ -621,52 +621,60 @@ def direct_disburse(request):
 		user = request.POST.get('user',None)
 		owner=User.objects.get(username=user)
 		comment = request.POST.get('comment',None)
-		cart = Cart_Request(cart_status='O',cart_reason='direct disbursement',cart_admin_comment=comment,cart_owner=owner)
+		info=''
+		if type=='Disburse':
+			info='direct disbursement'
+		else:
+			info='direct loan'
+		cart = Cart_Request(cart_status='O',cart_reason=info,cart_admin_comment=comment,cart_owner=owner)
 		cart.save()
 		for i in range(0,len(items_set)):
 			if items_set[i]!='':
 				try:
 					item = Item.objects.get(item_name=items_set[i])
-					item_request=Request(status='O',reason='direct disbursement',item_id=item,owner=owner,admin_comment=comment,quantity=int(count_set[i]),parent_cart=cart)
+					if item.count<int(count_set[i]):
+						context = {
+							'items': items,
+							'users': users,
+							'error': 'Insufficient quantity of '+item.item_name
+						}
+						return render(request, 'manager/direct_disburse.html', context)
+					item_request=Request(status='O',reason=info,item_id=item,owner=owner,admin_comment=comment,quantity=int(count_set[i]),parent_cart=cart)
 					item_request.save()
 				except Item.DoesNotExist:
-					return render(request, 'manager/success.html',{'message':'Invalid item name entered: '+items_set[i]})
+					context = {
+						'items': items,
+						'users': users,
+						'error': 'Invalid item name entered: '+items_set[i]
+					}
+					return render(request, 'manager/direct_disburse.html', context)
 		#cart.save()
 		subrequests = Request.objects.filter(parent_cart=cart);
-		valid = True;
+		letter="A"
+		word="disbursed"
+		if type=='Loan':
+			letter="L"
+			word="loaned"
+		cart.cart_status=letter
+		message = 'You have been directly '+word+':\n'
 		for subrequest in subrequests:
 			itemToChange = Item.objects.get(id=subrequest.item_id_id);
-			oldQuantity = itemToChange.count;
-			requestAmount = subrequest.quantity;
-			newQuantity = oldQuantity - requestAmount;
-			if newQuantity < 0:
-				valid = False;
-				break;
-		if valid==True:
-			letter="A"
-			word="disbursed"
-			if type=='Loan':
-				letter="L"
-				word="loaned"
-			cart.cart_status=letter
-			message = 'You have been directly '+word+':\n'
-			for subrequest in subrequests:
-				itemToChange = Item.objects.get(id=subrequest.item_id_id);
-				newQuantity = itemToChange.count - subrequest.quantity;
-				itemToChange.count = newQuantity
-				subrequest.status=letter
-				subrequest.save()
-				message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
-				itemToChange.save()
-			cart.save()
-			tag=EmailTag.objects.all()[0].tag
-			email = EmailMessage(
-				tag+' Direct Disburse',
-				message,
-				'from@example.com',
-				[owner.email]
-			)
-			email.send()
+			newQuantity = itemToChange.count - subrequest.quantity;
+			itemToChange.count = newQuantity
+			subrequest.status=letter
+			subrequest.save()
+			message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
+			itemToChange.save()
+		cart.save()
+		tag=EmailTag.objects.all()[0].tag
+		email = EmailMessage(
+			tag+' Direct Disburse',
+			message,
+			'from@example.com',
+			[owner.email]
+		)
+		email.send()
+			
 		if type=='Disburse':
 			return HttpResponseRedirect('/manager/disburse_success/Disbursed');
 		else:
