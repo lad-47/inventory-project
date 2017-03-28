@@ -636,6 +636,10 @@ def direct_disburse(request):
 				try:
 					item = Item.objects.get(item_name=items_set[i])
 					if item.count<int(count_set[i]):
+						reqs = Request.objects.filter(parent_cart=cart)
+						for req in reqs:
+							req.delete()
+						cart.delete()
 						context = {
 							'items': items,
 							'users': users,
