@@ -112,6 +112,7 @@ def cart_request_details(request, cart_request_id):
 					el[4].count = el[2]-el[1]; ##update item quantity
 					message+=el[0].item_id.item_name+' x'+str(el[0].quantity)+"\n"
 					el[0].status=new_status; ##subrequest was serviced
+					el[0].admin_comment=service_form.cleaned_data['admin_comment'];
 					el[0].save();  ##save the subrequest's updated status
 					el[4].save();  ##save the item with new quantity
 				message+='has been APPROVED'
@@ -120,6 +121,7 @@ def cart_request_details(request, cart_request_id):
 				current_request.cart_status='D';
 				for el in req_info:
 					el[0].status='D'; ##subrequest was serviced
+					el[0].admin_comment=service_form.cleaned_data['admin_comment'];
 					message+=el[0].item_id.item_name+' x'+str(el[0].quantity)+"\n"
 					el[0].save();
 				message+='has been DENIED'
