@@ -8,7 +8,7 @@
 
 <head>
   <style type="text/css">
-    .form_layout p { margin-left:10px; 
+    .form_layout p { margin-left:10px;
     				margin-bottom:10px; }
     			h4 { margin-left: 10px; }
     			h5 { margin-left: 10px; }
@@ -21,9 +21,9 @@
 	<h4> <b>Create a New Custom Field</b></h4>
 	{{add_form.as_p}}
 
-	<p><input type="submit" value="Create"></p>
+	<p><input class="btn btn-default" type="submit" value="Create"></p>
 </form>
-</div> <br><br>
+</div> <hr>
 
 <div class="form_layout" >
 <form method="POST" action="{% url 'cf delete conf' %}">
@@ -31,7 +31,7 @@
 	<h4> <b>Delete Custom Fields</b></h4>
 	{{delete_form.as_p}}
 
-	<p><input type="submit" value="Delete"></p>
+	<p><input class="btn btn-default" type="submit" value="Delete"></p>
 </form>
 </div> <br><br>
 

@@ -18,7 +18,7 @@ from django.shortcuts import redirect
 #    }
 #    params = urlencode(args)
 #    return HttpResponse('{0}?{1}'.format(url, params))
-    
+
 
 def callback(request):
     if 'code' in request.GET:
@@ -41,7 +41,7 @@ def callback(request):
         headers = {
             'Accept': 'application/json',
             'x-api-key': 'inventory',
-            'Authorization': 'Bearer '+token          
+            'Authorization': 'Bearer '+token
         }
 
         r = req('get',url, headers=headers)

@@ -77,25 +77,29 @@ def detail(request, item_id):
 			if cf.value_type == 'lt': # Long Text
 				try:
 					val = CustomLongTextField.objects.get(parent_item=item.id, field_name=cf)
-					custom_values.append(val.field_name.field_name+": "+val.field_value)
+					if val.field_value:
+						custom_values.append(val.field_name.field_name+": "+val.field_value)
 				except CustomLongTextField.DoesNotExist:
 					pass
 			elif cf.value_type == 'st': # Short Text
 				try:
 					val = CustomShortTextField.objects.get(parent_item=item.id, field_name=cf)
-					custom_values.append(val.field_name.field_name+": "+val.field_value)
+					if val.field_value:
+						custom_values.append(val.field_name.field_name+": "+val.field_value)
 				except CustomShortTextField.DoesNotExist:
 					pass
 			elif cf.value_type == 'int': # Integer
 				try:
 					val = CustomIntField.objects.get(parent_item=item.id, field_name=cf)
-					custom_values.append(val.field_name.field_name+": "+str(val.field_value))
+					if val.field_value:
+						custom_values.append(val.field_name.field_name+": "+str(val.field_value))
 				except CustomIntField.DoesNotExist:
 					pass
 			elif cf.value_type == 'float': # Float
 				try:
 					val = CustomFloatField.objects.get(parent_item=item.id, field_name=cf)
-					custom_values.append(val.field_name.field_name+": "+str(val.field_value))
+					if val.field_value:
+						custom_values.append(val.field_name.field_name+": "+str(val.field_value))
 				except CustomFloatField.DoesNotExist:
 					pass
 			else:
