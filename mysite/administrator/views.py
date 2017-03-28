@@ -45,7 +45,13 @@ def create_user(request):
         confirm_password = request.POST.get('confirm_password_box', None)
         email = request.POST.get('email_box', None)
         if password != confirm_password:
-            return render(request, 'manager/success.html', {'message':"Passwords must match."})
+            error = "Passwords must match!"
+            context = {
+                'error': error,
+                'username': username,
+                'email': email
+            }
+            return render(request, 'administrator/create_user.html', context)
         user = User.objects.create_user(username=username,email=email,password=password)
         user.save()
         return render(request, 'manager/success.html', {'message':"User was created successfully."});
