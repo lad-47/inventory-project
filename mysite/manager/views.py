@@ -190,6 +190,9 @@ def logs(request, *args, **kwargs):
 			except Item.DoesNotExist:
 				paginator = Paginator(logs, 10)
 				logs = paginator.page(1)
+				new_request['item_box']=''
+				new_request['user_box']=''
+				params = parse.urlencode(new_request)
 				context = {
 					'logs': logs,
 					'items': items,
@@ -204,6 +207,8 @@ def logs(request, *args, **kwargs):
 			except User.DoesNotExist:
 				paginator = Paginator(logs, 10)
 				logs = paginator.page(1)
+				new_request['user_box']=''
+				params = parse.urlencode(new_request)
 				context = {
 					'logs': logs,
 					'items': items,
