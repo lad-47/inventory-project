@@ -12,25 +12,20 @@
 <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
 <script type="text/javascript">
+	// auto-completes item name search
 	$(document).ready(function(){
-		// TODO: Change this to work with tags
-		var user_input=$('input[id="user_box"]');
-		var users = [
-			{% for user in users %}
-			"{{user}}",
+		var name_search=$('input[id="search_box"]');
+		var items = [
+			{% for item in items %}
+			"{{item}}",
 			{%endfor%}
 		];
-		user_input.autocomplete({
-			source: users,
+		name_search.autocomplete({
+			source: items,
 			minLength: 2
 		});
 	} );
 
-	//   keeps same width as box
-	jQuery.ui.autocomplete.prototype._resizeMenu = function () {
-		var ul = this.menu.element;
-		ul.outerWidth(this.element.outerWidth());
-	}
 </script>
 <!--
 <div class="container">

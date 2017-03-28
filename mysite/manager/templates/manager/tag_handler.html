@@ -2,6 +2,26 @@
 
 {% block content %}
 
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+<script type="text/javascript">
+	// auto-completes item name search
+	$(document).ready(function(){
+		var tag_box=$('input[id="id_old_name"]');
+		var tags = [
+			{% for tag in tags %}
+			"{{tag}}",
+			{%endfor%}
+		];
+		tag_box.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	} );
+
+</script>
+
 <head>
   <style type="text/css">
     .form_layout p { margin-left:10px;

@@ -12,16 +12,16 @@
   <h1>Inventory <small>Create User</small></h1>
 </div>
 
-{% if error %}
+<h5 style="margin-left:10px;color:red">
 {{error}}
-{% endif %}
+</h5>
 
 <form class="navbar-form navbar-top" method="POST" style="margin-left:10px">
   {% csrf_token %}
 	<div class="row">
 			<div class="form-group">
 				<label for="username_box">Username:</label>
-				<input id="username_box" name="username_box" type="text" class="form-control" required placeholder="Username">
+				<input id="username_box" name="username_box" type="text" class="form-control" required placeholder="Username" value="{{username}}">
 			</div>
 			<div class="form-group">
 				<label for="password_box">Password:</label>
@@ -33,7 +33,7 @@
 			</div>
 			<div class="form-group">
 				<label for="email_box">Email:</label>
-		    <input id="email_box" name="email_box" type="email" class="form-control" required placeholder="Email">
+		    <input id="email_box" name="email_box" type="email" class="form-control" required placeholder="Email" value="{{email}}">
 			</div>
 	</div>
 	<div class="row" style="margin-top:10px">
