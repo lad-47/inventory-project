@@ -11,7 +11,7 @@ def import_data(raw):
         return "Format: Please enter some text."
     try:
         items = create_items_from_json(raw)
-    except json.decoder.JSONDecodeError:
+    except ValueError:
         return "Format: Please format JSON correctly."
     #print(str(items))
     status = check_valid_items(items)
