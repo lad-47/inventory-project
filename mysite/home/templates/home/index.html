@@ -8,6 +8,113 @@
 
 {% block content %}
 
+<div class="container">
+	<form>
+		<div class="row">
+			<div class="col-lg-3">
+				<label for="search_box">Search Name:</label>
+		    <input id="search_box" name="search_box" type="text" class="form-control" placeholder="Name...">
+			</div>
+			<div class="col-lg-3">
+				<label for="model_box">Search Model:</label>
+		    <input id="model_box" name="model_box" type="text" class="form-control" placeholder="Model number...">
+			</div>
+			<div class="col-lg-3">
+				<div class="row">
+					<label for="include_tag" >Include Tag:</label>
+			    <input id="include_tag" name="include_tag" type="text" class="form-control" placeholder="Tag..."></input>
+				</div>
+				<div class="row">
+					<!--{% if tag_query %}-->
+					<ul class="list-group" id="include_list">
+					<!--{% for tag in tag_query %}
+						<li class="list-group-item">{{tag}}</li>
+					{% endfor %}-->
+					</ul>
+					<!--{% endif %}-->
+				</div>
+			</div>
+			<div class="col-lg-3">
+				<div class="row">
+					<label for="exclude_tag" >Exclude Tag:</label>
+			    <input id="exclude_tag" name="exclude_tag" type="text" class="form-control" placeholder="Tag..."></input>
+				</div>
+				<div class="row">
+					<!--{% if extag_query %}-->
+					<ul class="list-group" id="exclude_list">
+					<!--{% for tag in extag_query %}
+						<li class="list-group-item">{{tag}}</li>
+					{% endfor %}-->
+					</ul>
+					<!--{% endif %}-->
+				</div>
+			</div>
+		</div>
+		<div class="row">
+		</div>
+	</form>
+</div>
+
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+<script type="text/javascript">
+	// auto-completes item name search
+	/*$(document).ready(function(){
+		var name_search=$('input[id="search_box"]');
+		var items = [
+			{% for item in items %}
+			"{{item}}",
+			{%endfor%}
+		];
+		name_search.autocomplete({
+			source: items,
+			minLength: 2
+		});
+	} );*/
+
+	var include = [];
+	var exclude = [];
+
+	var inc_tag_input = document.getElementById("include_tag");
+	var exc_tag_input = document.getElementById("exclude_tag");
+
+	//inc_tag_input.addEventListener('keyup', includeTag());
+
+	function includeTag(){
+		// fetch the tag to include in search
+		var inc_tag = document.getElementById("include_tag").value;
+		// add the tag to the list
+		include.push(inc_tag);
+		// list of tags to include in search
+		var inc_tag_list = document.getElementById("include_list");
+		// build list content
+		var content = "";
+		// clear previous content
+		/*while (inc_tag_list.hasChildNodes()) {
+			inc_tag_list.removeChild(inc_tag_list.lastChild);
+		}*/
+		for (i=0; i<include.length; i++){
+			// append a tag to include in search
+			//var aTag = document.createTextNode(include[i]);
+			//inc_tag_list.appendChild(aTag);
+			// append list items to content
+			content += "<li>" + include[i] + "<li>";
+		}
+		inc_tag_list.innerHTML = content;
+	}
+
+	$("include_tag").keypress(function(event){
+		console.log(event.which);
+		if (event.which == 13){
+			event.preventDefault();
+			includeTag();
+		}
+	});
+
+</script>
+
 <form class="navbar-form navbar-top" role="search" type="get" action=".">
   <div class="form-group">
   	<label for="search_box">Search Name:</label>
