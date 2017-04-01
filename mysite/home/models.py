@@ -10,10 +10,8 @@ class Tag(models.Model):
 	def __str__(self):
   		return self.tag
 
-# if we add a field to this, we'll have to go add it to the
-# ItemForm_factory properties dictionary as well, using the same name
-class Item(models.Model):
-	item_name = models.CharField(max_length=100, unique=True)
+class AbstractItem(models.Model):
+	item_name = models.CharField(max_length=100)
 	count = models.PositiveIntegerField(default=0)
 	model_number = models.CharField(max_length=100, null=True)
 	description = models.TextField(null=True)
@@ -26,23 +24,31 @@ class Item(models.Model):
 		return reverse('detail', kwargs={'item_id': self.id})
 
 
+# if we add a field to this, we'll have to go add it to the
+# ItemForm_factory properties dictionary as well, using the same name
+class Item(AbstractItem):
+	#put item name in this field to throw non-unique exception
+	name_unique_check = models.CharField(max_length=100, unique=True, null=True)
+
+class Asset(AbstractItem):
+	asset_tag = models.PositiveIntegerField(unique=True);
+
+
+
 class Cart_Request(models.Model):
 	STATUSES = (
 	('O','Outstanding'),
 	('A','Approved'),
 	('D','Denied'),
 	('P','In Progress'),
-	('L','Loaned'))
+	('L','Loaned'),
+	('B','Backfill'))
 	SUGG = (('D', 'Disbursement'), ('L', 'Loan'))
 	cart_owner = models.ForeignKey(User, on_delete=models.CASCADE);
 	cart_reason = models.TextField();
 	cart_admin_comment = models.TextField(default="No Comment");
 	cart_status = models.CharField(max_length=1, choices=STATUSES, default='O');
 	suggestion = models.CharField(max_length=1, choices=SUGG, default='D')
-
-	
-	def __str__(self):
-		return self.tag
 
 	
 class Request(models.Model):
@@ -55,7 +61,7 @@ class Request(models.Model):
 	('R','Returned'),
 	('Z','Hacky Log Status'))
 	owner = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE, default=1)
-	item_id = models.ForeignKey(Item, on_delete=models.CASCADE, default=1)
+	item_id = models.ForeignKey(AbstractItem, on_delete=models.CASCADE, default=1)
 	reason = models.TextField()
 	admin_comment = models.TextField(default="No Comment");
 	quantity = models.PositiveIntegerField(default=1);
