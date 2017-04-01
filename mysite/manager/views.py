@@ -709,7 +709,7 @@ def handle_loan(request, request_id, disburse):
 	if request.method == 'POST':
 		form = PositiveIntArgMaxForm(request.POST, max_val=quantity);
 		if form.is_valid():
-			to_disburse = form.cleaned_data['Amount'];
+			no_longer_loaned = form.cleaned_data['Amount'];
 			comment = form.cleaned_data['Comment']
 
 			if disburse:
@@ -717,18 +717,18 @@ def handle_loan(request, request_id, disburse):
 			else:
 				new_status = 'R';
 
-			if (quantity-to_disburse > 0):
+			if (quantity-no_longer_loaned > 0):
 				signal_logs = Request.objects.create(owner=req.owner, status='Z',\
-				quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
+				quantity=(quantity-no_longer_loaned), item_id=req.item_id, parent_cart=req.parent_cart,\
 				reason=req.reason, admin_comment=comment);
 				signal_logs.delete();
 				still_loaned = Request.objects.create(owner=req.owner, status='L',\
-				quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
+				quantity=(quantity-no_longer_loaned), item_id=req.item_id, parent_cart=req.parent_cart,\
 				reason=req.reason, admin_comment=comment);
 				still_loaned.save();
 
 			disbursed = Request.objects.create(owner=req.owner, status=new_status,\
-			quantity=(to_disburse), item_id=req.item_id, parent_cart=req.parent_cart, \
+			quantity=(no_longer_loaned), item_id=req.item_id, parent_cart=req.parent_cart, \
 			reason=req.reason, admin_comment=comment);
 			#disbursed.save(); .create already saves
 
@@ -736,10 +736,10 @@ def handle_loan(request, request_id, disburse):
 			message=""
 
 			if disburse:
-				message = "You have been disbursed "+str(to_disburse)+" x "+str(req.item_id)+" from your previous loan"
+				message = "You have been disbursed "+str(no_longer_loaned)+" x "+str(req.item_id)+" from your previous loan"
 				tag += " Disbursement"
 			else:
-				message = "You have returned "+str(to_disburse)+" x "+str(req.item_id)
+				message = "You have returned "+str(no_longer_loaned)+" x "+str(req.item_id)
 				tag += " Loan Returned"
 
 			email = EmailMessage(
@@ -751,7 +751,7 @@ def handle_loan(request, request_id, disburse):
 			email.send()
 			if not disburse:
 				involved_item = req.item_id;
-				involved_item.count = involved_item.count + to_disburse;
+				involved_item.count = involved_item.count + no_longer_loaned;
 				involved_item.save();
 			req.delete();
 
