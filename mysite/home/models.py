@@ -59,6 +59,7 @@ class Request(models.Model):
 	('P','In Progress'),
 	('L','Loaned'),
 	('R','Returned'),
+	('B','For Backfill'),
 	('Z','Hacky Log Status'))
 	owner = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE, default=1)
 	item_id = models.ForeignKey(AbstractItem, on_delete=models.CASCADE, default=1)

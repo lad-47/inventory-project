@@ -35,7 +35,9 @@ urlpatterns = [
 	url(r'^disburse_loaned/(?P<request_id>[0-9]+)/$', views.disburse_loaned, name="disburse loaned"),
 	url(r'^loan_handle_success/$', views.loan_handle_success, name="loan handle success"),
 	url(r'^loan_handler/$', views.loan_handler, name="loan handler"),
+	url(r'^backfill_handler/$', views.backfill_handler, name="backfill handler"),
 	url(r'^return_loaned/(?P<request_id>[0-9]+)/$', views.return_loaned, name="return loaned"),
+	url(r'^change_status/(?P<request_id>[0-9]+)/(?P<new_status>[A-Z])/$', views.handle_loan, name="change status"),
 
 	#url(r'^cart_request/(?P<cart_request_id>[0-9]+$)', \
 		#views.cart_request_details, name="cart request details"),

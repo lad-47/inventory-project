@@ -26,7 +26,7 @@ def cart_requests(request):
 	cart_requests = Cart_Request.objects.exclude(cart_status='P');
 	cart_requestsO = cart_requests.filter(cart_status='O');
 	cart_requestsO_and_v = create_request_info(cart_requestsO);
-	cart_requestsL = cart_requests.filter(cart_status='L')
+	cart_requestsL = cart_requests.filter(cart_status='L') | cart_requests.filter(cart_status='B')
 	cart_requestsL_and_v = create_request_info(cart_requestsL);
 
 
@@ -102,7 +102,7 @@ def cart_request_details(request, cart_request_id):
 			message = 'Your request for:\n'
 			tag=EmailTag.objects.all()[0].tag
 			new_status = service_form.cleaned_data['approve_deny'];
-			if new_status == 'A' or new_status == 'L':
+			if new_status == 'A' or new_status == 'L' or new_status == 'B':
 				current_request.cart_status=new_status;
 				for el in req_info:
 					if not el[3]:
@@ -704,7 +704,7 @@ def disburse_success(request, message):
 	return render(request, 'manager/success.html', {'message': message})
 
 
-def handle_loan(request, request_id, disburse):
+def handle_loan(request, request_id, new_status):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	req = get_object_or_404(Request, pk=request_id);
@@ -714,38 +714,49 @@ def handle_loan(request, request_id, disburse):
 	if request.method == 'POST':
 		form = PositiveIntArgMaxForm(request.POST, max_val=quantity);
 		if form.is_valid():
-			no_longer_loaned = form.cleaned_data['Amount'];
-			comment = form.cleaned_data['Comment']
+			to_new_status = form.cleaned_data['Amount'];
+			comment = form.cleaned_data['Comment'];
 
-			if disburse:
-				new_status = 'A';
+			if (quantity-to_new_status < 0):
+				return render(request, 'manager/success.html', {'message': 'Failure.'})
+
+			signal_logs = Request.objects.create(owner=req.owner, status='Z',\
+			quantity=(quantity-to_new_status), item_id=req.item_id, parent_cart=req.parent_cart,\
+			reason=req.reason, admin_comment=comment);
+			signal_logs.delete();
+			#still_old_status = Request.objects.create(owner=req.owner, status=req.status, \
+			#quantity=(quantity-no_longer_loaned), item_id=req.item_id, parent_cart=req.parent_cart,\
+			#reason=req.reason, admin_comment=comment);
+			#still_old_status.save();
+			req.quantity = quantity - to_new_status;
+			if(req.quantity > 0):
+				req.save();
 			else:
-				new_status = 'R';
+				req.delete();
 
-			if (quantity-no_longer_loaned > 0):
-				signal_logs = Request.objects.create(owner=req.owner, status='Z',\
-				quantity=(quantity-no_longer_loaned), item_id=req.item_id, parent_cart=req.parent_cart,\
-				reason=req.reason, admin_comment=comment);
-				signal_logs.delete();
-				still_loaned = Request.objects.create(owner=req.owner, status='L',\
-				quantity=(quantity-no_longer_loaned), item_id=req.item_id, parent_cart=req.parent_cart,\
-				reason=req.reason, admin_comment=comment);
-				still_loaned.save();
-
-			disbursed = Request.objects.create(owner=req.owner, status=new_status,\
-			quantity=(no_longer_loaned), item_id=req.item_id, parent_cart=req.parent_cart, \
+			to_new_status = Request.objects.create(owner=req.owner, status=new_status,\
+			quantity=(to_new_status), item_id=req.item_id, parent_cart=req.parent_cart, \
 			reason=req.reason, admin_comment=comment);
 			#disbursed.save(); .create already saves
 
 			tag=EmailTag.objects.all()[0].tag
 			message=""
 
-			if disburse:
-				message = "You have been disbursed "+str(no_longer_loaned)+" x "+str(req.item_id)+" from your previous loan"
+			if new_status == 'A':
+				message = "You have been disbursed "+str(to_new_status)+" x "+str(req.item_id)+" from your previous loan"
 				tag += " Disbursement"
-			else:
-				message = "You have returned "+str(no_longer_loaned)+" x "+str(req.item_id)
+			elif new_status == 'R':
+				message = "You have returned "+str(to_new_status)+" x "+str(req.item_id)
 				tag += " Loan Returned"
+			elif new_status == 'L':
+				message = "Now on loan to you: "+str(to_new_status)+" x "+str(req.item_id)
+				tag += "Backfill now loaned" # maybe "backfill rejected"?
+			elif new_status == 'B':
+				message = "Marked for backfill: "+str(to_new_status)+" x "+str(req.item_id)
+				tag += "Marked for Backfill"
+			else:
+				message = "error"
+				tag += "error"
 
 			email = EmailMessage(
 				tag,
@@ -754,15 +765,16 @@ def handle_loan(request, request_id, disburse):
 				[req.owner.email]
 			)
 			email.send()
-			if not disburse:
+			# have active and outstanding requests
+			# active = backfill or loans
+			if new_status == 'R':
 				involved_item = req.item_id;
 				involved_item.count = involved_item.count + no_longer_loaned;
 				involved_item.save();
-			req.delete();
 
 			still_loaned = False;
 			for subreq in Request.objects.filter(parent_cart = parent):
-				if subreq.status == 'L':
+				if subreq.status == 'L' or subreq.status == 'B':
 					still_loaned = True;
 			if not still_loaned:
 				parent.cart_status = 'A';
@@ -774,12 +786,18 @@ def handle_loan(request, request_id, disburse):
 	else:
 		form = PositiveIntArgMaxForm(max_val=quantity);
 
-	if disburse:
+	if new_status == 'A':
 		heading = "Disbursing";
 		button = "Disburse";
-	else:
+	elif new_status == 'R':
 		heading = "Returning";
 		button = "Mark as Returned";
+	elif new_status == 'B':
+		heading = "For Backfill";
+		button = "Mark for Backfill";
+	elif new_status == 'L':
+		heading = "To Loan";
+		button = "Mark as Loaned";
 
 	context = {
 		'form': form,
@@ -791,18 +809,22 @@ def handle_loan(request, request_id, disburse):
 	return render(request, 'manager/disburse_loaned.html', context)
 
 def disburse_loaned(request, request_id):
-	return handle_loan(request, request_id, True);
+	return handle_loan(request, request_id, 'A');
 
 def return_loaned(request, request_id):
-	return handle_loan(request, request_id, False);
+	return handle_loan(request, request_id, 'R');
+
+def convert_status(request, request_id, new_status):
+	return handle_loan(request, reqeust_id, new_status);
 
 def loan_handle_success(request):
 	return render(request, 'manager/success.html', {'message': 'Loan Status Updated.'})
 
-def loan_handler(request):
+def loan_backfill_handler(request, status_type):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	request_list = Request.objects.all().filter(status='L');
+	request_list = Request.objects.all().filter(status=status_type);
+
 	# it's a search
 	if request.method == 'GET':
 		search_user = request.GET.get('user_box', None)
@@ -828,9 +850,16 @@ def loan_handler(request):
 		'request_list': request_list,
 		'items':items,
 		'users':users,
+		'loan': (status_type == 'L'),
 
 	}
 	return render(request, 'manager/loan_handler.html',context)
+
+def loan_handler(request):
+	return loan_backfill_handler(request, 'L');
+
+def backfill_handler(request):
+	return loan_backfill_handler(request, 'B');
 
 def assemble_loan_info(request_list):
 	req_info = [];
