@@ -6,8 +6,8 @@
 <table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 
 	<tr class="active"> 
-	<th> Item </th><th> Amount Requested </th>
-	{% if current_request.cart_status == 'A' or current_request.cart_status == 'L' %}
+	<th> Item </th><th> Quantity </th>
+	{% if current_request.cart_status == 'A' or current_request.cart_status == 'L' or current_request.cart_status == 'B' %}
 	<th>Item Status</th>
 	{% endif %}
 	</tr>
@@ -28,16 +28,22 @@
 		<!--make the actual tablerow -->
 		<th> <a href='/{{req.4.pk}}'> {{req.0.item_id}} </a> </th>
 		<th> {{req.1}} </th>
-		{% if current_request.cart_status == 'A' or current_request.cart_status == 'L' %}
+		{% if current_request.cart_status == 'A' or current_request.cart_status == 'L' or current_request.cart_status == 'B' %}
 		<th>
 		{% if req.5 == 'L' %}
 		Loaned
 		<a style="margin-left:10px" href="{% url 'disburse loaned' req.0.pk %}">Disburse</a>
 		<a style="margin-left:10px" href="{% url 'return loaned' req.0.pk %}">Mark as Returned</a>
+		<a style="margin-left:10px" href="{% url 'change status' req.0.pk 'B' %}">Mark for Backfill</a>
 		{% elif req.5 == 'A' %}
 		Disbursed
 		{% elif req.5 == 'R' %}
 		Returned
+		{% elif req.5 == 'B' %}
+		For Backfill
+		<a style="margin-left:10px" href="{% url 'disburse loaned' req.0.pk %}">Disburse</a>
+		<a style="margin-left:10px" href="{% url 'change status' req.0.pk 'L' %}">Mark as Loaned</a>
+		<a style="margin-left:10px" href="{% url 'return loaned' req.0.pk %}">Mark as Returned</a>
 		{% else %}
 		{{req.5}}
 		{% endif %}

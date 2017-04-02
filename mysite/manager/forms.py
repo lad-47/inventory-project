@@ -2,7 +2,12 @@ from django import forms
 from home.models import CustomFieldEntry, Item, Tag;
 
 class ServiceForm(forms.Form):
-	CHOICES = (('A', 'Approve for Disbursment'), ('L', 'Approve for Loan'), ('D', 'Deny'));
+	CHOICES = (
+		('A', 'Approve for Disbursment'), 
+		('L', 'Approve for Loan'), 
+		('B', 'Approve for Backfill'),
+		('D', 'Deny'),
+		);
 	admin_comment = forms.CharField(max_length=200, required=False);
 	approve_deny = forms.ChoiceField(widget=forms.RadioSelect, \
 		choices=CHOICES);
