@@ -24,14 +24,8 @@
 					<label for="include_tag" >Include Tag:</label>
 			    <input id="include_tag" name="include_tag" type="text" class="form-control" placeholder="Tag..."></input>
 				</div>
-				<div class="row">
-					<!--{% if tag_query %}-->
-					<ul class="list-group" id="include_list">
-					<!--{% for tag in tag_query %}
-						<li class="list-group-item">{{tag}}</li>
-					{% endfor %}-->
-					</ul>
-					<!--{% endif %}-->
+				<div class="row" id="include_list" name="include_list">
+					<!-- INCLUDE TAGS -->
 				</div>
 			</div>
 			<div class="col-lg-3">
@@ -39,14 +33,8 @@
 					<label for="exclude_tag" >Exclude Tag:</label>
 			    <input id="exclude_tag" name="exclude_tag" type="text" class="form-control" placeholder="Tag..."></input>
 				</div>
-				<div class="row">
-					<!--{% if extag_query %}-->
-					<ul class="list-group" id="exclude_list">
-					<!--{% for tag in extag_query %}
-						<li class="list-group-item">{{tag}}</li>
-					{% endfor %}-->
-					</ul>
-					<!--{% endif %}-->
+				<div class="row" id="exclude_list" name="exclude_list">
+					<!-- EXCLUDE TAGS -->
 				</div>
 			</div>
 		</div>
@@ -60,56 +48,84 @@
 <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
 <script type="text/javascript">
-	// auto-completes item name search
-	/*$(document).ready(function(){
-		var name_search=$('input[id="search_box"]');
-		var items = [
-			{% for item in items %}
-			"{{item}}",
+	// auto-completes tag searches
+	$(document).ready(function(){
+		var inc_tag_search=$('input[id="include_tag"]');
+		var exc_tag_search=$('input[id="exclude_tag"]');
+		var tags = [
+			{% for tag in tag_list %}
+			"{{tag}}",
 			{%endfor%}
 		];
-		name_search.autocomplete({
-			source: items,
+		inc_tag_search.autocomplete({
+			source: tags,
 			minLength: 2
 		});
-	} );*/
+		exc_tag_search.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	} );
 
 	var include = [];
 	var exclude = [];
-
 	var inc_tag_input = document.getElementById("include_tag");
 	var exc_tag_input = document.getElementById("exclude_tag");
 
-	//inc_tag_input.addEventListener('keyup', includeTag());
-
 	function includeTag(){
 		// fetch the tag to include in search
-		var inc_tag = document.getElementById("include_tag").value;
+		var inc_tag = inc_tag_input.value;
 		// add the tag to the list
-		include.push(inc_tag);
+		if (inc_tag != ''){
+			include.push(inc_tag);
+		}
 		// list of tags to include in search
 		var inc_tag_list = document.getElementById("include_list");
 		// build list content
 		var content = "";
 		// clear previous content
-		/*while (inc_tag_list.hasChildNodes()) {
+		while (inc_tag_list.hasChildNodes()) {
 			inc_tag_list.removeChild(inc_tag_list.lastChild);
-		}*/
+		}
 		for (i=0; i<include.length; i++){
-			// append a tag to include in search
-			//var aTag = document.createTextNode(include[i]);
-			//inc_tag_list.appendChild(aTag);
-			// append list items to content
-			content += "<li>" + include[i] + "<li>";
+			content += "<li>" + include[i] + "</li>";
 		}
 		inc_tag_list.innerHTML = content;
 	}
-
-	$("include_tag").keypress(function(event){
-		console.log(event.which);
+	function excludeTag(){
+		// fetch the tag to include in search
+		var exc_tag = exc_tag_input.value;
+		// add the tag to the list
+		if (exc_tag != ''){
+			exclude.push(exc_tag);
+		}
+		// list of tags to include in search
+		var exc_tag_list = document.getElementById("exclude_list");
+		// build list content
+		var content = "";
+		// clear previous content
+		while (exc_tag_list.hasChildNodes()) {
+			exc_tag_list.removeChild(exc_tag_list.lastChild);
+		}
+		for (i=0; i<exclude.length; i++){
+			content += "<li>" + exclude[i] + "</li>";
+		}
+		exc_tag_list.innerHTML = content;
+	}
+	$("#include_tag").keypress(function(event){
+		//console.log(event.which);
 		if (event.which == 13){
 			event.preventDefault();
 			includeTag();
+			$("#include_tag").val('');
+		}
+	});
+	$("#exclude_tag").keypress(function(event){
+		//console.log(event.which);
+		if (event.which == 13){
+			event.preventDefault();
+			excludeTag();
+			$("#exclude_tag").val('');
 		}
 	});
 
