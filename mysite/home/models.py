@@ -54,7 +54,7 @@ class Cart_Request(models.Model):
 class Request(models.Model):
 	STATUSES = (
 	('O','Outstanding'),
-	('A','Approved'),
+	('A','Disbursed'),
 	('D','Denied'),
 	('P','In Progress'),
 	('L','Loaned'),
