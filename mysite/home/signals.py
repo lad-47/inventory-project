@@ -2,9 +2,9 @@ from .current_user import get_current_user
 from django.utils import timezone
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from .models import Item, Tag, User, CustomFieldEntry,CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, Cart_Request, Request, Log
+from .models import Item, Tag, User, CustomFieldEntry,CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, Cart_Request, Request, Log, EmailTag, SubscribedEmail
 from .serializers import ItemSerializer, UserSerializer, TagSerializer, RequestSerializer, CustomFieldEntrySerializer, CustomShortTextFieldSerializer, CustomLongTextFieldSerializer, CustomIntFieldSerializer, CustomFloatFieldSerializer
-
+from django.core.mail import EmailMessage
     
 @receiver(post_save, sender=Item, dispatch_uid="item_save")
 def log_item(sender, instance, created, **kwargs):
@@ -23,6 +23,28 @@ def log_item(sender, instance, created, **kwargs):
     else:
         log = Log(initiating_user=user.id,initiating_username=user.username,involved_item=instance.id,involved_item_name=instance.item_name,nature='UPDATE Item '+info,timestamp=timezone.now())
         log.save()
+    
+    ## check minimum stock
+    if instance.count<instance.minimum_stock and not instance.understocked:
+        instance.understocked = True
+        instance.save()
+        message="The available pool for "+instance.item_name+" has fallen below the minimum stock threshold of "+str(instance.minimum_stock)+". Only "+str(instance.count)+" are still available."
+        tag=EmailTag.objects.all()[0].tag
+        subscribed_emails=SubscribedEmail.objects.all()
+        bcc=[]
+        for email in subscribed_emails:
+            bcc.append(email.email)
+        email = EmailMessage(
+            tag+' Restock Reminder',
+            message,
+            'from@example.com',
+            ['duke.ece.inventory@gmail.com'],
+            bcc
+        )
+        email.send()
+    elif instance.count>=instance.minimum_stock and instance.understocked:
+        instance.understocked = False
+        instance.save()
         
 @receiver(pre_delete, sender=Item, dispatch_uid="item_delete")
 def log_item_delete(sender, instance, **kwargs):
