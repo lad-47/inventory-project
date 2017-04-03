@@ -436,7 +436,7 @@ def add_an_item(request):
 def createItem(data):
 	item_instance = Item.objects.create(item_name=data['item_name'],\
 	 	model_number=data['model_number'], description=data['description'],\
-	 	count=data['count']);
+	 	count=data['count'],minimum_stock=data['minimum_stock']);
 	for field_entry in CustomFieldEntry.objects.all():
 		field_type = field_entry.value_type;
 		field = field_entry.field_name;

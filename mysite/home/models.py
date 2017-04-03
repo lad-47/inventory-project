@@ -30,7 +30,7 @@ class Item(AbstractItem):
 	#put item name in this field to throw non-unique exception
 	name_unique_check = models.CharField(max_length=100, unique=True, null=True)
 	minimum_stock = models.PositiveIntegerField(default=0)
-	understocked = models.BooleanField();
+	understocked = models.BooleanField(default=False);
 
 class Asset(AbstractItem):
 	asset_tag = models.PositiveIntegerField(unique=True);
