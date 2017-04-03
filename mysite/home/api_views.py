@@ -2,7 +2,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from .models import Item, Request, Tag, CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, CustomFieldEntry, Log
+from .models import Item, Request, Cart_Request, Tag, CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, CustomFieldEntry, Log
 from .serializers import ItemSerializer, RequestSerializer, UserSerializer, UserCreateSerializer, CustomShortTextFieldSerializer, CustomLongTextFieldSerializer, CustomIntFieldSerializer,CustomFloatFieldSerializer,CustomFieldEntrySerializer,LogSerializer
 from rest_framework.reverse import reverse
 from rest_framework import status
@@ -157,7 +157,11 @@ def request_list(request, format=None):
     elif request.method == 'POST':
         serializer = RequestSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            subrequest = serializer.save()
+            parent = Cart_Request(cart_owner=subrequest.owner,cart_reason=subrequest.reason,cart_admin_comment=subrequest.admin_comment,cart_status=subrequest.status)
+            parent.save()
+            subrequest.parent_cart=parent
+            subrequest.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
