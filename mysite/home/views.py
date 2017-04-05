@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from .models import Item, Request, Tag, CustomFieldEntry, CustomLongTextField, CustomShortTextField, CustomIntField, CustomFloatField, Cart_Request,SubscribedEmail,EmailTag;
+from .models import Item, Request, Tag, CustomFieldEntry, CustomLongTextField, CustomShortTextField, CustomIntField, CustomFloatField, Cart_Request,SubscribedEmail,EmailTag,BackfillPDF;
 from .forms import CheckoutForm
 from .serializers import ItemSerializer
 # chance genereic.Listview stuff to ListView
@@ -272,13 +272,15 @@ def checkout(request):
 		context = {
 			'subrequests':subrequests,
 			'to_checkout':to_checkout,
-			'checkout_form':checkout_form,
+			'checkout_form':checkout_form
 		}
 		return render(request, 'home/checkout.html', context)
 	else:
 		# request.method == 'POST'
-		checkout_form = CheckoutForm(request.POST);
+		print('POST')
+		checkout_form = CheckoutForm(request.POST, request.FILES);
 		if checkout_form.is_valid():
+			print('VALID')
 			to_checkout.cart_reason = checkout_form.cleaned_data['cart_reason'];
 			to_checkout.cart_status = 'O';
 			to_checkout.suggestion = checkout_form.cleaned_data['loan_disburse'];
@@ -289,6 +291,9 @@ def checkout(request):
 				subrequest.status = 'O';
 				subrequest.reason = to_checkout.cart_reason;
 				subrequest.save();
+				print('PDF')
+				pdf = BackfillPDF(request=subrequest,pdf=request.FILES['backfill_pdf'])
+				pdf.save()
 				message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
 			tag=EmailTag.objects.all()[0].tag
 			subscribed_emails=SubscribedEmail.objects.all()
