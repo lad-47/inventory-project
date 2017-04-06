@@ -86,13 +86,13 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 #            'default': {
 #                'ENGINE': 'django.db.backends.postgresql',
 #                'NAME': 'inventory',
-#               'USER': 'postgres',
+#                'USER': 'postgres',
 #                'PASSWORD': '',
 #                'PORT': '5432'
 #            }
 #        }
 
-## LOCALHOST 
+## LOCALHOST
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
