@@ -1,5 +1,5 @@
 import json
-from home.models import Item,Tag,CustomFieldEntry
+from home.models import Item,Tag,CustomFieldEntry,CustomIntField,CustomFloatField,CustomLongTextField,CustomShortTextField
 
 def import_data(raw):
     """ This function parses JSON data and attempts to import items into the system.
@@ -177,7 +177,7 @@ def save_items(items):
             description=item.get('description',""), count=item['count'])
         # Create cfs
         if item.get('custom_fields',None):
-            save_cfs(item['custom_fields'])
+            save_cfs(item['custom_fields'],item_instance)
         # Attempt to save item instance
         try:
             item_instance.save()
@@ -199,7 +199,7 @@ def save_items(items):
         except:
             return "Item with name "+item['item_name']+" failed to save correctly."
 
-def save_cfs(custom_fields):
+def save_cfs(custom_fields, item_instance):
     for cf in custom_fields:
         cf_name = cf['field_name']
         cf_value = cf['field_value']
