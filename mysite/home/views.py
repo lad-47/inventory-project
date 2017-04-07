@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
@@ -17,6 +17,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from django.core.mail import EmailMessage
+
+from django.core.files.storage import FileSystemStorage
 
 import os, sys
 
@@ -140,13 +142,49 @@ class RequestOwnerMixin(object):
 			raise PermsisionDenied
 		return obj
 
-class requestsView(LoggedInMixin, RequestOwnerMixin, ListView):
-	model = Cart_Request;
-	context_object_name = 'request_list';
-	template_name = 'home/cart_requests.html';
+# class requestsView(LoggedInMixin, RequestOwnerMixin, ListView):
+# 	model = Cart_Request;
+# 	context_object_name = 'request_list';
+# 	template_name = 'home/cart_requests.html';
+# 
+# 	def get_queryset(self):
+# 		return Cart_Request.objects.filter(cart_owner=self.request.user).exclude(cart_status='P');
 
-	def get_queryset(self):
-		return Cart_Request.objects.filter(cart_owner=self.request.user).exclude(cart_status='P');
+def requestsView(request):
+
+	all_reqs = Request.objects.filter(owner=request.user)
+	outstanding = all_reqs.filter(status='O')
+	loans = all_reqs.filter(status='L')
+	backfills = all_reqs.filter(status='B')
+	approved = all_reqs.filter(status='A')
+	denied = all_reqs.filter(status='D')
+	
+	outstanding_carts = set()
+	loan_carts = set()
+	backfill_carts = set()
+	approved_carts = set()
+	denied_carts = set()
+	
+	for subreq in outstanding:
+		outstanding_carts.add(subreq.parent_cart)
+	for subreq in loans:
+		loan_carts.add(subreq.parent_cart)
+	for subreq in backfills:
+		backfill_carts.add(subreq.parent_cart)
+	for subreq in approved:
+		approved_carts.add(subreq.parent_cart)
+	for subreq in denied:
+		denied_carts.add(subreq.parent_cart)
+	
+	context = {
+		'outstanding': outstanding_carts,
+		'loans': loan_carts,
+		'backfills': backfill_carts,
+		'approved': approved_carts,
+		'denied': denied_carts
+	}
+	return render(request, 'home/cart_requests.html', context);
+
 
 #class serviceRequestsView(LoggedInMixin, ListView):
 #	model = Request;
@@ -294,6 +332,8 @@ def checkout(request):
 				print('PDF')
 				pdf = BackfillPDF(request=subrequest,pdf=request.FILES['backfill_pdf'])
 				pdf.save()
+# 				file_url = FileSystemStorage().url(pdf.pdf)
+# 				return redirect(file_url)
 				message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
 			tag=EmailTag.objects.all()[0].tag
 			subscribed_emails=SubscribedEmail.objects.all()

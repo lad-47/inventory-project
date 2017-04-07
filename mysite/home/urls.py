@@ -17,7 +17,7 @@ urlpatterns = [
     url(r'^(?P<item_id>[0-9]+)/request/$', views.request, name='request'),
     #url(r'^delete/(?P<pk>\d+)/$', views.DeleteRequestView.as_view(),
        # name='request-delete'),
-    url(r'^requests/$', views.requestsView.as_view(), name='requests'),
+    url(r'^requests/$', views.requestsView, name='requests'),
     url(r'^delete_request/(?P<cart_request_id>[0-9]+)/$', views.delete_request, name='delete request'),
     url(r'^delete_request_success/$', views.delete_request_success, \
         name='delete request success'),
