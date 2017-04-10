@@ -93,7 +93,7 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 #             }
 #         }
 
-## LOCALHOST 
+## LOCALHOST
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -104,7 +104,6 @@ DATABASES = {
         'PORT': '5432'
    }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
