@@ -45,7 +45,7 @@ class Cart_Request(models.Model):
 	('P','In Progress'),
 	('L','Loaned'),
 	('B','Backfill'))
-	SUGG = (('D', 'Disbursement'), ('L', 'Loan'))
+	SUGG = (('D', 'Disbursement'), ('L', 'Loan'), ('B', 'Backfill'))
 	cart_owner = models.ForeignKey(User, on_delete=models.CASCADE);
 	cart_reason = models.TextField();
 	cart_admin_comment = models.TextField(default="No Comment");

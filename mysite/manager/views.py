@@ -84,7 +84,7 @@ def create_indv_request_info(cart_request):
 		newQuantity = oldQuantity - requestAmount;
 		valid = not (newQuantity < 0)
 		req_info+=[(subrequest, requestAmount, oldQuantity, valid, itemToChange, subrequest.status)];
-		if subrequest.status=='B':
+		if subrequest.status=='B' or subrequest.parent_cart.suggestion=='B':
 			req_info[0]+= (FileSystemStorage().url(BackfillPDF.objects.get(request=subrequest).pdf),)
 	return req_info;
 
