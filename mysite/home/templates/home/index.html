@@ -8,29 +8,98 @@
 
 {% block content %}
 
-<form class="navbar-form navbar-top" role="search" type="get" action=".">
-  <div class="form-group">
-  	<label for="search_box">Search Name:</label>
-    <input id="search_box" name="search_box" type="text" class="form-control" placeholder="Search name">
-    <label for="model_box">Search Model:</label>
-    <input id="model_box" name="model_box" type="text" class="form-control" placeholder="Search model">
-    <label for="select" >Include Tag:</label>
-    <select id="select" style="vertical-align: middle" multiple name="select">
-    	<option value="all">All</option>
-    	{% for tag in tag_list %}
-    	<option value="{{tag.tag}}">{{tag.tag}}</option>
-    	{% endfor %}
-    </select>
-    <label for="exselect">Exclude Tag:</label>
-    <select id="exselect" style="vertical-align: middle" multiple name="exselect">
-      <option value="none">None</option>
-      {% for tag in tag_list %}
-      <option value="{{tag.tag}}">{{tag.tag}}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <button id="search_submit" type="submit" class="btn btn-default">Search<span style="margin-left:5px" class="glyphicon glyphicon-search" aria-hidden="true"> </span></button>
-</form>
+<div class="container">
+	<form role="search" type="get" action=".">
+		<div class="row">
+			<div class="col-lg-2">
+				<label for="search_box">Search Name:</label>
+		    <input id="search_box" name="search_box" type="text" class="form-control" placeholder="Name...">
+			</div>
+			<div class="col-lg-2">
+				<label for="model_box">Search Model:</label>
+		    <input id="model_box" name="model_box" type="text" class="form-control" placeholder="Model number...">
+			</div>
+			<div class="col-lg-2">
+				<div id="dynamicInclude">
+					<label for="myTags">Include Tags:</label>
+	        <input class="form-control" type="text" name="myTags[]" placeholder="Tag...">
+	      </div>
+				<input class="btn btn-default btn-block" type="button" value="Include another tag" onClick="addInTag();">
+			</div>
+			<div class="col-lg-2">
+				<div id="dynamicExclude">
+					<label for="exTags">Exclude Tags:</label>
+	        <input class="form-control" type="text" name="exTags[]" placeholder="Tag...">
+	      </div>
+				<input class="btn btn-default btn-block" type="button" value="Exclude another tag" onClick="addExTag();">
+			</div>
+			<div class="col-lg-2" style="padding-top:25px">
+				<!--<label for="search_submit">Submit:</label>-->
+				<button id="search_submit" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+			</div>
+		</div>
+	</form>
+</div>
+
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var tag_input=$('input[name="myTags[]"]');
+	var exclude_tag_input=$('input[name="exTags[]"]');
+	var tags = [
+		{% for tag in tag_list %}
+		"{{tag}}",
+		{%endfor%}
+	];
+	tag_input.autocomplete({
+		source: tags,
+		minLength: 2
+	});
+	exclude_tag_input.autocomplete({
+		source: tags,
+		minLength: 2
+	});
+});
+</script>
+
+<script type="text/javascript">
+  function addInTag(divName){
+      var newdiv = document.createElement('div');
+      newdiv.innerHTML = "<input class='form-control' type='text' name='myTags[]' placeholder='Tag...'>";
+      document.getElementById('dynamicInclude').appendChild(newdiv);
+
+      var tag_input=$('input[name="myTags[]"]');
+      var tags = [
+        {% for tag in tag_list %}
+        "{{tag}}",
+        {%endfor%}
+      ];
+      tag_input.autocomplete({
+        source: tags,
+        minLength: 2
+      });
+  }
+	function addExTag(){
+		var newdiv = document.createElement('div');
+		newdiv.innerHTML = "<input class='form-control' type='text' name='exTags[]' placeholder='Tag...'>";
+		document.getElementById('dynamicExclude').appendChild(newdiv);
+
+		var exclude_tag_input=$('input[name="exTags[]"]');
+		var tag_input=$('input[name="myTags[]"]');
+		var tags = [
+			{% for tag in tag_list %}
+			"{{tag}}",
+			{%endfor%}
+		];
+		exclude_tag_input.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	}
+</script>
 
 <div class="page-header" style="padding-left: 15px">
   <h1>Inventory <small>Item List</small></h1>
@@ -38,7 +107,7 @@
 
 {% if request.user.is_staff %}
 <h4 style="padding-left: 15px;padding-bottom: 10px">
-  <a href = "{% url 'add an item' %}" class="btn btn-primary" role="button">Add an Item</a>
+  <a href = "{% url 'add an item' %}" class="btn btn-primary" role="button"><span class="glyphicon glyphicon-plus-sign"></span> Add an Item</a>
 </h4>
 {% endif %}
 
