@@ -12,6 +12,25 @@
   <h1>Inventory <small>Minimum Stock</small></h1>
 </div>
 
+<h3 style="padding-left: 15px">Set Minimum Stock Threshold for all Items in search below: </h3>
+<div>
+<form class="navbar-form navbar-top" role="search" action="." method="POST">  
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="quantity">Minimum Threshold:</label>
+    <input id="quantity" name="quantity" type="number" required step="1" min="0" class="form-control">
+    <input id="search_param" name="search_param" type="hidden" class="form-control" value="{{search_param}}" readonly>
+    <input id="model_param" name="model_param" type="hidden" class="form-control" value="{{model_param}}" readonly>
+    <input id="tag_param" name="tag_param" type="hidden" class="form-control" value="{{tag_param}}" readonly>
+    <input id="extag_param" name="extag_param" type="hidden" class="form-control" value="{{extag_param}}" readonly>
+  </div>
+  <button id="save_request" type="submit" class="btn btn-default">Set Threshold</button>
+</form>
+</div>
+<p style="padding-left: 15px; width: 60%">For all items included in the search below, the minimum stock threshold for that item will be set to the value specified above. Subscried managers will receive an email alert when the available stock of any of those items falls below this threshold.</p>
+
+<hr>
+
 <div class="container">
   <form role="search" type="get" action=".">
     <div class="row">
@@ -39,7 +58,7 @@
       </div>
       <div class="col-lg-2" style="padding-top:25px">
         <!--<label for="search_submit">Submit:</label>-->
-        <button id="search_submit" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+        <button id="search_submit" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span>Filter</button>
       </div>
     </div>
   </form>
@@ -105,23 +124,13 @@ $(document).ready(function(){
   }
 </script>
 
-
-
-{% if request.user.is_staff %}
-<h4 style="padding-left: 15px;padding-bottom: 10px">
-  <a href = "{% url 'add an item' %}" class="btn btn-primary" role="button"><span class="glyphicon glyphicon-plus-sign"></span> Add an Item</a>
-</h4>
-{% endif %}
-
 <table class="table">
   <thead>
     <tr>
       <th>Item Name</th>
       <th>Model Number</th>
       <th>Quantity</th>
-      {% if request.user.is_staff or request.user.is_superuser %}
-        <th>Actions</th>
-      {% endif %}
+      <th>Minimum Stock</th>
     </tr>
   </thead>
   <tbody>
@@ -138,14 +147,7 @@ $(document).ready(function(){
           {% endif %}
         </td>
         <td style="vertical-align:middle"><span class="badge">{{item.count}}</span></td>
-        {% if request.user.is_staff or request.user.is_superuser %}
-          <td style="vertical-align:middle">
-            <a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span style="margin-left:5px; color:green" title="Modify" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
-            {% if request.user.is_superuser %}
-              <a href="{% url 'delete check' item_id=item.id %}" ><span style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" title="Delete" aria-hidden="true"> </span></a>
-            {% endif %}
-          </td>
-        {% endif %}
+        <td>{{item.minimum_stock}}</td>
       </tr>
     {% endfor %}
   </tbody>
