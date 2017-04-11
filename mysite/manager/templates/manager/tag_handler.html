@@ -8,7 +8,7 @@
 <script type="text/javascript">
 	// auto-completes item name search
 	$(document).ready(function(){
-		var tag_box=$('input[id="id_old_name"]');
+		var tag_box=$('input[id="delete_tag_search"]');
 		var tags = [
 			{% for tag in tags %}
 			"{{tag}}",
@@ -59,7 +59,12 @@
 <form method="POST" action="{% url 'delete tag conf' %}">
 	{% csrf_token %}
 	<h4> <b>Delete Tags </b></h4>
-	{{delete_form.as_p}}
+	<div id="deleteTagsDynamic">
+		<input type="text" class="form-control" name="deleteTags[]" placeholder="Delete tag..." >
+	</div>
+	<button class="btn btn-default" value="Delete another tag" onclick="addDeleteTag();" >
+	<!-- Commenting out old delete form
+	{{delete_form.as_p}} -->
 
 	<p><input class="btn btn-default" type="submit" value="Delete"></p>
 </form>
