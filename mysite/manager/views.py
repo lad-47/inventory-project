@@ -76,7 +76,8 @@ def create_request_info(cart_requests):
 def create_indv_request_info(cart_request):
 	subrequests = Request.objects.filter(parent_cart=cart_request);
 	#assemble useful info to pass to template or use for db manipulation
-	req_info = [];
+	req_info = []
+	i=0
 	for subrequest in subrequests:
 		itemToChange = Item.objects.get(id=subrequest.item_id_id);
 		oldQuantity = itemToChange.count;
@@ -84,8 +85,9 @@ def create_indv_request_info(cart_request):
 		newQuantity = oldQuantity - requestAmount;
 		valid = not (newQuantity < 0)
 		req_info+=[(subrequest, requestAmount, oldQuantity, valid, itemToChange, subrequest.status)];
-		if subrequest.status=='B' or subrequest.parent_cart.suggestion=='B':
-			req_info[0]+= (FileSystemStorage().url(BackfillPDF.objects.get(request=subrequest).pdf),)
+		if subrequest.status=='B' or subrequest.suggestion=='B':
+			req_info[i]+= (FileSystemStorage().url(BackfillPDF.objects.get(request=subrequest).pdf),)
+		i+=1
 	return req_info;
 
 
@@ -109,6 +111,7 @@ def cart_request_details(request, cart_request_id):
 			new_status = service_form.cleaned_data['approve_deny'];
 			if new_status == 'A' or new_status == 'L' or new_status == 'B':
 				current_request.cart_status=new_status;
+				current_request.suggestion='D'
 				for el in req_info:
 					if not el[3]:
 						#this is a place I could fix things
@@ -118,15 +121,18 @@ def cart_request_details(request, cart_request_id):
 					message+=el[0].item_id.item_name+' x'+str(el[0].quantity)+"\n"
 					el[0].status=new_status; ##subrequest was serviced
 					el[0].admin_comment=service_form.cleaned_data['admin_comment'];
+					el[0].suggestion='D'
 					el[0].save();  ##save the subrequest's updated status
 					el[4].save();  ##save the item with new quantity
 				message+='has been APPROVED'
 				tag+=' Request APPROVED'
 			else:
 				current_request.cart_status='D';
+				current_request.suggestion='D'
 				for el in req_info:
 					el[0].status='D'; ##subrequest was serviced
 					el[0].admin_comment=service_form.cleaned_data['admin_comment'];
+					el[0].suggestion='D'
 					message+=el[0].item_id.item_name+' x'+str(el[0].quantity)+"\n"
 					el[0].save();
 				message+='has been DENIED'

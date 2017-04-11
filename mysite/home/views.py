@@ -297,6 +297,16 @@ def api_download(request):
 def cart_request_details(request, cart_request_id):
 	current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
 	subrequests = Request.objects.filter(parent_cart=current_request);
+	if request.method == 'POST':
+		items = request.POST.getlist('check[]',None)
+		for item in items:
+			req = subrequests.get(item_id__item_name=item)		
+			pdf = BackfillPDF(request=req,pdf=request.FILES['receipt'])
+			pdf.save()
+			req.suggestion = 'B'
+			req.save()
+			current_request.suggestion='B'
+		current_request.save()
 	context = {
 		'current_request':current_request,
 		'subrequests':subrequests,
@@ -339,12 +349,12 @@ def checkout(request):
 			for subrequest in subrequests:
 				subrequest.status = 'O';
 				subrequest.reason = to_checkout.cart_reason;
+				subrequest.suggestion = to_checkout.suggestion
 				subrequest.save();
-				print('PDF')
-				pdf = BackfillPDF(request=subrequest,pdf=request.FILES['backfill_pdf'])
-				pdf.save()
-# 				file_url = FileSystemStorage().url(pdf.pdf)
-# 				return redirect(file_url)
+				if(to_checkout.suggestion=='B'):
+					print('PDF')
+					pdf = BackfillPDF(request=subrequest,pdf=request.FILES['backfill_pdf'])
+					pdf.save()
 				message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
 			tag=EmailTag.objects.all()[0].tag
 			subscribed_emails=SubscribedEmail.objects.all()
