@@ -558,6 +558,8 @@ def modify_tag(request):
 	return render(request, 'manager/tag_handler.html', context);
 
 def delete_tag_conf(request):
+	# TODO: Fix delete tag logic!!! DONT use forms.
+
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	if request.method=='POST':
@@ -587,6 +589,8 @@ def delete_tag_conf(request):
 	return render(request, 'manager/tag_handler.html', context);
 
 def delete_tag_action(request):
+	# TODO: Fix delete tag logic!!! DONT use forms.
+
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	if request.method=='POST':
