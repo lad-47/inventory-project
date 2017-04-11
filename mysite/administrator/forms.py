@@ -24,7 +24,7 @@ class CFAddForm(forms.Form):
 	field_name = forms.CharField(max_length=100, label="Field Name");
 	value_type = forms.ChoiceField(widget=forms.RadioSelect, choices=TYPES, label="Field Datatype");
 	is_private = forms.ChoiceField(widget=forms.RadioSelect, choices=PRIV, label="Field Privacy");
-	is_private = forms.ChoiceField(widget=forms.RadioSelect, choices=PER_ASSET, label="Per asset field?");
+	per_asset = forms.ChoiceField(widget=forms.RadioSelect, choices=PER_ASSET, label="Per asset field?");
 
 
 class CFDeleteForm(forms.Form):
