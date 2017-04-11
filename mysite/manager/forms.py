@@ -3,8 +3,8 @@ from home.models import CustomFieldEntry, Item, Tag;
 
 class ServiceForm(forms.Form):
 	CHOICES = (
-		('A', 'Approve for Disbursment'), 
-		('L', 'Approve for Loan'), 
+		('A', 'Approve for Disbursment'),
+		('L', 'Approve for Loan'),
 		('B', 'Approve for Backfill'),
 		('D', 'Deny'),
 		);
@@ -112,4 +112,3 @@ class PositiveIntArgMaxForm(forms.Form):
 		#print(kwargs['max_val'])
 		self.fields['Amount'] = forms.IntegerField(min_value=1, max_value=max_val)
 		self.fields['Comment'] = forms.CharField(initial='No Comment', required=False);
-
