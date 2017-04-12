@@ -325,9 +325,9 @@ def checkout(request):
 		to_checkout = Cart_Request.objects.get(cart_status='P', cart_owner=request.user);
 	except Cart_Request.DoesNotExist:
 		return render(request, 'home/message.html', {'message':"Cart Empty."});
+	checkout_form = CheckoutForm();
+	subrequests = Request.objects.filter(parent_cart=to_checkout);
 	if request.method=='GET':
-		checkout_form = CheckoutForm();
-		subrequests = Request.objects.filter(parent_cart=to_checkout);
 		context = {
 			'subrequests':subrequests,
 			'to_checkout':to_checkout,
@@ -336,13 +336,19 @@ def checkout(request):
 		return render(request, 'home/checkout.html', context)
 	else:
 		# request.method == 'POST'
-		print('POST')
 		checkout_form = CheckoutForm(request.POST, request.FILES);
 		if checkout_form.is_valid():
-			print('VALID')
+			to_checkout.suggestion = checkout_form.cleaned_data['loan_disburse'];
+			if to_checkout.suggestion == 'B' and not request.FILES:
+				context = {
+				'subrequests':subrequests,
+				'to_checkout':to_checkout,
+				'checkout_form':checkout_form,
+				'error':'You must provide a pdf receipt to request a backfill'
+				}
+				return render(request, 'home/checkout.html', context)
 			to_checkout.cart_reason = checkout_form.cleaned_data['cart_reason'];
 			to_checkout.cart_status = 'O';
-			to_checkout.suggestion = checkout_form.cleaned_data['loan_disburse'];
 			to_checkout.save();
 			message = 'You have requested:\n'
 			subrequests = Request.objects.filter(parent_cart=to_checkout);
@@ -352,7 +358,6 @@ def checkout(request):
 				subrequest.suggestion = to_checkout.suggestion
 				subrequest.save();
 				if(to_checkout.suggestion=='B'):
-					print('PDF')
 					pdf = BackfillPDF(request=subrequest,pdf=request.FILES['backfill_pdf'])
 					pdf.save()
 				message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
