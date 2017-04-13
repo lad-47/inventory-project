@@ -82,6 +82,20 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 # SERVER
+<<<<<<< HEAD
+=======
+# DATABASES = {
+#            'default': {
+#                'ENGINE': 'django.db.backends.postgresql',
+#                'NAME': 'inventory',
+#                'USER': 'postgres',
+#                'PASSWORD': '',
+#                'PORT': '5432'
+#            }
+#        }
+
+## LOCALHOST
+>>>>>>> 7ba93a232b948c88345e4310a94bed27021f552a
 DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
@@ -92,6 +106,7 @@ DATABASES = {
             }
 }
 
+<<<<<<< HEAD
 ## LOCALHOST 
 #DATABASES = {
  #   'default': {
@@ -105,6 +120,8 @@ DATABASES = {
 #}
 
 
+=======
+>>>>>>> 7ba93a232b948c88345e4310a94bed27021f552a
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
 

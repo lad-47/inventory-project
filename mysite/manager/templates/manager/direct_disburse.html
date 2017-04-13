@@ -68,9 +68,11 @@
   <h1>Inventory <small>Disburse</small></h1>
 </div>
 
+<div style="padding-left: 15px">
 {% if error %}
-{{error}}
+<p style="color: red">{{error}}</p>
 {% endif %}
+</div>
 
 <div style="padding-left: 15px">
 <form method="POST">

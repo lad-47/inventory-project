@@ -47,20 +47,28 @@
 </div>
 </form>
 
-<h3 style="margin-left:15px"> Active Loans </h3>
+<h3 style="margin-left:15px"> Active {% if loan %} Loans {% else %} Backfills {% endif %} </h3>
 <table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 
 	<tr class="active"> 
-	<th> Loan Owner</th><th>Item </th><th> Amount Loaned </th><th> Actions </th>
+	<th> {% if loan %} Loan {% else %} Backfill {% endif %} Owner</th><th>Item </th><th>Request</th><th> Amount {{reqeust_list.0.get_status_display}} </th><th> Actions </th>
 	</tr>
 	{% for req in request_list %}
 		<!--make the actual tablerow -->
 		<th>{{req.owner.username}}</a> </th>
+    <th>{{req.reason}}</th>
 		<th><a href='/{{req.item_id.pk}}'> {{req.item_id}}</a> </th>
 		<th> {{req.quantity}} </th>
 		<th><a style = "margin-right:10px" href="{% url 'disburse loaned' req.pk %}">Disburse</a>
-			<a href="{% url 'return loaned' req.pk %}">Mark as Returned</a></th>
+			<a style="margin-right:10px" href="{% url 'return loaned' req.pk %}">Mark as Returned</a>
+      {% if loan %}
+      <a href="{% url 'change status' request_id=req.pk new_status='B' %}">Convert To Backfill</a></th>
+      {% else %}
+      <a href="{% url 'change status' request_id=req.pk new_status='L' %}">Convert To Loan</a></th>
+      {% endif %}
+      </th>
 		</tr>
+
 	{% endfor %}
 	</table>
 

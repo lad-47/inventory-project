@@ -2,9 +2,33 @@
 
 {% block content %}
 
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+<script type="text/javascript">
+	// auto-completes item name search
+	$(document).ready(function(){
+		var tag_box=$('input[id="id_old_name"]');
+		var tags = [
+			{% for tag in tags %}
+			"{{tag}}",
+			{%endfor%}
+		];
+		tag_box.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	} );
+
+</script>
+
+<div class="page-header" style="padding-left: 15px">
+  <h1>Inventory <small>Tags</small></h1>
+</div>
+
 <head>
   <style type="text/css">
-    .form_layout p { margin-left:10px; 
+    .form_layout p { margin-left:10px;
     				margin-bottom:10px; }
     			h4 { margin-left: 10px; }
     			h5 { margin-left: 10px; }
@@ -17,9 +41,9 @@
 	<h4> <b>Change the Name of a Current Tag </b></h4>
 	{{modify_form.as_p}}
 
-	<p><input type="submit" value="Modify"></p>
+	<p><input class="btn btn-default" type="submit" value="Modify"></p>
 </form>
-</div> <br><br>
+</div> <hr>
 
 <div class="form_layout" >
 <form method="POST" action="{% url 'create tag' %}">
@@ -27,9 +51,9 @@
 	<h4> <b>Create a New Tag </b></h4>
 	{{create_form.as_p}}
 
-	<p><input type="submit" value="Create"></p>
+	<p><input class="btn btn-default" type="submit" value="Create"></p>
 </form>
-</div> <br><br>
+</div> <hr>
 
 <div class="form_layout" >
 <form method="POST" action="{% url 'delete tag conf' %}">
@@ -37,7 +61,7 @@
 	<h4> <b>Delete Tags </b></h4>
 	{{delete_form.as_p}}
 
-	<p><input type="submit" value="Delete"></p>
+	<p><input class="btn btn-default" type="submit" value="Delete"></p>
 </form>
 </div>
 

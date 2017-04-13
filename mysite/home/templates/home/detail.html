@@ -50,10 +50,10 @@
     {% else %}
     <a href="{% url 'view request details' request.parent_cart.id %}"> 
     {% endif %}
-    {{request.reason}}</a> <span style="margin-left:10px" class="badge">{{request.quantity}}</span>
+    {{request.reason}}</a> <span style="margin-left:10px; margin-right:20px" class="badge">{{request.quantity}}</span>
     <big>Requested</big></div></li> 
 
-    {% elif request.status == 'L' %}
+    {% elif request.status == 'L' or request.status == 'B'%}
     {% if user.is_staff %} 
       <big>Owner:</big> {{request.owner}}
     {% endif %}
@@ -63,7 +63,7 @@
     {% else %}
     <a href="{% url 'view request details' request.parent_cart.id %}"> 
     {% endif %}
-    {{request.reason}}</a> <span style="margin-left:10px; margin-right:20px" class="badge">{{request.quantity}}</span><big>Loaned</big></div></li> 
+    {{request.reason}}</a> <span style="margin-left:10px; margin-right:20px" class="badge">{{request.quantity}}</span><big>{{request.get_status_display}}</big></div></li> 
     {% endif %}
 	{% endfor %}
 </ul>
@@ -75,7 +75,7 @@
   {% csrf_token %}
   <div class="form-group">
     <label for="quantity">Quantity:</label>
-    <input id="quantity" name="quantity" type="number" class="form-control">
+    <input id="quantity" name="quantity" type="number" required step="1" min="1" class="form-control">
   </div>
   <button id="save_request" type="submit" class="btn btn-default">Add to Cart</button>
 </form>

@@ -29,20 +29,32 @@ def index(request):
 		latest_item_list = Item.objects.all()
 		search_query = request.GET.get('search_box', None)
 		model_query = request.GET.get('model_box', None)
-		tag_query = request.GET.getlist('select', None)
-		extag_query = request.GET.getlist('exselect', None)
+		#old_tag_query = request.GET.getlist('select', None)
+		#old_extag_query = request.GET.getlist('exselect', None)
+		tag_query = request.GET.getlist('myTags[]', None)
+		extag_query = request.GET.getlist('exTags[]', None)
 		if search_query is not None:
 			latest_item_list = latest_item_list.filter(item_name__icontains=search_query)
 		if model_query is not None:
 			latest_item_list = latest_item_list.filter(model_number__icontains=model_query)
-		if tag_query is not None and 'all' not in tag_query:
+		if tag_query is not None:
+			# tags_to_include = []
 			for tag in tag_query:
-				tag = Tag.objects.get(tag=tag);
-				latest_item_list = latest_item_list.filter(tags=tag) 
-		if extag_query is not None and 'none' not in extag_query:
+				print(tag)
+				# if (tag != ''):
+				# 	this_tag = Tag.objects.get(tag=tag)
+				# 	tags_to_include.append(this_tag)
+				if (tag != ''):
+					tag = Tag.objects.get(tag=tag);
+					latest_item_list = latest_item_list.filter(tags=tag)
+			# if tags_to_include is not None:
+			# 	latest_item_list = latest_item_list.filter(tags__in=tags_to_include)
+		if extag_query is not None:
 			for tag in extag_query:
-				tag = Tag.objects.get(tag=tag)
-				latest_item_list = latest_item_list.exclude(tags=tag)
+				if (tag != ''):
+					tag = Tag.objects.get(tag=tag)
+					latest_item_list = latest_item_list.exclude(tags=tag)
+		latest_item_list = sorted(latest_item_list, key=lambda item: item.item_name)
 	page = request.GET.get('page', 1)
 	paginator = Paginator(latest_item_list, 10)
 	try:
@@ -56,18 +68,18 @@ def index(request):
 		'tag_list': tag_list
 	}
 	return render(request, 'home/index.html', context)
- 	
+
 def detail(request, item_id):
 	item = get_object_or_404(Item, pk=item_id)
 	tags = item.tags.all()
 	if request.user.is_anonymous:
 		requests = Request.objects.none()
-	elif request.user.is_staff:
-		requests = Request.objects.filter(item_id=item.id, status='O');
-		requests = requests | Request.objects.filter(item_id=item.id, status='L')
-	else:
-		requests = Request.objects.filter(item_id=item.id, owner=request.user, status='O')
-		requests = requests | Request.objects.filter(item_id=item.id, status='L')
+		
+	requests = Request.objects.filter(item_id=item.id, status='O');
+	requests = requests | Request.objects.filter(item_id=item.id, status='L')
+	requests = requests | Request.objects.filter(item_id=item.id, status='B')
+	if not request.user.is_staff:
+		requests = requests.filter(owner=request.user);
 
 	custom_fields = CustomFieldEntry.objects.all()
 	custom_values = []
@@ -76,25 +88,29 @@ def detail(request, item_id):
 			if cf.value_type == 'lt': # Long Text
 				try:
 					val = CustomLongTextField.objects.get(parent_item=item.id, field_name=cf)
-					custom_values.append(val.field_name.field_name+": "+val.field_value)
+					if val.field_value:
+						custom_values.append(val.field_name.field_name+": "+val.field_value)
 				except CustomLongTextField.DoesNotExist:
 					pass
 			elif cf.value_type == 'st': # Short Text
 				try:
 					val = CustomShortTextField.objects.get(parent_item=item.id, field_name=cf)
-					custom_values.append(val.field_name.field_name+": "+val.field_value)
+					if val.field_value:
+						custom_values.append(val.field_name.field_name+": "+val.field_value)
 				except CustomShortTextField.DoesNotExist:
 					pass
 			elif cf.value_type == 'int': # Integer
 				try:
 					val = CustomIntField.objects.get(parent_item=item.id, field_name=cf)
-					custom_values.append(val.field_name.field_name+": "+str(val.field_value))
+					if val.field_value:
+						custom_values.append(val.field_name.field_name+": "+str(val.field_value))
 				except CustomIntField.DoesNotExist:
 					pass
 			elif cf.value_type == 'float': # Float
 				try:
 					val = CustomFloatField.objects.get(parent_item=item.id, field_name=cf)
-					custom_values.append(val.field_name.field_name+": "+str(val.field_value))
+					if val.field_value:
+						custom_values.append(val.field_name.field_name+": "+str(val.field_value))
 				except CustomFloatField.DoesNotExist:
 					pass
 			else:
@@ -107,7 +123,7 @@ def detail(request, item_id):
 		'user':request.user
 	}
 	return render(request, 'home/detail.html', context)
-	
+
 def developers(request):
 	return render(request, 'home/developers.html')
 
@@ -152,14 +168,14 @@ class requestsView(LoggedInMixin, RequestOwnerMixin, ListView):
 #		return Request.objects.all();
 
 def cannotService(request):
-	return render(request, 'home/notAdmin.html'); 
-	
+	return render(request, 'home/notAdmin.html');
+
 #def request_details(request, request_id):
 #	if not request.user.is_staff:
 #		return render(request, 'home/notAdmin.html')
 #	current_request = get_object_or_404(Request, pk=request_id)
 #	context = {
-#		'current_request': current_request 
+#		'current_request': current_request
 #	}
 #	return render(request, 'home/serviceReq.html', context)
 
@@ -180,7 +196,7 @@ def cannotService(request):
 #		itemToChange.save();
 #	else:
 #		requestToService.status = 'D';
-#	
+#
 #	admin_comment_fromReq = request.POST.get('comment', None);
 #	requestToService.admin_comment = admin_comment_fromReq;
 #	requestToService.save();
@@ -207,7 +223,7 @@ def request(request, item_id):
 class DeleteRequestView(DeleteView):
 	model = Request
 	template_name = 'home/delete_request.html'
-	
+
 	def get_success_url(self):
 		return reverse('index')
 
@@ -251,7 +267,7 @@ def cart_request_details(request, cart_request_id):
 # class ListItemView(ListView):
 #	 model=Item
 #	 template_name='home/index.html'
-# 
+#
 # class ItemDetailView(DetailView):
 #	 model=Item
 #	 template_name='home/detail.html'
