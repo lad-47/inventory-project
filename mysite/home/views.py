@@ -35,6 +35,7 @@ def index(request):
 		#old_extag_query = request.GET.getlist('exselect', None)
 		tag_query = request.GET.getlist('myTags[]', None)
 		extag_query = request.GET.getlist('exTags[]', None)
+		low_stock = request.GET.get('low_stock',None)
 		if search_query is not None:
 			latest_item_list = latest_item_list.filter(item_name__icontains=search_query)
 		if model_query is not None:
@@ -56,6 +57,8 @@ def index(request):
 				if (tag != ''):
 					tag = Tag.objects.get(tag=tag)
 					latest_item_list = latest_item_list.exclude(tags=tag)
+		if low_stock is not None:
+			latest_item_list = latest_item_list.filter(understocked=True)
 		latest_item_list = sorted(latest_item_list, key=lambda item: item.item_name)
 	page = request.GET.get('page', 1)
 	paginator = Paginator(latest_item_list, 10)
