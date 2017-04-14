@@ -6,6 +6,7 @@ from home.models import Request, Cart_Request, User, Item, Log, Tag, CustomField
 CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, BackfillPDF
 from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
 PositiveIntArgMaxForm
+from .auto_increment import generateAssetTag()
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
@@ -359,6 +360,7 @@ def modify_an_item_action(request, item_id):
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
 			updateItem(itemToChange, item_form.cleaned_data);
+			#convert_item_to_asset(itemToChange);
 			return HttpResponseRedirect('/manager/update_success');
 		else:
 			context = {
@@ -369,6 +371,23 @@ def modify_an_item_action(request, item_id):
 	# we should never get here with a GET
 	# if we do, just render the home page
 	render(request, 'index.html');
+
+def convert_item_to_asset(item):
+	itemQuantity = item.count;
+	item.is_asset = True;
+	item.save();
+	for x in range (0, itemQuantity):
+		newAsset = Asset.objects.create(item_name=item.item_name, model_number=item.model_number, description=item.description, tags=item.tags, is_asset = True, asset_tag = generateAssetTag());
+	return True;
+
+def convert_asset_to_item(asset):
+	assets = Asset.objects.filter(item_name=asset.item_name);
+	asset.count = len(assets);
+	asset.is_asset = False;
+	asset.save();
+	for asset in assets:
+		asset.delete();
+	return True;
 
 def update_success(request):
 	return render(request, 'manager/update_success.html');
