@@ -7,37 +7,171 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form class="navbar-form navbar-top" role="search" type="get" action=".">
-  <div class="form-group">
-  	<label for="search_box">Search Name:</label>
-    <input id="search_box" name="search_box" type="text" class="form-control" placeholder="Search name">
-    <label for="model_box">Search Model:</label>
-    <input id="model_box" name="model_box" type="text" class="form-control" placeholder="Search model">
-    <label for="select">Include Tag:</label>
-    <select id="select" multiple name="select">
-    	<option value="all">All</option>
-    	{% for tag in tag_list %}
-    	<option value="{{tag.tag}}">{{tag.tag}}</option>
-    	{% endfor %}
-    </select>
-    <label for="exselect">Exclude Tag:</label>
-    <select id="exselect" multiple name="exselect">
-      <option value="none">None</option>
-      {% for tag in tag_list %}
-      <option value="{{tag.tag}}">{{tag.tag}}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <button id="search_submit" type="submit" class="btn btn-default">Submit</button>
-</form>
+
+<div class="container">
+	<form role="search" type="get" action=".">
+		<div class="row">
+			<div class="col-lg-2">
+				<label for="search_box">Search Name:</label>
+		    <input id="search_box" name="search_box" type="text" class="form-control" placeholder="Name...">
+			</div>
+			<div class="col-lg-2">
+				<label for="model_box">Search Model:</label>
+		    <input id="model_box" name="model_box" type="text" class="form-control" placeholder="Model number...">
+			</div>
+			<div class="col-lg-2">
+				<div id="dynamicInclude">
+					<label for="myTags">Include Tags:</label>
+	        <input class="form-control" type="text" name="myTags[]" placeholder="Tag...">
+	      </div>
+				<input class="btn btn-default btn-block" type="button" value="Include another tag" onClick="addInTag();">
+			</div>
+			<div class="col-lg-2">
+				<div id="dynamicExclude">
+					<label for="exTags">Exclude Tags:</label>
+	        <input class="form-control" type="text" name="exTags[]" placeholder="Tag...">
+	      </div>
+				<input class="btn btn-default btn-block" type="button" value="Exclude another tag" onClick="addExTag();">
+			</div>
+			<div class="col-lg-2" style="padding-top:25px">
+				<!--<label for="search_submit">Submit:</label>-->
+				<button id="search_submit" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
+			</div>
+		</div>
+	</form>
+</div>
+
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var tag_input=$('input[name="myTags[]"]');
+	var exclude_tag_input=$('input[name="exTags[]"]');
+	var tags = [
+		{% for tag in tag_list %}
+		"{{tag}}",
+		{%endfor%}
+	];
+	tag_input.autocomplete({
+		source: tags,
+		minLength: 2
+	});
+	exclude_tag_input.autocomplete({
+		source: tags,
+		minLength: 2
+	});
+});
+</script>
+
+<script type="text/javascript">
+  function addInTag(divName){
+      var newdiv = document.createElement('div');
+      newdiv.innerHTML = "<input class='form-control' type='text' name='myTags[]' placeholder='Tag...'>";
+      document.getElementById('dynamicInclude').appendChild(newdiv);
+
+      var tag_input=$('input[name="myTags[]"]');
+      var tags = [
+        {% for tag in tag_list %}
+        "{{tag}}",
+        {%endfor%}
+      ];
+      tag_input.autocomplete({
+        source: tags,
+        minLength: 2
+      });
+  }
+	function addExTag(){
+		var newdiv = document.createElement('div');
+		newdiv.innerHTML = "<input class='form-control' type='text' name='exTags[]' placeholder='Tag...'>";
+		document.getElementById('dynamicExclude').appendChild(newdiv);
+
+		var exclude_tag_input=$('input[name="exTags[]"]');
+		var tag_input=$('input[name="myTags[]"]');
+		var tags = [
+			{% for tag in tag_list %}
+			"{{tag}}",
+			{%endfor%}
+		];
+		exclude_tag_input.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	}
+</script>
+
 <div class="page-header" style="padding-left: 15px">
   <h1>Inventory <small>Item List</small></h1>
 </div>
-<div class="list-group">
-  	{% for item in latest_item_list %}
-  	<a href="{{ item.get_absolute_url }}" class="list-group-item">{{ item.item_name }}</a>
+
+{% if request.user.is_staff %}
+<h4 style="padding-left: 15px;padding-bottom: 10px">
+  <a href = "{% url 'add an item' %}" class="btn btn-primary" role="button"><span class="glyphicon glyphicon-plus-sign"></span> Add an Item</a>
+</h4>
+{% endif %}
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Item Name</th>
+			<th>Model Number</th>
+			<th>Quantity</th>
+			{% if request.user.is_staff or request.user.is_superuser %}
+				<th>Actions</th>
+			{% endif %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for item in items %}
+			<tr>
+				<td style="font-size:larger;font-weight:bold;vertical-align:middle">
+					<a style="font-weight:bold" class="btn btn-link" href="{{ item.get_absolute_url }}">{{item.item_name}}</a>
+				</td>
+				<td style="font-size:smaller;vertical-align:middle">
+					{% if item.model_number %}
+						{{item.model_number}}
+					{% else %}
+						N/A
+					{% endif %}
+				</td>
+				<td style="vertical-align:middle"><span class="badge">{{item.count}}</span></td>
+				{% if request.user.is_staff or request.user.is_superuser %}
+					<td style="vertical-align:middle">
+						<a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span style="margin-left:5px; color:green" title="Modify" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
+		        {% if request.user.is_superuser %}
+		          <a href="{% url 'delete check' item_id=item.id %}" ><span style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" title="Delete" aria-hidden="true"> </span></a>
+		        {% endif %}
+					</td>
+				{% endif %}
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+{% if items.has_other_pages %}
+  <ul class="pagination" style="padding-left: 15px">
+    {% if items.has_previous %}
+      <li><a href="?page={{ items.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in items.paginator.page_range %}
+      {% if items.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
     {% endfor %}
-</div>
+    {% if items.has_next %}
+      <li><a href="?page={{ items.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
+
+
 {% endblock %}
 </body>
 </html>

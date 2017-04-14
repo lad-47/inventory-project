@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+<html>
+<head>
+	<title>Inventory</title>
+</head>
+<body>
+
+{% block content %}
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+        var item_input=$('input[id="item_box"]');
+        var items = [
+      {% for item in items %}
+          "{{item}}",
+      {%endfor%}
+    ];
+        item_input.autocomplete({
+          source: items,
+          minLength: 2
+        });
+        var user_input=$('input[id="user_box"]');
+        var users = [
+      {% for user in users %}
+          "{{user}}",
+      {%endfor%}
+    ];
+        user_input.autocomplete({
+          source: users,
+          minLength: 2
+        });
+      } );
+    
+
+    //   keeps same width as box
+      jQuery.ui.autocomplete.prototype._resizeMenu = function () {
+          var ul = this.menu.element;
+          ul.outerWidth(this.element.outerWidth());
+        }
+</script>
+
+
+<div class="page-header" style="padding-left: 15px">
+  <h1>Inventory <small>Logs</small></h1>
+</div>
+
+{% if error %}
+{{error}}
+{% endif %}
+
+<form class="navbar-form navbar-top" role="search" type="get" action=".">
+  <div class="form-group">
+  	<label for="item_box">Search Item:</label>
+    <input id="item_box" name="item_box" type="text" class="form-control" placeholder="Search item">
+    <label for="user_box">Search User:</label>
+    <input id="user_box" name="user_box" type="text" class="form-control" placeholder="Search user">
+    <label for="date">From Date:</label>
+    <input id="date" name="date" type="date" class="form-control" value="" />
+  </div>
+  <button id="search_submit" type="submit" class="btn btn-default">Search<span style="margin-left:5px" class="glyphicon glyphicon-search" aria-hidden="true"> </span></button>
+</form>
+
+<div style="padding: 15px">
+<table class="table table-striped table-bordered table-hover">
+  <thead class="thead" style="background-color: black; color: white">
+        <tr>
+            <th>#</th>
+            <th>Initiating User</th>
+            <th>Involved Item</th>
+            <th>Nature</th>
+            <th>Timestamp</th>
+            <th>Related Request</th>
+            <th>Affected User</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <th scope="row">{{log.id}}</th>
+            <td>{{log.initiating_username}}</td>
+            <td>
+            {% if log.involved_item %}
+            <a href="{% url 'detail' log.involved_item %}">{{log.involved_item_name}}</a>
+            {% else %}
+            {{log.involved_item_name}}
+            {% endif %}</td>
+            <td style="width: 30%">{{log.nature}}</td>
+            <td>{{log.timestamp}}</td>
+            <td>
+            {% if log.related_request %}
+            <a href="{% url 'cart request details' log.related_request %}">{{log.related_request}}</a>
+            {% else %}
+            {{log.related_request}}
+            {% endif %}
+            </td>
+            <td>{{log.affected_username}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+{% if logs.has_other_pages %}
+  <ul class="pagination" style="padding-left: 15px">
+    {% if logs.has_previous %}
+      <li><a href="?page={{ logs.previous_page_number }}&{{params}}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in logs.paginator.page_range %}
+      {% if logs.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}&{{params}}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if logs.has_next %}
+      <li><a href="?page={{ logs.next_page_number }}&{{params}}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
+
+{% endblock %}
+</body>
+</html>

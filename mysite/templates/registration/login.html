@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Login</title>
+</head>
+<body>
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-header" style="padding-left: 15px">
+  <h1>Inventory <small>Login</small></h1>
+</div>
+
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+
+<div style="margin-left:10px">
+<form method="post" action="{% url 'login' %}">
+{% csrf_token %}
+<table>
+<tr>
+    <td>{{ form.username.label_tag }}</td>
+    <td>{{ form.username }}</td>
+</tr>
+<tr>
+    <td>{{ form.password.label_tag }}</td>
+    <td>{{ form.password }}</td>
+</tr>
+</table>
+
+<input class="btn btn-primary" type="submit" value="Login" />
+<input type="hidden" name="next" value="{{ next }}" />
+</form>
+</div>
+
+<a style="margin-top:10px" class="btn btn-link" href="https://colab-sbx-44.oit.duke.edu/accounts/login/duke">Login with Duke</a>
+
+{% endblock %}
+</body>
+</html>

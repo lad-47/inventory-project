@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3 style="margin-left:10px">Update Item </h3>
+
+<head>
+  <style type="text/css">
+    .form_layout p { margin-left:10px; 
+    				margin-bottom:10px; }
+  </style>
+</head>
+<form method="POST">
+	{% csrf_token %}
+	<div class="form_layout">
+	{{item_form.as_p}}
+	<p><input type="submit" value="Update Item"></p>
+	</div>
+</form>
+    
+{% endblock %}
+
+
+<!--
+item_name = forms.CharField(max_length=100)
+	count = forms.IntegerField(min_value=0);
+	model_number = forms.CharField()
+	description = forms.CharField(widget=forms.Textarea); -->

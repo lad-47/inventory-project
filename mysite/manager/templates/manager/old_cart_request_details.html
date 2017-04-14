@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3 style="margin-left:15px"> Requested by {{current_request.cart_owner.username}}: "{{current_request.cart_reason}}" </h3>
+<table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
+
+	<tr class="active"> 
+	<th> Item </th><th> Quantity </th>
+	{% if current_request.cart_status == 'A' or current_request.cart_status == 'L' or current_request.cart_status == 'B' %}
+	<th>Item Status</th>
+	{% endif %}
+	</tr>
+
+	<!-- rows for each cart request -->
+	{% for req in req_info %}
+	{% if current_request.cart_status == 'O' %}
+		<!-- color the row based on validity -->
+		{% if req.3 %}
+		<tr class="success">
+		{% else %}
+		<tr class="danger">
+		{% endif %}
+
+	{% else %}
+	<tr>
+	{% endif %}
+		<!--make the actual tablerow -->
+		<th> <a href='/{{req.4.pk}}'> {{req.0.item_id}} </a> </th>
+		<th> {{req.1}} </th>
+		{% if current_request.cart_status == 'A' or current_request.cart_status == 'L' or current_request.cart_status == 'B' %}
+		<th>
+		{% if req.5 == 'L' %}
+		Loaned
+		<a style="margin-left:10px" href="{% url 'disburse loaned' req.0.pk %}">Disburse</a>
+		<a style="margin-left:10px" href="{% url 'return loaned' req.0.pk %}">Mark as Returned</a>
+		<a style="margin-left:10px" href="{% url 'change status' req.0.pk 'B' %}">Mark for Backfill</a>
+		{% elif req.5 == 'A' %}
+		Disbursed
+		{% elif req.5 == 'R' %}
+		Returned
+		{% elif req.5 == 'B' %}
+		For Backfill
+		<a style="margin-left:10px" href="{% url 'disburse loaned' req.0.pk %}">Disburse</a>
+		<a style="margin-left:10px" href="{% url 'change status' req.0.pk 'L' %}">Mark as Loaned</a>
+		<a style="margin-left:10px" href="{% url 'return loaned' req.0.pk %}">Mark as Returned</a>
+		<a style="margin-left:10px" href="{{ req.6 }}">View Receipt PDF</a>
+		{% else %}
+		{{req.5}}
+		{% endif %}
+		</th>
+		{% endif %}
+		</tr>
+	{% endfor %}
+	</table>
+{% endblock %}

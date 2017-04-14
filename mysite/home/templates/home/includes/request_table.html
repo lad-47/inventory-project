@@ -1,0 +1,54 @@
+{% block content %}
+
+<script type="text/javascript">
+	function dynamic(elem){
+    $(elem).parent().parent().nextUntil('tr.active').css('display', function(i,v){
+        return this.style.display === 'table-row' ? 'none' : 'table-row';
+    });
+    $(elem).parent().parent().parent().parent().next().css('display', function(i,v){
+        return this.style.display === 'table-row' ? 'none' : 'table-row';
+    });;
+};
+</script>
+
+<style type="text/css">
+	tr {
+    display: none;
+}
+
+tr.active {
+    display: table-row;
+}
+ul.pagination {
+	display: none;
+}
+</style>
+
+<table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
+	<tr class="active"> 
+	<th> Reason <input type="button" value="Show/Hide" onClick="dynamic(this);"></th><th> Actions </th>
+	</tr>
+
+	<!-- rows for each cart request -->
+	{% for cart_request in cart_requests %}
+		{% if cart_request.cart_status == type %}
+		<tr>
+		<!--make the actual tablerow -->
+		<th> <a href="{% url 'view request details' cart_request_id=cart_request.id %}"> Reason: {{cart_request.cart_reason}}</a> </th>
+		<th> 
+			{% if type == 'O' %}
+			<a style="margin-left:24px" href="{% url 'delete request' cart_request.id%}">Delete Request</a>
+			{% endif %}
+		</th>
+		</tr>
+		{% endif %}
+
+	{% endfor %}
+	</table>
+
+	<ul class="pagination">
+		<li></li>
+	</ul>
+
+
+{% endblock %}

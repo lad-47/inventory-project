@@ -1,0 +1,66 @@
+{% block content %}
+
+<script type="text/javascript">
+	function dynamic(elem){
+    $(elem).parent().parent().nextUntil('tr.active').css('display', function(i,v){
+        return this.style.display === 'table-row' ? 'none' : 'table-row';
+    });
+    $(elem).parent().parent().parent().parent().next().css('display', function(i,v){
+        return this.style.display === 'table-row' ? 'none' : 'table-row';
+    });;
+};
+</script>
+
+<style type="text/css">
+	tr {
+    display: none;
+}
+
+tr.active {
+    display: table-row;
+}
+ul.pagination {
+	display: none;
+}
+</style>
+
+<table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
+	<tr class="active"> 
+	<th> Request Owner <input type="button" value="Show/Hide" onClick="dynamic(this);"></th><th> Reason </th><th> Actions </th>
+	</tr>
+
+	<!-- rows for each cart request -->
+	{% for cart_request_and_v in cart_requests_and_v %}
+		<!-- color the row based on validity -->
+		{% if color %}
+			{% if cart_request_and_v.1 %}
+			<tr class="success">
+			{% else %}
+			<tr class="danger">
+			{% endif %}
+		{% else %}
+		<tr>
+		{% endif %}
+
+		<!--make the actual tablerow -->
+		<th> {{cart_request_and_v.0.cart_owner}} </th>
+		<th> {{cart_request_and_v.0.cart_reason}} </th>
+		<th> 
+		{% if color %}
+			<a href="{% url 'cart request details' cart_request_id=cart_request_and_v.0.pk %}"> View Details / Service </a>
+		{% else %}
+			<a href="{% url 'old cart request details' cart_request_id=cart_request_and_v.0.pk %}"> View Details</a>
+		{% endif %}
+		</th>
+		</tr>
+
+
+	{% endfor %}
+	</table>
+
+	<ul class="pagination">
+		<li></li>
+	</ul>
+
+
+{% endblock %}

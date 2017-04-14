@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if outstanding or loans or backfills or approved or denied %}
+	{% if outstanding %}
+	<h3 style="margin-left:15px">Outstanding Requests</h3>
+	{% include "home/includes/request_table.html" with cart_requests=outstanding type='O' %}
+	{% endif %}
+	{% if loans %}
+	<h3 style="margin-left:15px">Active Loans</h3>
+	{% include "home/includes/request_table.html" with cart_requests=loans type='L' %}
+	{% endif %}
+	{% if backfills %}
+	<h3 style="margin-left:15px">Active Backfills</h3>
+	{% include "home/includes/request_table.html" with cart_requests=backfills type='B' %}
+	{% endif %}
+	{% if approved %}
+	<h3 style="margin-left:15px">Approved Requests</h3>
+	{% include "home/includes/request_table.html" with cart_requests=approved type='A' %}
+	{% endif %}
+	{% if denied %}
+	<h3 style="margin-left:15px">Denied Requests</h3>
+	{% include "home/includes/request_table.html" with cart_requests=denied type='D' %}
+	{% endif %}
+{% else %}
+	<head>
+  <style type="text/css">
+    .options_layout p { margin-left:10px; 
+    				margin-bottom:10px; }
+  </style>
+</head>
+
+<div class="options_layout">
+<h3 style="margin-left:10px">You Haven't Made Any Requests</h3>
+<p> Perhaps you'd like to... </p>
+<p><a href="{% url 'index' %}">View Inventory</a></p>
+<p><a href="{% url 'checkout' %}">View Your Cart</a></p>
+<p><a href="{% url 'requests' %}">View Your Requests</a></p>
+</div>
+{% endif %}
+
+{% endblock %}

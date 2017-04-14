@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+<style type="text/css">
+.table_title h3 {margin-left:15px;}
+</style>
+</head>
+
+<div class="table_title">
+
+<h3>Approved, Inactive Requests</h3>
+	{% include "manager/includes/cart_request_table.html" with cart_requests_and_v=approved color=False %}
+
+<h3>Denied Requests</h3>
+	{% include "manager/includes/cart_request_table.html" with cart_requests_and_v=denied color=False %}
+</div>
+{% endblock %}
