@@ -4,8 +4,8 @@ from datetime import date
 from django.contrib.auth.models import User
 from home.models import Request, Cart_Request, User, Item, Log, Tag, CustomFieldEntry, \
 CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField
-from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
-PositiveIntArgMaxForm
+#from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
+#PositiveIntArgMaxForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
