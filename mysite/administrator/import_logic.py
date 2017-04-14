@@ -214,15 +214,15 @@ def save_cfs(custom_fields):
                 elif field_type == "lt":
                     new_cf = CustomLongTextField.objects.create(\
                                 parent_item=item_instance,\
-                                field_name=cf_name, field_value = cf_value)
+                                field_name=field_entry, field_value = cf_value)
                     new_cf.save();
                 elif field_type == "int":
                     new_cf = CustomIntField.objects.create(\
                                 parent_item=item_instance,\
-                                field_name=cf_name, field_value = cf_value)
+                                field_name=cf_nfield_entryame, field_value = cf_value)
                     new_cf.save();
                 elif field_type == "float":
                     new_cf = CustomFloatField.objects.create(\
                                 parent_item=item_instance,\
-                                field_name=cf_name, field_value = cf_value)
+                                field_name=field_entry, field_value = cf_value)
                     new_cf.save();
