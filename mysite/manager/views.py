@@ -2,11 +2,11 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from datetime import date
 from django.contrib.auth.models import User
-from home.models import Request, Cart_Request, User, Item, Log, Tag, CustomFieldEntry, \
+from home.models import Request, Cart_Request, User, Item, Asset, Log, Tag, CustomFieldEntry, \
 CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, BackfillPDF
 from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
 PositiveIntArgMaxForm
-from .auto_increment import generateAssetTag()
+from .auto_increment import generateAssetTag
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
@@ -359,12 +359,18 @@ def modify_an_item_action(request, item_id):
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
+			convertCheck = False;
+			if 'convert' in item_form.cleaned_data.keys():
+				convertCheck = item_form.cleaned_data.pop('convert')
 			updateItem(itemToChange, item_form.cleaned_data);
-			### NEED TO 
-			if ItemForm.cleaned_data['convert'] and itemToChange.is_asset:
+			print(convertCheck);
+			print(itemToChange.is_asset); 
+			if convertCheck  and itemToChange.is_asset:
 				convert_asset_to_item(itemToChange);
-			elif ItemForm.cleaned_data['convert'] and not itemToChange.is_asset:
+				print("asset to item");
+			elif convertCheck  and not itemToChange.is_asset:
 				convert_item_to_asset(itemToChange);
+				print("item to asset");
 			return HttpResponseRedirect('/manager/update_success');
 		else:
 			context = {
@@ -380,11 +386,14 @@ def convert_item_to_asset(item):
 	itemQuantity = item.count;
 	item.is_asset = True;
 	item.save();
+	print(itemQuantity);
 	for x in range (0, itemQuantity):
-		newAsset = Asset.objects.create(item_name=item.item_name, model_number=item.model_number, description=item.description, tags=item.tags, is_asset = True, asset_tag = generateAssetTag());
+		print(x);
+		newAsset = Asset.objects.create(item_name=item.item_name, model_number=item.model_number, description=item.description, is_asset = True, asset_tag = generateAssetTag());
 	return True;
 
 def convert_asset_to_item(asset):
+	print("here in asset to item conversion!");
 	assets = Asset.objects.filter(item_name=asset.item_name);
 	asset.count = len(assets);
 	asset.is_asset = False;
