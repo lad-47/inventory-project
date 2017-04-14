@@ -69,7 +69,7 @@
 			source: tags,
 			minLength: 2
 		});
-	} );
+	});
 
 	function addDeleteTag(){
 		var newdiv = document.createElement('div');
@@ -87,6 +87,22 @@
 			minLength: 2
 		});
 	}
+</script>
+
+<script type="text/javascript">
+	// auto-completes modify item name
+	$(document).ready(function(){
+		var old_tag_box=$('input[id="id_old_name"]');
+		var tags = [
+			{% for tag in tags %}
+			"{{tag}}",
+			{%endfor%}
+		];
+		old_tag_box.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	});
 </script>
 
 {% endblock %}
