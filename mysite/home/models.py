@@ -123,3 +123,7 @@ class EmailTag(models.Model):
 	
 class LoanDate(models.Model):
 	date=models.DateField()
+	
+class BackfillPDF(models.Model):
+	request = models.ForeignKey(Request,on_delete=models.CASCADE)
+	pdf = models.FileField(upload_to='backfills/')
