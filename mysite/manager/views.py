@@ -360,7 +360,11 @@ def modify_an_item_action(request, item_id):
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
 			updateItem(itemToChange, item_form.cleaned_data);
-			#convert_item_to_asset(itemToChange);
+			### NEED TO 
+			if ItemForm.cleaned_data['convert'] and itemToChange.is_asset:
+				convert_asset_to_item(itemToChange);
+			elif ItemForm.cleaned_data['convert'] and not itemToChange.is_asset:
+				convert_item_to_asset(itemToChange);
 			return HttpResponseRedirect('/manager/update_success');
 		else:
 			context = {
