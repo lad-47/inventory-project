@@ -75,6 +75,7 @@ def ItemForm_factory():
 		'minimum_stock': forms.IntegerField(min_value=0, required=False),
 		'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
 			choices=TAGS, required=False),
+		'convert': forms.BooleanField(default=False),
 		'__init__': ItemForm_init,
 	}
 
@@ -113,4 +114,3 @@ class PositiveIntArgMaxForm(forms.Form):
 		#print(kwargs['max_val'])
 		self.fields['Amount'] = forms.IntegerField(min_value=1, max_value=max_val)
 		self.fields['Comment'] = forms.CharField(initial='No Comment', required=False);
-
