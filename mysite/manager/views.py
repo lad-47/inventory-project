@@ -594,6 +594,17 @@ def delete_tag_action(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	if request.method=='POST':
+		delete_tags = request.POST.getlist('deleteTags[]', None)
+		if delete_tags is not None:
+			for tag in delete_tags:
+				try:
+					tag_instance = Tag.objects.get(tag=tag)
+					tag_instance.delete()
+				except:
+					# User entered a nonexistent tag, or tag was not able to be deleted
+					pass
+			return HttpResponseRedirect('/manager/tag_success')
+		"""
 		delete_form = TagDeleteForm(request.POST);
 		if delete_form.is_valid():
 			for tagPK in delete_form.cleaned_data['to_delete']:
@@ -601,14 +612,14 @@ def delete_tag_action(request):
 				tag.delete();
 			return HttpResponseRedirect('/manager/tag_success');
 	else:
-		delete_form = TagDeleteForm();
+		delete_form = TagDeleteForm();"""
 	create_form = TagCreateForm();
 	modify_form = TagModifyForm();
 
 	context = {
 		'create_form': create_form,
-		'modify_form': modify_form,
-		'delete_form': delete_form,
+		'modify_form': modify_form#,
+		#'delete_form': delete_form,
 	}
 
 	return render(request, 'manager/tag_handler.html', context);
