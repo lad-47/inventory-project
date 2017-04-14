@@ -175,14 +175,14 @@ def save_items(items):
         item_instance = Item(item_name=item['item_name'],\
             model_number=item.get('model_number',""),\
             description=item.get('description',""), count=item['count'])
-        # Create cfs
-        if item.get('custom_fields',None):
-            save_cfs(item['custom_fields'])
         # Attempt to save item instance
         try:
             item_instance.save()
         except:
             return "Item with name "+item['item_name']+" failed to save correctly."
+        # Create cfs
+        if item.get('custom_fields',None):
+            save_cfs(item['custom_fields'])
         # Create non-existing tags.
         if item.get('tags',None):
             for tag_name in item['tags']:
