@@ -3,9 +3,9 @@ from django.shortcuts import get_object_or_404, render
 from datetime import date
 from django.contrib.auth.models import User
 from home.models import Request, Cart_Request, User, Item, Log, Tag, CustomFieldEntry, \
-CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField
-#from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
-#PositiveIntArgMaxForm
+CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, BackfillPDF
+from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
+PositiveIntArgMaxForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
@@ -13,6 +13,7 @@ from django.db import IntegrityError
 from rest_framework import status
 from home.models import SubscribedEmail,EmailBody,EmailTag,LoanDate
 from django.core.mail import EmailMessage
+from django.core.files.storage import FileSystemStorage
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -26,13 +27,15 @@ def cart_requests(request):
 	cart_requests = Cart_Request.objects.exclude(cart_status='P');
 	cart_requestsO = cart_requests.filter(cart_status='O');
 	cart_requestsO_and_v = create_request_info(cart_requestsO);
-	cart_requestsL = cart_requests.filter(cart_status='L') | cart_requests.filter(cart_status='B')
+	cart_requestsL = cart_requests.filter(cart_status='L')
 	cart_requestsL_and_v = create_request_info(cart_requestsL);
-
+	cart_requestsB = cart_requests.filter(cart_status='B')
+	cart_requestsB_and_v = create_request_info(cart_requestsB);
 
 	context = {
 		'outstanding': cart_requestsO_and_v,
 		'loans': cart_requestsL_and_v,
+		'backfills':cart_requestsB_and_v
 	}
 	return render(request, 'manager/cart_requestsI.html', context)
 
@@ -81,6 +84,8 @@ def create_indv_request_info(cart_request):
 		newQuantity = oldQuantity - requestAmount;
 		valid = not (newQuantity < 0)
 		req_info+=[(subrequest, requestAmount, oldQuantity, valid, itemToChange, subrequest.status)];
+		if subrequest.status=='B':
+			req_info[0]+= (FileSystemStorage().url(BackfillPDF.objects.get(request=subrequest).pdf),)
 	return req_info;
 
 
@@ -162,6 +167,7 @@ def old_cart_request_details(request, cart_request_id):
 	current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
 	req_info = create_indv_request_info(current_request);
 
+	print(req_info)
 	context = {
 		'current_request': current_request,
 		'req_info': req_info,
@@ -436,7 +442,7 @@ def add_an_item(request):
 def createItem(data):
 	item_instance = Item.objects.create(item_name=data['item_name'],\
 	 	model_number=data['model_number'], description=data['description'],\
-	 	count=data['count']);
+	 	count=data['count'],minimum_stock=data['minimum_stock']);
 	for field_entry in CustomFieldEntry.objects.all():
 		field_type = field_entry.value_type;
 		field = field_entry.field_name;

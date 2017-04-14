@@ -44,6 +44,7 @@
 		<a style="margin-left:10px" href="{% url 'disburse loaned' req.0.pk %}">Disburse</a>
 		<a style="margin-left:10px" href="{% url 'change status' req.0.pk 'L' %}">Mark as Loaned</a>
 		<a style="margin-left:10px" href="{% url 'return loaned' req.0.pk %}">Mark as Returned</a>
+		<a style="margin-left:10px" href="{{ req.6 }}">View Receipt PDF</a>
 		{% else %}
 		{{req.5}}
 		{% endif %}

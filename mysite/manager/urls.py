@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.conf.urls import include, url
 
-from . import views,email_views
+from . import views,email_views,minimum_stock_views
 
 
 urlpatterns = [
@@ -38,7 +38,7 @@ urlpatterns = [
 	url(r'^backfill_handler/$', views.backfill_handler, name="backfill handler"),
 	url(r'^return_loaned/(?P<request_id>[0-9]+)/$', views.return_loaned, name="return loaned"),
 	url(r'^change_status/(?P<request_id>[0-9]+)/(?P<new_status>[A-Z])/$', views.handle_loan, name="change status"),
-
+	url(r'^minimum_stock/$', minimum_stock_views.minimum_stock_bulk_set, name="minimum stock bulk set"),
 	#url(r'^cart_request/(?P<cart_request_id>[0-9]+$)', \
 		#views.cart_request_details, name="cart request details"),
 ]
