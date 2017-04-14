@@ -182,7 +182,7 @@ def save_items(items):
             return "Item with name "+item['item_name']+" failed to save correctly."
         # Create cfs
         if item.get('custom_fields',None):
-            save_cfs(item['custom_fields'])
+            save_cfs(item['custom_fields'], item_instance)
         # Create non-existing tags.
         if item.get('tags',None):
             for tag_name in item['tags']:
@@ -209,7 +209,7 @@ def save_cfs(custom_fields):
                 if field_type == "st":
                     new_cf = CustomShortTextField.objects.create(\
                                 parent_item=item_instance,\
-                                field_name=cf_name, field_value = cf_value)
+                                field_name=field_entry, field_value = cf_value)
                     new_cf.save();
                 elif field_type == "lt":
                     new_cf = CustomLongTextField.objects.create(\
