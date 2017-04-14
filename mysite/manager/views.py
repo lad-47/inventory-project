@@ -346,6 +346,9 @@ def modify_an_item(request, item_id):
 	else:
 		item_dict = item_to_dict(itemToChange);
 		item_form = ItemForm(item_dict);
+# 		item_form.fields['new']=item_form.fields.get('item_name')
+# 		print(item_form.fields.get('item_name'))
+# 		print(item_form.data)
 
 	#item_form = ItemForm(item_dict);
 	#item_form=ItemForm();
