@@ -14,6 +14,9 @@
           <a href="{% url 'delete check' item_id=item.id %}" ><span title="Delete" style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" aria-hidden="true"> </span></a>
         {% endif %}</small>{% endif %}</h1>
   <p>Available: {{item.count}}</p>
+  {% if request.user.is_staff %}
+  <p>Minimum Stock Threshold: {{item.minimum_stock}} {% if item.understocked %}<span style="color: red">(Understocked)</span>{% endif %}</p>
+  {% endif %}
   <p>Model: {{item.model_number}}</p>
   <p>Description: {{item.description}}</p>
 </div>
