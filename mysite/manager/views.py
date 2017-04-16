@@ -382,20 +382,15 @@ def modify_an_item_action(request, item_id):
 	# if we do, just render the home page
 	render(request, 'index.html');
 
-def convert_item_to_asset(item, request):
+def convert_item_to_asset(item):
 	itemQuantity = item.count;
 	item.is_asset = True;
 	item.save();
 	print(itemQuantity);
 	status = request.status;
+	print("status = ", status)
 	for x in range (0, itemQuantity):
 		print(x);
-		if status is 'L':
-			print("status is a Loan!");
-		elif status is 'B':
-			print("status is a Backfill!");
-		else:
-			return;
 		newAsset = Asset.objects.create(item_name=item.item_name, model_number=item.model_number, description=item.description, is_asset = True, asset_tag = generateAssetTag());
 	return True;
 
