@@ -2,10 +2,9 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from datetime import date
 from django.contrib.auth.models import User
-from home.models import Request, Cart_Request, User, Item, Log, Tag, CustomFieldEntry, \
-CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, BackfillPDF
+from home.models import *
 from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
-PositiveIntArgMaxForm
+PositiveIntArgMaxForm, AssetForm_factory
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
@@ -320,7 +319,7 @@ def modify_an_item(request, item_id):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	itemToChange = get_object_or_404(Item, pk=item_id);
-	ItemForm = ItemForm_factory();
+	ItemForm = ItemForm_factory(item_type=type(itemToChange), is_asset_row=itemToChange.is_asset);
 
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
@@ -363,7 +362,7 @@ def modify_an_item_action(request, item_id):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	itemToChange = get_object_or_404(Item, pk=item_id);
-	ItemForm = ItemForm_factory();
+	ItemForm = ItemForm_factory(item_type=type(itemToChange), is_asset_row=itemToChange.is_asset);
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
@@ -430,14 +429,14 @@ def item_to_dict(item_instance):
 def add_an_item(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	ItemForm = ItemForm_factory();
+	ItemForm = ItemForm_factory(item_type='Item', is_asset_row=False);
 
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
 			try:
-				createItem(item_form.cleaned_data);
+				createItem(item_form.cleaned_data, 'item');
 			except IntegrityError:
 				return render(request, 'home/message.html',{'message':'An item with that name already exists'})
 			return HttpResponseRedirect('/manager/create_success');
@@ -447,12 +446,69 @@ def add_an_item(request):
 
 	return render(request, 'manager/add_an_item.html', {'item_form':item_form})
 
+def add_an_asset_row(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	ItemForm = ItemForm_factory(item_type='Item', is_asset_row=True);
 
-def createItem(data):
-	item_instance = Item.objects.create(item_name=data['item_name'],\
-	 	model_number=data['model_number'], description=data['description'],\
-	 	count=data['count'],minimum_stock=data['minimum_stock']);
-	for field_entry in CustomFieldEntry.objects.all():
+	# on a post we (print) the data and then return success
+	if request.method == 'POST':
+		item_form = ItemForm(request.POST);
+		if item_form.is_valid():
+			try:
+				createItem(item_form.cleaned_data, 'asset_row');
+			except IntegrityError:
+				return render(request, 'home/message.html',{'message':'An item with that name already exists'})
+			return HttpResponseRedirect('/manager/create_success');
+
+	else:
+		item_form = ItemForm();
+
+	return render(request, 'manager/add_an_item.html', {'item_form':item_form})
+
+def add_an_asset(request, item_id):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	item = get_object_or_404(Item, pk=item_id);
+
+	asset_tag = 3;
+	AssetForm = AssetForm_factory(asset_tag);
+
+	# on a post we (print) the data and then return success
+	if request.method == 'POST':
+		item_form = AssetForm(request.POST);
+		if item_form.is_valid():
+			try:
+				createAsset(item_form.cleaned_data, item);
+			except IntegrityError:
+				return render(request, 'home/message.html',{'message':'Asset Tag Exists.'})
+			return HttpResponseRedirect('/manager/create_success');
+
+	else:
+		item_form = AssetForm();
+
+	return render(request, 'manager/add_an_item.html', {'item_form':item_form})
+
+
+def createItem(data, kind):
+	if(kind == 'item'):
+		item_instance = Item.objects.create(item_name=data['item_name'],\
+		 	model_number=data['model_number'], description=data['description'],\
+		 	count=data['count'], is_asset=False);
+		cfs = CustomFieldEntry.objects.all();
+	elif(kind == 'asset_row'):
+		item_instance = Item.objects.create(item_name=data['item_name'],\
+		 	model_number=data['model_number'], description=data['description'],\
+		 	count=data['count'], is_asset=True);
+		cfs = CustomFieldEntry.objects.filter(per_asset=False);
+	elif(kind == 'asset'):
+		## TODO:  REPLACE ASSET TAGGGG!!!!!!!!!!!!!!!!!!!!!
+		item_instance = Asset.objects.create(asset_tag=5, item_name=data['item_name'],\
+		 	model_number=data['model_number'], description=data['description'],\
+		 	count=data['count'], is_asset=True);
+		cfs = CustomFieldEntry.objects.filter(per_asset=True);
+
+	for field_entry in cfs:
 		field_type = field_entry.value_type;
 		field = field_entry.field_name;
 		if field_type == 'st' and not data[field]=="":
@@ -476,6 +532,37 @@ def createItem(data):
 	for tagPK in data['tags']:
 		item_instance.tags.add(Tag.objects.get(pk=tagPK));
 	item_instance.save();
+
+def createAsset(data, item):
+	item_instance = Asset.objects.create(asset_tag=data['asset_tag'],\
+				item_name=item.item_name, count=1, model_number=item.model_number, is_asset=True,
+				description=item.description);
+	
+	for tag in item.tags.all():
+		item_instance.tags.add(tag);
+
+	item_instance.save();
+	cfs = CustomFieldEntry.objects.filter(per_asset=True);
+
+	for field_entry in cfs:
+		field_type = field_entry.value_type;
+		field = field_entry.field_name;
+		if field_type == 'st' and not data[field]=="":
+			to_change = CustomShortTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+			to_change.save();
+		elif field_type == 'lt' and not data[field]=="":
+			to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+			to_change.save();
+		elif field_type == 'int' and data[field] is not None:
+			to_change = CustomIntField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+			to_change.save();
+		elif field_type == 'float' and data[field] is not None:
+			to_change = CustomFloatField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+			to_change.save();
 
 def create_success(request):
 	return render(request, 'manager/create_success.html');
@@ -881,3 +968,23 @@ def assemble_loan_info(request_list):
 	for req in request_list:
 		involved_item = req.item_id;
 	return 0;
+
+# a method to call after doing anything to an asset;
+# this will update the count of the row in the item table
+# call with either asset_tag or item_name
+# ex:  update_assets(asset_tag=1111)  or
+#      update_assets(item_name="Resistor")
+def update_assets(**kwargs):
+
+	if not (asset_tag or item_name):
+		raise ValueError("Neither valid argument (asset_tag or item_name) was provided");
+	
+	if asset_tag:
+		item_name = Asset.objects.get(asset_tag=asset_tag).item_name;
+		
+	assets_left = Asset.objects.filter(item_name=asset_item_name, count=1).count();	
+	asset_item_row = Item.objects.get(item_name=asset.item_name);
+	asset_item_row.count = assets_left;
+	asset_item_row.save();
+
+
