@@ -49,6 +49,9 @@ ul.pagination {
 		{% if color %}
 			<a href="{% url 'cart request details' cart_request_id=cart_request_and_v.0.pk %}"> View Details / Service </a>
 		{% else %}
+		{% if cart_request_and_v.0.suggestion == 'B' %}
+		<span style="color: red">Requested For Backfill</span>
+		{% endif %}
 			<a href="{% url 'old cart request details' cart_request_id=cart_request_and_v.0.pk %}"> View Details</a>
 		{% endif %}
 		</th>

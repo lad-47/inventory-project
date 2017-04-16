@@ -10,3 +10,4 @@ mysite/env
 .metadata
 **/.DS_Store
 mysite/mysite/settings.py
+mysite/mysite/media

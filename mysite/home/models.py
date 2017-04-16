@@ -47,7 +47,7 @@ class Cart_Request(models.Model):
 	('P','In Progress'),
 	('L','Loaned'),
 	('B','Backfill'))
-	SUGG = (('D', 'Disbursement'), ('L', 'Loan'))
+	SUGG = (('D', 'Disbursement'), ('L', 'Loan'), ('B', 'Backfill'))
 	cart_owner = models.ForeignKey(User, on_delete=models.CASCADE);
 	cart_reason = models.TextField();
 	cart_admin_comment = models.TextField(default="No Comment");
@@ -65,12 +65,14 @@ class Request(models.Model):
 	('R','Returned'),
 	('B','For Backfill'),
 	('Z','Hacky Log Status'))
+	SUGG = (('D', 'Disbursement'), ('L', 'Loan'), ('B', 'Backfill'))
 	owner = models.ForeignKey(User, related_name='requests', on_delete=models.CASCADE, default=1)
 	item_id = models.ForeignKey(AbstractItem, on_delete=models.CASCADE, default=1)
 	reason = models.TextField()
 	admin_comment = models.TextField(default="No Comment");
 	quantity = models.PositiveIntegerField(default=1);
 	status = models.CharField(max_length=1, choices=STATUSES, default='O')
+	suggestion = models.CharField(max_length=1, choices=SUGG, default='D')
 	#testField = models.IntegerField(default=0);
 	parent_cart = models.ForeignKey(Cart_Request, null=True);
 

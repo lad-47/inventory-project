@@ -33,6 +33,14 @@
 	      </div>
 				<input class="btn btn-default btn-block" type="button" value="Exclude another tag" onClick="addExTag();">
 			</div>
+      {% if request.user.is_staff %}
+      <div class="col-lg-2">
+        <div>
+          <label for="low_stock">Only Show Understocked:</label>
+          <input type="checkbox" name="low_stock">
+        </div>
+      </div>
+      {% endif %}
 			<div class="col-lg-2" style="padding-top:25px">
 				<!--<label for="search_submit">Submit:</label>-->
 				<button id="search_submit" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>

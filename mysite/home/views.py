@@ -35,6 +35,7 @@ def index(request):
 		#old_extag_query = request.GET.getlist('exselect', None)
 		tag_query = request.GET.getlist('myTags[]', None)
 		extag_query = request.GET.getlist('exTags[]', None)
+		low_stock = request.GET.get('low_stock',None)
 		if search_query is not None:
 			latest_item_list = latest_item_list.filter(item_name__icontains=search_query)
 		if model_query is not None:
@@ -56,6 +57,8 @@ def index(request):
 				if (tag != ''):
 					tag = Tag.objects.get(tag=tag)
 					latest_item_list = latest_item_list.exclude(tags=tag)
+		if low_stock is not None:
+			latest_item_list = latest_item_list.filter(understocked=True)
 		latest_item_list = sorted(latest_item_list, key=lambda item: item.item_name)
 	page = request.GET.get('page', 1)
 	paginator = Paginator(latest_item_list, 10)
@@ -339,6 +342,16 @@ def api_download(request):
 def cart_request_details(request, cart_request_id):
 	current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
 	subrequests = Request.objects.filter(parent_cart=current_request);
+	if request.method == 'POST':
+		items = request.POST.getlist('check[]',None)
+		for item in items:
+			req = subrequests.get(item_id__item_name=item)		
+			pdf = BackfillPDF(request=req,pdf=request.FILES['receipt'])
+			pdf.save()
+			req.suggestion = 'B'
+			req.save()
+			current_request.suggestion='B'
+		current_request.save()
 	context = {
 		'current_request':current_request,
 		'subrequests':subrequests,
@@ -357,9 +370,9 @@ def checkout(request):
 		to_checkout = Cart_Request.objects.get(cart_status='P', cart_owner=request.user);
 	except Cart_Request.DoesNotExist:
 		return render(request, 'home/message.html', {'message':"Cart Empty."});
+	checkout_form = CheckoutForm();
+	subrequests = Request.objects.filter(parent_cart=to_checkout);
 	if request.method=='GET':
-		checkout_form = CheckoutForm();
-		subrequests = Request.objects.filter(parent_cart=to_checkout);
 		context = {
 			'subrequests':subrequests,
 			'to_checkout':to_checkout,
@@ -368,25 +381,30 @@ def checkout(request):
 		return render(request, 'home/checkout.html', context)
 	else:
 		# request.method == 'POST'
-		print('POST')
 		checkout_form = CheckoutForm(request.POST, request.FILES);
 		if checkout_form.is_valid():
-			print('VALID')
+			to_checkout.suggestion = checkout_form.cleaned_data['loan_disburse'];
+			if to_checkout.suggestion == 'B' and not request.FILES:
+				context = {
+				'subrequests':subrequests,
+				'to_checkout':to_checkout,
+				'checkout_form':checkout_form,
+				'error':'You must provide a pdf receipt to request a backfill'
+				}
+				return render(request, 'home/checkout.html', context)
 			to_checkout.cart_reason = checkout_form.cleaned_data['cart_reason'];
 			to_checkout.cart_status = 'O';
-			to_checkout.suggestion = checkout_form.cleaned_data['loan_disburse'];
 			to_checkout.save();
 			message = 'You have requested:\n'
 			subrequests = Request.objects.filter(parent_cart=to_checkout);
 			for subrequest in subrequests:
 				subrequest.status = 'O';
 				subrequest.reason = to_checkout.cart_reason;
+				subrequest.suggestion = to_checkout.suggestion
 				subrequest.save();
-				print('PDF')
-				pdf = BackfillPDF(request=subrequest,pdf=request.FILES['backfill_pdf'])
-				pdf.save()
-# 				file_url = FileSystemStorage().url(pdf.pdf)
-# 				return redirect(file_url)
+				if(to_checkout.suggestion=='B'):
+					pdf = BackfillPDF(request=subrequest,pdf=request.FILES['backfill_pdf'])
+					pdf.save()
 				message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
 			tag=EmailTag.objects.all()[0].tag
 			subscribed_emails=SubscribedEmail.objects.all()
