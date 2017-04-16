@@ -91,8 +91,9 @@ def cf_manager(request):
             vt = add_form.cleaned_data['value_type'];
             fn = add_form.cleaned_data['field_name'];
             i_p = add_form.cleaned_data['is_private'];
+            p_a = add_form.cleaned_data['per_asset'];
             new_field = CustomFieldEntry.objects.create(value_type=vt, \
-                field_name=fn, is_private=i_p);
+                field_name=fn, is_private=i_p, per_asset=p_a);
             new_field.save();
             return HttpResponseRedirect('/admin/custom_fields/create/success/');
     else:
