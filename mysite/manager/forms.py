@@ -58,8 +58,8 @@ class TagDeleteForm(forms.Form):
 # the item form; complicated by custom fields
 def ItemForm_init(self, *args, **kwargs):
 	super(self.__class__, self).__init__(*args, **kwargs)
-	TAGS = generate_choices(Tag, 'tag');
-	self.fields['tags'].choices=TAGS;
+	#TAGS = generate_choices(Tag, 'tag');
+	#self.fields['tags'].choices=TAGS;
 
 
 
@@ -106,8 +106,8 @@ def ItemForm_factory(**kwargs):
 		'description': forms.CharField(widget=forms.Textarea, required=False),
 		'count': count_field,
 		'minimum_stock': forms.IntegerField(min_value=0, required=False),
-		'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
-			choices=TAGS, required=False),
+		#'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
+		#	choices=TAGS, required=False),
 		'__init__': ItemForm_init,
 	}
 

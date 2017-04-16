@@ -435,6 +435,9 @@ def add_an_item(request):
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
+			d = item_form.cleaned_data
+			# TODO: get tag names from html
+			d['tags'] = []
 			try:
 				createItem(item_form.cleaned_data, 'item');
 			except IntegrityError:
@@ -444,7 +447,9 @@ def add_an_item(request):
 	else:
 		item_form = ItemForm();
 
-	return render(request, 'manager/add_an_item.html', {'item_form':item_form})
+	tags = Tag.objects.all()
+
+	return render(request, 'manager/add_an_item.html', {'item_form':item_form,'tags':tags})
 
 def add_an_asset_row(request):
 	if not request.user.is_staff:
@@ -528,7 +533,7 @@ def createItem(data, kind):
 				field_name=field_entry, field_value = data[field])
 			to_change.save();
 
-
+	# TODO: use tag names
 	for tagPK in data['tags']:
 		item_instance.tags.add(Tag.objects.get(pk=tagPK));
 	item_instance.save();
