@@ -29,6 +29,7 @@ class TagModifyForm(forms.Form):
 	old_name = forms.CharField(max_length=100);
 	new_name = forms.CharField(max_length=100);
 
+# @deprecated
 class TagCreateForm(forms.Form):
 	current_items = Item.objects.all();
 
@@ -43,6 +44,7 @@ class TagCreateForm(forms.Form):
 		ITEMS = generate_choices(Item, 'item_name');
 		self.fields['tagged_items'].choices=ITEMS;
 
+# @deprecated
 class TagDeleteForm(forms.Form):
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)
