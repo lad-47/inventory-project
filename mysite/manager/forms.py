@@ -103,6 +103,7 @@ def ItemForm_factory(**kwargs):
 		'model_number': forms.CharField(max_length=100, required=False),
 		'description': forms.CharField(widget=forms.Textarea, required=False),
 		'count': count_field,
+		'minimum_stock': forms.IntegerField(min_value=0, required=False),
 		'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
 			choices=TAGS, required=False),
 		'__init__': ItemForm_init,

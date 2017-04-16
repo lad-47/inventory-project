@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 	<h3 style="margin-left:15px">Outstanding Requests</h3>
 	{% include "manager/includes/cart_request_table.html" with cart_requests_and_v=outstanding color=True %}
-	<h3 style="margin-left:15px">Requests with Active Loans/Backfills</h3>
+	<h3 style="margin-left:15px">Active Loans</h3>
 	{% include "manager/includes/cart_request_table.html" with cart_requests_and_v=loans color=False %}
+	<h3 style="margin-left:15px">Active Backfills</h3>
+	{% include "manager/includes/cart_request_table.html" with cart_requests_and_v=backfills color=False %}
 
 	<a style="margin-left:15px" href="{% url 'request history' %}"> See Past Requests </a>
 
