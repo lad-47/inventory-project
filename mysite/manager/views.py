@@ -520,13 +520,14 @@ def createItem(data, kind):
 	item_instance.save();
 
 def createAsset(data, item):
-	new_asset = Asset.objects.create(asset_tag=data['asset_tag'],\
+	item_instance = Asset.objects.create(asset_tag=data['asset_tag'],\
 				item_name=item.item_name, count=1, model_number=item.model_number, is_asset=True,
 				description=item.description);
 	
 	for tag in item.tags.all():
-		new_asset.tags.add(tag);
+		item_instance.tags.add(tag);
 
+	item_instance.save();
 	cfs = CustomFieldEntry.objects.filter(per_asset=True);
 
 	for field_entry in cfs:

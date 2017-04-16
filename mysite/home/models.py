@@ -86,7 +86,7 @@ class CustomFieldEntry(models.Model):
 #in theory, "CustomField" should be an abstract class, but 
 #I'm not totally sure how to implement that funcionality in python
 class CustomField(models.Model):
-	parent_item = models.ForeignKey(Item, on_delete=models.CASCADE);
+	parent_item = models.ForeignKey(AbstractItem, on_delete=models.CASCADE);
 	field_name = models.ForeignKey(CustomFieldEntry, on_delete=models.CASCADE);
 
 class CustomLongTextField(CustomField):

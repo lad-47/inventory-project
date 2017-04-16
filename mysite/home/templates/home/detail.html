@@ -4,11 +4,11 @@
 <html>
 {% block content %}
 <head>
-	<title>{{item.item_name}}</title>
+	<title>{{item.item_name}} </title>
 </head>
 <body>
 <div style="padding-left: 15px">
-  <h1>{{ item.item_name }}{% if request.user.is_staff or request.user.is_superuser %}
+  <h1>{{ item.item_name }}{% if asset_tag %}, Asset Tag: {{asset_tag}} {% endif %}{% if request.user.is_staff or request.user.is_superuser %}
         <small><a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span title="Modify" style="margin-left:15px; color:green" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
         {% if request.user.is_superuser %}
           <a href="{% url 'delete check' item_id=item.id %}" ><span title="Delete" style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" aria-hidden="true"> </span></a>
@@ -32,7 +32,26 @@
   <p>None</p>
   {% endif %}
 </div>
+{% if item.is_asset %}
+<h3 style="margin-left:15px"> Asset Instances </h3>
+<table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 
+  <tr class="active"> 
+  <th> Asset Tag</th><th>In Stock?</th><th>Actions</th>
+  </tr>
+  {% for asset in assets %}
+    <!--make the actual tablerow -->
+    <tr>
+    <th>{{asset.asset_tag}}</a> </th>
+    <th>{% if asset.quantity == 0 %} No {% else %} Yes {% endif %}</th>
+    <th>{% if request.user.is_staff or request.user.is_superuser %}
+        <small><a href="{% url 'modify_an_item' item_id=asset.id%}" style="margin-right:15px"><span title="Modify" style="margin-left:15px; color:green" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
+        {% if request.user.is_superuser %}
+          <a href="{% url 'delete check' item_id=asset.id %}" ><span title="Delete" style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" aria-hidden="true"> </span></a>
+        {% endif %}</small>{% endif %}</th></tr>
+  {% endfor %}
+  </table>
+{% endif %}
 {% if requests|length > 0 %}
 <h2 style="padding-left: 15px">Requests with this item</h2>
 {% endif %}
