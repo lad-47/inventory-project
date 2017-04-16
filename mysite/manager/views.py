@@ -387,7 +387,6 @@ def convert_item_to_asset(item, request):
 	item.is_asset = True;
 	item.save();
 	print(itemQuantity);
-	status = request.POST.get('status', none);
 	print("status = ", status)
 	for x in range (0, itemQuantity):
 		print(x);
