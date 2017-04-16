@@ -366,10 +366,10 @@ def modify_an_item_action(request, item_id):
 			print(convertCheck);
 			print(itemToChange.is_asset); 
 			if convertCheck  and itemToChange.is_asset:
-				convert_asset_to_item(itemToChange, request);
+				convert_asset_to_item(itemToChange);
 				print("asset to item");
 			elif convertCheck  and not itemToChange.is_asset:
-				convert_item_to_asset(itemToChange, request);
+				convert_item_to_asset(itemToChange);
 				print("item to asset");
 			return HttpResponseRedirect('/manager/update_success');
 		else:
@@ -382,18 +382,17 @@ def modify_an_item_action(request, item_id):
 	# if we do, just render the home page
 	render(request, 'index.html');
 
-def convert_item_to_asset(item, request):
+def convert_item_to_asset(item):
 	itemQuantity = item.count;
 	item.is_asset = True;
 	item.save();
 	print(itemQuantity);
-	print("status = ", status)
 	for x in range (0, itemQuantity):
 		print(x);
 		newAsset = Asset.objects.create(item_name=item.item_name, model_number=item.model_number, description=item.description, is_asset = True, asset_tag = generateAssetTag());
 	return True;
 
-def convert_asset_to_item(asset, request):
+def convert_asset_to_item(asset):
 	print("here in asset to item conversion!");
 	assets = Asset.objects.filter(item_name=asset.item_name);
 	asset.count = len(assets);
