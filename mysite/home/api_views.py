@@ -283,6 +283,16 @@ def custom_list(request, format=None):
             fields = CustomFieldEntry.objects.filter(is_private=False)
             serializer = CustomFieldEntrySerializer(fields, many=True)
             return Response(serializer.data)
+        
+    elif request.method == 'POST':
+        if request.user.is_staff:
+            serializer = CustomFieldEntrySerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response('Manager Permission Required')
+    
     
 @api_view(['GET', 'PUT', 'DELETE'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
@@ -330,6 +340,15 @@ def short_list(request, format=None):
             shorts = CustomShortTextField.objects.filter(field_name__is_private=False)
             serializer = CustomShortTextFieldSerializer(shorts, many=True)
             return Response(serializer.data)
+        
+    elif request.method == 'POST':
+        if request.user.is_staff:
+            serializer = CustomShortTextFieldSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response('Manager Permission Required')
     
 @api_view(['GET', 'PUT', 'DELETE'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
@@ -376,6 +395,15 @@ def long_list(request, format=None):
             longs = CustomLongTextField.objects.filter(field_name__is_private=False)
             serializer = CustomLongTextFieldSerializer(longs, many=True)
             return Response(serializer.data)
+        
+    elif request.method == 'POST':
+        if request.user.is_staff:
+            serializer = CustomLongTextFieldSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response('Manager Permission Required')
     
 @api_view(['GET', 'PUT', 'DELETE'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
@@ -422,6 +450,15 @@ def int_list(request, format=None):
             nums = CustomIntField.objects.filter(field_name__is_private=False)
             serializer = CustomIntFieldSerializer(nums, many=True)
             return Response(serializer.data)
+        
+    elif request.method == 'POST':
+        if request.user.is_staff:
+            serializer = CustomIntFieldSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response('Manager Permission Required')
     
 @api_view(['GET', 'PUT', 'DELETE'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
@@ -468,6 +505,15 @@ def float_list(request, format=None):
             nums = CustomFloatField.objects.filter(field_name__is_private=False)
             serializer = CustomFloatFieldSerializer(nums, many=True)
             return Response(serializer.data)
+        
+    elif request.method == 'POST':
+        if request.user.is_staff:
+            serializer = CustomFloatFieldSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response('Manager Permission Required')
     
 @api_view(['GET', 'PUT', 'DELETE'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))

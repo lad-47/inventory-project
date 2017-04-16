@@ -81,7 +81,6 @@ ul.pagination {
 
 {% if requests|length > 0 %}
 <h2 style="padding-left: 15px">Requests with this item</h2>
-{% endif %}
 
 <table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 
@@ -102,6 +101,8 @@ ul.pagination {
     <th>{{request.get_status_display}}</th></tr>
   {% endfor %}
   </table>
+  
+{% endif %}
 
 {% if not user.is_anonymous %}
 <h2 style="padding-left: 15px">Add Item to Cart: </h2>
