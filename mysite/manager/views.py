@@ -470,17 +470,19 @@ def tag_handler(request):
 		return render(request, 'home/notAdmin.html')
 
 	# on a POST, these definitions will be overwritten before rendering
-	create_form = TagCreateForm();
+	#create_form = TagCreateForm(); --- deprecated
 	modify_form = TagModifyForm();
-	delete_form = TagDeleteForm();
+	#delete_form = TagDeleteForm(); --- deprecated
 
 	tags = Tag.objects.all()
+	items = Item.objects.all()
 
 	context = {
-		'create_form': create_form,
+		#'create_form': create_form,
 		'modify_form': modify_form,
-		'delete_form': delete_form,
-		'tags': tags
+		#'delete_form': delete_form,
+		'tags': tags,
+		'items': items
 	}
 
 	return render(request, 'manager/tag_handler.html', context);
@@ -489,6 +491,27 @@ def create_tag(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	if request.method == 'POST':
+		try:
+			tag_name = request.POST.get('new_tag_name', None)
+			print("Tag Name: "+str(tag_name))
+			new_tag = Tag.objects.create(tag=tag_name)
+		except IntegrityError:
+			context = {
+				#'create_form': create_form,
+				'modify_form': TagModifyForm(),
+				'delete_form': TagDeleteForm()
+			}
+			return render(request, 'manager/tag_exists.html', context)
+
+		new_tag.save()
+		items = request.POST.getlist('tagExisting[]', [])
+		for item in items:
+			if item != "":
+				item_instance = Item.objects.get(item_name=item)
+				item_instance.tags.add(new_tag)
+				item_instance.save()
+		return HttpResponseRedirect('/manager/tag_success')
+		"""
 		create_form = TagCreateForm(request.POST);
 		if create_form.is_valid():
 			try:
@@ -509,7 +532,7 @@ def create_tag(request):
 				item.save();
 			return HttpResponseRedirect('/manager/tag_success');
 	else:
-		create_form = TagCreateForm();
+		create_form = TagCreateForm();"""
 	modify_form = TagModifyForm();
 	delete_form = TagDeleteForm();
 
