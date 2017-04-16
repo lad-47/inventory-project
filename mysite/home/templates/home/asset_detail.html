@@ -1,0 +1,19 @@
+{% extends base.html %}
+
+<h3>Asset tag: {{asset.asset_tag}} </h3>
+
+<div style="padding-left: 15px">
+  <!--Custom Fields-->
+  {% for cf in custom %}
+    <p>{{cf}}</p>
+  {% endfor %}
+</div>
+<div style="padding-left: 15px">
+  <h2>Tags</h2>
+  {% for tag in tags %}
+    <span class="badge">{{tag}}</span>
+  {% endfor %}
+  {% if tags|length == 0 %}
+  <p>None</p>
+  {% endif %}
+</div>

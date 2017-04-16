@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from .models import Item, Request, Tag, CustomFieldEntry, CustomLongTextField, CustomShortTextField, CustomIntField, CustomFloatField, Cart_Request,SubscribedEmail,EmailTag,BackfillPDF;
+from .models import *
 from .forms import CheckoutForm
 from .serializers import ItemSerializer
 # chance genereic.Listview stuff to ListView
@@ -80,46 +80,88 @@ def detail(request, item_id):
 	requests = Request.objects.filter(item_id=item.id, status='O');
 	requests = requests | Request.objects.filter(item_id=item.id, status='L')
 	requests = requests | Request.objects.filter(item_id=item.id, status='B')
+	if item.is_asset:
+		assets = Asset.objects.filter(item_name=item.item_name);
+	else:
+		assets = None;
 	if not request.user.is_staff:
 		requests = requests.filter(owner=request.user);
 
-	custom_fields = CustomFieldEntry.objects.all()
-	custom_values = []
-	for cf in custom_fields:
-		if request.user.is_staff or not cf.is_private:
-			if cf.value_type == 'lt': # Long Text
-				try:
-					val = CustomLongTextField.objects.get(parent_item=item.id, field_name=cf)
-					if val.field_value:
-						custom_values.append(val.field_name.field_name+": "+val.field_value)
-				except CustomLongTextField.DoesNotExist:
-					pass
-			elif cf.value_type == 'st': # Short Text
-				try:
-					val = CustomShortTextField.objects.get(parent_item=item.id, field_name=cf)
-					if val.field_value:
-						custom_values.append(val.field_name.field_name+": "+val.field_value)
-				except CustomShortTextField.DoesNotExist:
-					pass
-			elif cf.value_type == 'int': # Integer
-				try:
-					val = CustomIntField.objects.get(parent_item=item.id, field_name=cf)
-					if val.field_value:
-						custom_values.append(val.field_name.field_name+": "+str(val.field_value))
-				except CustomIntField.DoesNotExist:
-					pass
-			elif cf.value_type == 'float': # Float
-				try:
-					val = CustomFloatField.objects.get(parent_item=item.id, field_name=cf)
-					if val.field_value:
-						custom_values.append(val.field_name.field_name+": "+str(val.field_value))
-				except CustomFloatField.DoesNotExist:
-					pass
-			else:
-				return HttpResponseNotFound('<h1>Custom Field not found<h1>')
+	if request.user.is_staff:
+		cf_entries = CustomFieldEntry.objects.all();
+	else:
+		cf_entries = CustomFieldEntry.objects.filter(is_private=False);
+	custom_values = get_cfs_from_entries(cf_entries, item);
 	context = {
 		'item': item,
 		'tags': tags,
+		'requests': requests,
+		'custom': custom_values,
+		'user':request.user,
+		'assets':assets,
+	}
+	return render(request, 'home/detail.html', context)
+
+
+def get_cfs_from_entries(cf_entries, item):
+	custom_values = []
+	for cf in cf_entries:
+		if cf.value_type == 'lt': # Long Text
+			try:
+				val = CustomLongTextField.objects.get(parent_item=item.id, field_name=cf)
+				if val.field_value:
+					custom_values.append(val.field_name.field_name+": "+val.field_value)
+			except CustomLongTextField.DoesNotExist:
+				pass
+		elif cf.value_type == 'st': # Short Text
+			try:
+				val = CustomShortTextField.objects.get(parent_item=item.id, field_name=cf)
+				if val.field_value:
+					custom_values.append(val.field_name.field_name+": "+val.field_value)
+			except CustomShortTextField.DoesNotExist:
+				pass
+		elif cf.value_type == 'int': # Integer
+			try:
+				val = CustomIntField.objects.get(parent_item=item.id, field_name=cf)
+				if val.field_value:
+					custom_values.append(val.field_name.field_name+": "+str(val.field_value))
+			except CustomIntField.DoesNotExist:
+				pass
+		elif cf.value_type == 'float': # Float
+			try:
+				val = CustomFloatField.objects.get(parent_item=item.id, field_name=cf)
+				if val.field_value:
+					custom_values.append(val.field_name.field_name+": "+str(val.field_value))
+			except CustomFloatField.DoesNotExist:
+				pass
+	return custom_values;
+# asset detail doesn't actauly exist, I forgot Lucas was gonna do this
+# I'll leave the code here just in case
+def assets_detail(request, item_id):
+	item = get_object_or_404(Item, pk=item_id);
+	assets = Item.objects.filter(item_name=item.item_name);
+
+	context = {
+		'asset_row': item,
+		'asset_list': assets,
+	}
+	return render(request, 'manager/success.html', {'message':"Page Not Implemented"})
+
+def asset_detail(request, asset_id):
+	asset = get_object_or_404(Asset, pk=asset_id)
+	requests = Request.objects.filter(item_id=asset.id, status='O');
+	requests = requests | Request.objects.filter(item_id=asset.id, status='L')
+	requests = requests | Request.objects.filter(item_id=asset.id, status='B')
+	if request.user.is_staff:
+		cf_entries = CustomFieldEntry.objects.filter(per_asset=True);
+	else:
+		cf_entries = CustomFieldEntry.objects.filter(is_private=False, per_asset=True);
+
+	custom_values = get_cfs_from_entries(cf_entries, asset);
+	context = {
+		'asset_tag': asset.asset_tag,
+		'item': asset,
+		'tags': asset.tags.all(),
 		'requests': requests,
 		'custom': custom_values,
 		'user':request.user

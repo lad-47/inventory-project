@@ -16,6 +16,8 @@ class AbstractItem(models.Model):
 	model_number = models.CharField(max_length=100, null=True)
 	description = models.TextField(null=True)
 	tags = models.ManyToManyField(Tag);
+	is_asset = models.BooleanField(default=False);
+
 	#location = models.CharField(max_length=100,null=True)
 	def __str__(self):
 		return self.item_name
@@ -81,12 +83,12 @@ class CustomFieldEntry(models.Model):
 	field_name = models.CharField(max_length=100, unique=True);
 	is_private = models.BooleanField();
 	value_type = models.CharField(max_length=10); # string key to indicate which type of value (lt,st,int,float)
-
+	per_asset = models.BooleanField(default=False);
 #custom fields implemented using extra tables in the database
 #in theory, "CustomField" should be an abstract class, but 
 #I'm not totally sure how to implement that funcionality in python
 class CustomField(models.Model):
-	parent_item = models.ForeignKey(Item, on_delete=models.CASCADE);
+	parent_item = models.ForeignKey(AbstractItem, on_delete=models.CASCADE);
 	field_name = models.ForeignKey(CustomFieldEntry, on_delete=models.CASCADE);
 
 class CustomLongTextField(CustomField):
