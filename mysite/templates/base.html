@@ -17,6 +17,13 @@
 </head>
 <body>
 
+<style type="text/css">
+	.navbar-nav>li>a.sign:hover {
+    color: #777;
+    background-color: transparent;
+}
+</style>
+
 <nav class="navbar navbar-default">
 		<div class="container">
 			<div class="navbar-header">
@@ -30,13 +37,14 @@
 			</div>
 			<div class="collapse navbar-collapse" id="bs-nav-demo">
 				<ul class="nav navbar-nav">
-					<li><a><div style="text-align: center;">Signed in as<br>{{ user }}</div></a></li>
+					<li><a class="sign"><div style="text-align: center;">Signed in as<br>{{ user }}</div></a></li>
 					{% if user.is_staff %}
 					<li class="dropdown">
 			          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Manager<span class="caret"></span></a>
 			          <ul class="dropdown-menu">
 			            <li><a href="{% url 'cart requests' %}">Service Requests</a></li>
 			            <li><a href="{% url 'loan handler' %}">Loans</a></li>
+			            <li><a href="{% url 'backfill handler' %}">Backfills</a></li>
 			            <li><a href="{% url 'direct-disburse' %}">Direct Disburse</a></li>
 			            <li role="separator" class="divider"></li>
 			            <li><a href="{% url 'emails' %}">Emails<span style="margin-left:5px" class="glyphicon glyphicon-envelope" aria-hidden="true"> </span></a></li>
@@ -68,7 +76,7 @@
 					{% if user.is_anonymous %}
       				<li><a href="{% url 'login' %}">Login<span style="margin-left:5px" class="glyphicon glyphicon-log-in" aria-hidden="true"> </span></a></li>
       				{% else %}
-      				<li><a href="{% url 'logout' %}">Logout<span style="margin-left:5px" class="glyphicon glyphicon-log-out" aria-hidden="true"> </span></a></li>
+      				<li><a href="{% url 'logout' %}?next={% url 'index' %}">Logout<span style="margin-left:5px" class="glyphicon glyphicon-log-out" aria-hidden="true"> </span></a></li>
       				{% endif %}
 				</ul>
 			</div>

@@ -1,5 +1,5 @@
 import json
-from home.models import Item,Tag,CustomFieldEntry
+from home.models import Item,Tag,CustomFieldEntry,CustomIntField,CustomFloatField,CustomLongTextField,CustomShortTextField
 
 def import_data(raw):
     """ This function parses JSON data and attempts to import items into the system.
@@ -11,7 +11,7 @@ def import_data(raw):
         return "Format: Please enter some text."
     try:
         items = create_items_from_json(raw)
-    except json.decoder.JSONDecodeError:
+    except ValueError:
         return "Format: Please format JSON correctly."
     #print(str(items))
     status = check_valid_items(items)
@@ -175,14 +175,14 @@ def save_items(items):
         item_instance = Item(item_name=item['item_name'],\
             model_number=item.get('model_number',""),\
             description=item.get('description',""), count=item['count'])
+        # Create cfs
+        if item.get('custom_fields',None):
+            save_cfs(item['custom_fields'],item_instance)
         # Attempt to save item instance
         try:
             item_instance.save()
         except:
             return "Item with name "+item['item_name']+" failed to save correctly."
-        # Create cfs
-        if item.get('custom_fields',None):
-            save_cfs(item['custom_fields'], item_instance)
         # Create non-existing tags.
         if item.get('tags',None):
             for tag_name in item['tags']:
@@ -199,7 +199,7 @@ def save_items(items):
         except:
             return "Item with name "+item['item_name']+" failed to save correctly."
 
-def save_cfs(custom_fields):
+def save_cfs(custom_fields, item_instance):
     for cf in custom_fields:
         cf_name = cf['field_name']
         cf_value = cf['field_value']

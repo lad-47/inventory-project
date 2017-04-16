@@ -1,21 +1,17 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from home.models import User, Item, Request, Cart_Request, CustomFieldEntry, Tag
+from home.models import User, Item, Request, Cart_Request, CustomFieldEntry, Tag, EmailBody, EmailTag
 
 class Command(BaseCommand):
     def handle(self, **options):
         jdk1 = User.objects.create_user(username='admin', \
-        	password='yellowisacolor1', email=None);
-        canService = Permission.objects.create(codename='can_service', \
-        	name='Can Service Requests', \
-        	content_type=ContentType.objects.get_for_model(Request));
-        jdk1.user_permissions.add(canService);
+        	password='yellowisacolor1', email='admin@gmail.com');
         jdk1.is_superuser=True;
         jdk1.is_staff=True;
         jdk1.save();
         jdk2 = User.objects.create_user(username='jdk2', \
-        	password='yellowisacolor2', email=None);
+        	password='yellowisacolor2', email='jdk2@gmail.com');
         resistor100ohm = Item.objects.create(item_name="Resistor 100 Ohm", \
         	count=10, model_number="R100", \
         	description="Resistor");
@@ -68,4 +64,7 @@ class Command(BaseCommand):
             is_private=False, value_type='st');
         testField = CustomFieldEntry.objects.create(field_name="TEST", \
             is_private=False, value_type='st');
+
+        e = EmailBody.objects.create(body="ece");
+        etag = EmailTag.objects.create(tag="a loan");
        

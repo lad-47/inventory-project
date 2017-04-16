@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2 style="padding-left: 15px"> Emails </h2>
+<div class="page-header" style="padding-left: 15px">
+  <h1>Inventory <small>Emails</small></h1>
+</div>
 
 <div style="padding-left: 15px">
 <p>Loan Reminder Body: {{body}}</p>
@@ -12,33 +14,56 @@
 <p>You are not currently subscribed to system emails</p> 
 {% endif %}
 <h3>Loan Reminder Dates:</h3>
-{% for date in dates %}
-<p>{{date.date}}</p>
-    <form method="POST" action="{% url 'delete-loan-date' date.id %}" style="padding-left: 15px">
-	{% csrf_token %}
-	<input type="submit" value="Delete">
-</form>
-{% endfor %}
-</div>
 
+<ul class="list-group">
+{% for date in dates %}
+<li class="list-group-item">{{date.date}}
+<a href="{% url 'delete-loan-date' date.id %}" ><span style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" title="Delete" aria-hidden="true"> </span></a></li>
+{% endfor %}
+</ul>
+
+<style type="text/css">
+    td {
+        padding: 5px;
+    }
+</style>
+
+<h3>Edit:</h3>
 <form method="POST" style="padding-left: 15px">
-	{% csrf_token %}
-	<div class="form_layout">
-	{% if subscribed %}
+    {% csrf_token %}
+    <table border="2" style="border-collapse: collapse;">
+    {% if subscribed %}
+    <tr>
+    <td>
     <label for="subscribed">Subscribed:</label>
-    <input id="subscribed" name="subscribed" type="checkbox" checked value="subscribed"><br>
+    </td>
+    <td>
+    <input id="subscribed" name="subscribed" type="checkbox" checked value="subscribed"></td></tr>
     {% else %}
+    <tr><td>
     <label for="subscribed">Subscribed:</label>
-    <input id="subscribed" name="subscribed" type="checkbox" value="subscribed"><br>
+    </td>
+    <td>
+    <input id="subscribed" name="subscribed" type="checkbox" value="subscribed"></td></tr>
     {% endif %}
+    <tr>
+    <td>
     <label for="tag">Email Subject Tag:</label>
-    <input id="tag" name="tag" type="text" placeholder="{{tag}}"><br>
-    <label for="body">Body:</label>
-    <textarea id="body" style="vertical-align: top" name="body" placeholder="{{body}}" rows="3"></textarea><br>
-    <label for="date">Add Reminder Date:</label>
-    <input id="date" name="date" type="date" value="" />
-	</div>
-	<input type="submit" value="Update">
+    </td>
+    <td>
+    <input id="tag" name="tag" type="text" placeholder="{{tag}}"></td></tr>
+    <tr>
+    <td>
+    <label for="body">Body:</label></td>
+    <td>
+    <textarea id="body" style="vertical-align: top" name="body" placeholder="{{body}}" rows="3"></textarea></td></tr>
+    <tr>
+    <td>
+    <label for="date">Add Reminder Date:</label></td>
+    <td><input id="date" name="date" type="date" value="" />
+    </td></tr>
+    </table>
+    <input type="submit" value="Update" style="margin: 15px 0 15px 0">
 </form>
 
 {% endblock %}

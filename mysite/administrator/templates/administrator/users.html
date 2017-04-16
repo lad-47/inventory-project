@@ -8,7 +8,7 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
   <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
   <script type="text/javascript">
@@ -24,7 +24,7 @@
           minLength: 2
         });
       } );
-    
+
 
     //   keeps same width as box
       jQuery.ui.autocomplete.prototype._resizeMenu = function () {
@@ -42,8 +42,8 @@
 {{error}}
 {% endif %}
 
-<div style="padding-left: 15px">
-  <a href="{% url 'create-user' %}">Create New User</a>
+<div>
+  <a class="btn btn-link" href="{% url 'create-user' %}">Create New User</a>
 </div>
 
 <form class="navbar-form navbar-top" role="search" type="get" action=".">

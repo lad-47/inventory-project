@@ -17,7 +17,7 @@ urlpatterns = [
     url(r'^(?P<item_id>[0-9]+)/request/$', views.request, name='request'),
     #url(r'^delete/(?P<pk>\d+)/$', views.DeleteRequestView.as_view(),
        # name='request-delete'),
-    url(r'^requests/$', views.requestsView.as_view(), name='requests'),
+    url(r'^requests/$', views.requestsView, name='requests'),
     url(r'^delete_request/(?P<cart_request_id>[0-9]+)/$', views.delete_request, name='delete request'),
     url(r'^delete_request_success/$', views.delete_request_success, \
         name='delete request success'),
@@ -31,6 +31,8 @@ urlpatterns = [
     url(r'^checkout/$', views.checkout, name='checkout'),
     url(r'^remove_request/(?P<request_id>[0-9]+)/$', views.remove_request, name='remove subrequest'),
     url(r'^loan_viewer/$', views.loan_viewer, name='loan viewer'),
+    url(r'^asset_detail/(?P<asset_id>[0-9]+)/$', views.asset_detail, name='asset detail'),
+
 
     #url(r'^request/(?P<request_id>[0-9]+)/$', views.request_details, name='service form'),
     #url(r'^request/(?P<request_id>[0-9]+)/service/$', views.service_request, \

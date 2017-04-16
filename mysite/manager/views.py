@@ -2,10 +2,9 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from datetime import date
 from django.contrib.auth.models import User
-from home.models import Request, Cart_Request, User, Item, Log, Tag, CustomFieldEntry, \
-CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField
+from home.models import *
 from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
-PositiveIntArgMaxForm
+PositiveIntArgMaxForm, AssetForm_factory
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
@@ -13,6 +12,7 @@ from django.db import IntegrityError
 from rest_framework import status
 from home.models import SubscribedEmail,EmailBody,EmailTag,LoanDate
 from django.core.mail import EmailMessage
+from django.core.files.storage import FileSystemStorage
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -28,11 +28,13 @@ def cart_requests(request):
 	cart_requestsO_and_v = create_request_info(cart_requestsO);
 	cart_requestsL = cart_requests.filter(cart_status='L')
 	cart_requestsL_and_v = create_request_info(cart_requestsL);
-
+	cart_requestsB = cart_requests.filter(cart_status='B')
+	cart_requestsB_and_v = create_request_info(cart_requestsB);
 
 	context = {
 		'outstanding': cart_requestsO_and_v,
 		'loans': cart_requestsL_and_v,
+		'backfills':cart_requestsB_and_v
 	}
 	return render(request, 'manager/cart_requestsI.html', context)
 
@@ -73,7 +75,8 @@ def create_request_info(cart_requests):
 def create_indv_request_info(cart_request):
 	subrequests = Request.objects.filter(parent_cart=cart_request);
 	#assemble useful info to pass to template or use for db manipulation
-	req_info = [];
+	req_info = []
+	i=0
 	for subrequest in subrequests:
 		itemToChange = Item.objects.get(id=subrequest.item_id_id);
 		oldQuantity = itemToChange.count;
@@ -81,6 +84,9 @@ def create_indv_request_info(cart_request):
 		newQuantity = oldQuantity - requestAmount;
 		valid = not (newQuantity < 0)
 		req_info+=[(subrequest, requestAmount, oldQuantity, valid, itemToChange, subrequest.status)];
+		if subrequest.status=='B' or subrequest.suggestion=='B':
+			req_info[i]+= (FileSystemStorage().url(BackfillPDF.objects.get(request=subrequest).pdf),)
+		i+=1
 	return req_info;
 
 
@@ -92,7 +98,7 @@ def cart_request_details(request, cart_request_id):
 	if not current_request.cart_status == 'O':
 		return render(request, 'home/message.html', {'message':'Request Not Outstanding'})
 	subrequests = Request.objects.filter(parent_cart_id=cart_request_id);
-	
+
 	#assemble useful info to pass to template or use for db manipulation
 	req_info = create_indv_request_info(current_request);
 	##handle the data from the form on a post
@@ -102,8 +108,9 @@ def cart_request_details(request, cart_request_id):
 			message = 'Your request for:\n'
 			tag=EmailTag.objects.all()[0].tag
 			new_status = service_form.cleaned_data['approve_deny'];
-			if new_status == 'A' or new_status == 'L':
+			if new_status == 'A' or new_status == 'L' or new_status == 'B':
 				current_request.cart_status=new_status;
+				current_request.suggestion='D'
 				for el in req_info:
 					if not el[3]:
 						#this is a place I could fix things
@@ -112,14 +119,19 @@ def cart_request_details(request, cart_request_id):
 					el[4].count = el[2]-el[1]; ##update item quantity
 					message+=el[0].item_id.item_name+' x'+str(el[0].quantity)+"\n"
 					el[0].status=new_status; ##subrequest was serviced
+					el[0].admin_comment=service_form.cleaned_data['admin_comment'];
+					el[0].suggestion='D'
 					el[0].save();  ##save the subrequest's updated status
 					el[4].save();  ##save the item with new quantity
 				message+='has been APPROVED'
 				tag+=' Request APPROVED'
 			else:
 				current_request.cart_status='D';
+				current_request.suggestion='D'
 				for el in req_info:
 					el[0].status='D'; ##subrequest was serviced
+					el[0].admin_comment=service_form.cleaned_data['admin_comment'];
+					el[0].suggestion='D'
 					message+=el[0].item_id.item_name+' x'+str(el[0].quantity)+"\n"
 					el[0].save();
 				message+='has been DENIED'
@@ -160,6 +172,7 @@ def old_cart_request_details(request, cart_request_id):
 	current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
 	req_info = create_indv_request_info(current_request);
 
+	print(req_info)
 	context = {
 		'current_request': current_request,
 		'req_info': req_info,
@@ -188,6 +201,9 @@ def logs(request, *args, **kwargs):
 			except Item.DoesNotExist:
 				paginator = Paginator(logs, 10)
 				logs = paginator.page(1)
+				new_request['item_box']=''
+				new_request['user_box']=''
+				params = parse.urlencode(new_request)
 				context = {
 					'logs': logs,
 					'items': items,
@@ -202,6 +218,8 @@ def logs(request, *args, **kwargs):
 			except User.DoesNotExist:
 				paginator = Paginator(logs, 10)
 				logs = paginator.page(1)
+				new_request['user_box']=''
+				params = parse.urlencode(new_request)
 				context = {
 					'logs': logs,
 					'items': items,
@@ -211,7 +229,7 @@ def logs(request, *args, **kwargs):
 				return render(request, 'manager/logs.html', context)
 		if time_query is not None and not time_query=="":
 			date_string = time_query.split("-")
-			logs = logs.filter(timestamp__date__gte=date(int(date_string[0]),int(date_string[1]),int(date_string[2]))) 
+			logs = logs.filter(timestamp__date__gte=date(int(date_string[0]),int(date_string[1]),int(date_string[2])))
 	paginator = Paginator(logs, 10)
 	try:
 		logs = paginator.page(page)
@@ -230,7 +248,7 @@ def logs(request, *args, **kwargs):
 
 def updateItem(item_instance, data):
 	for field in data.keys():
-		
+
 		# we have to parse the tags by hand
 		if field == 'tags':
 			for tag in Tag.objects.all():
@@ -290,7 +308,7 @@ def updateItem(item_instance, data):
 					to_change = CustomFloatField.objects.create(parent_item=item_instance,\
 						field_name=field_entry, field_value = data[field])
 					to_change.save();
-				
+
 
 
 	item_instance.save();
@@ -301,7 +319,7 @@ def modify_an_item(request, item_id):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	itemToChange = get_object_or_404(Item, pk=item_id);
-	ItemForm = ItemForm_factory();
+	ItemForm = ItemForm_factory(item_type=type(itemToChange), is_asset_row=itemToChange.is_asset);
 
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
@@ -327,10 +345,13 @@ def modify_an_item(request, item_id):
 	else:
 		item_dict = item_to_dict(itemToChange);
 		item_form = ItemForm(item_dict);
+# 		item_form.fields['new']=item_form.fields.get('item_name')
+# 		print(item_form.fields.get('item_name'))
+# 		print(item_form.data)
 
 	#item_form = ItemForm(item_dict);
 	#item_form=ItemForm();
-	
+
 	#print(item_to_dict(itemToChange));
 	context = {
 		'item_form': item_form,
@@ -341,7 +362,7 @@ def modify_an_item_action(request, item_id):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	itemToChange = get_object_or_404(Item, pk=item_id);
-	ItemForm = ItemForm_factory();
+	ItemForm = ItemForm_factory(item_type=type(itemToChange), is_asset_row=itemToChange.is_asset);
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
@@ -350,7 +371,7 @@ def modify_an_item_action(request, item_id):
 		else:
 			context = {
 				'item_form:':item_form,
-				}	
+				}
 			return render(request, '/manager/modify_an_item.html', context)
 
 	# we should never get here with a GET
@@ -408,14 +429,14 @@ def item_to_dict(item_instance):
 def add_an_item(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	ItemForm = ItemForm_factory();
+	ItemForm = ItemForm_factory(item_type='Item', is_asset_row=False);
 
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
 			try:
-				createItem(item_form.cleaned_data);
+				createItem(item_form.cleaned_data, 'item');
 			except IntegrityError:
 				return render(request, 'home/message.html',{'message':'An item with that name already exists'})
 			return HttpResponseRedirect('/manager/create_success');
@@ -425,12 +446,69 @@ def add_an_item(request):
 
 	return render(request, 'manager/add_an_item.html', {'item_form':item_form})
 
+def add_an_asset_row(request):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	ItemForm = ItemForm_factory(item_type='Item', is_asset_row=True);
 
-def createItem(data):
-	item_instance = Item.objects.create(item_name=data['item_name'],\
-	 	model_number=data['model_number'], description=data['description'],\
-	 	count=data['count']);
-	for field_entry in CustomFieldEntry.objects.all():
+	# on a post we (print) the data and then return success
+	if request.method == 'POST':
+		item_form = ItemForm(request.POST);
+		if item_form.is_valid():
+			try:
+				createItem(item_form.cleaned_data, 'asset_row');
+			except IntegrityError:
+				return render(request, 'home/message.html',{'message':'An item with that name already exists'})
+			return HttpResponseRedirect('/manager/create_success');
+
+	else:
+		item_form = ItemForm();
+
+	return render(request, 'manager/add_an_item.html', {'item_form':item_form})
+
+def add_an_asset(request, item_id):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	item = get_object_or_404(Item, pk=item_id);
+
+	asset_tag = 3;
+	AssetForm = AssetForm_factory(asset_tag);
+
+	# on a post we (print) the data and then return success
+	if request.method == 'POST':
+		item_form = AssetForm(request.POST);
+		if item_form.is_valid():
+			try:
+				createAsset(item_form.cleaned_data, item);
+			except IntegrityError:
+				return render(request, 'home/message.html',{'message':'Asset Tag Exists.'})
+			return HttpResponseRedirect('/manager/create_success');
+
+	else:
+		item_form = AssetForm();
+
+	return render(request, 'manager/add_an_item.html', {'item_form':item_form})
+
+
+def createItem(data, kind):
+	if(kind == 'item'):
+		item_instance = Item.objects.create(item_name=data['item_name'],\
+		 	model_number=data['model_number'], description=data['description'],\
+		 	count=data['count'], is_asset=False);
+		cfs = CustomFieldEntry.objects.all();
+	elif(kind == 'asset_row'):
+		item_instance = Item.objects.create(item_name=data['item_name'],\
+		 	model_number=data['model_number'], description=data['description'],\
+		 	count=data['count'], is_asset=True);
+		cfs = CustomFieldEntry.objects.filter(per_asset=False);
+	elif(kind == 'asset'):
+		## TODO:  REPLACE ASSET TAGGGG!!!!!!!!!!!!!!!!!!!!!
+		item_instance = Asset.objects.create(asset_tag=5, item_name=data['item_name'],\
+		 	model_number=data['model_number'], description=data['description'],\
+		 	count=data['count'], is_asset=True);
+		cfs = CustomFieldEntry.objects.filter(per_asset=True);
+
+	for field_entry in cfs:
 		field_type = field_entry.value_type;
 		field = field_entry.field_name;
 		if field_type == 'st' and not data[field]=="":
@@ -449,11 +527,42 @@ def createItem(data):
 			to_change = CustomFloatField.objects.create(parent_item=item_instance,\
 				field_name=field_entry, field_value = data[field])
 			to_change.save();
-		
+
 
 	for tagPK in data['tags']:
 		item_instance.tags.add(Tag.objects.get(pk=tagPK));
 	item_instance.save();
+
+def createAsset(data, item):
+	item_instance = Asset.objects.create(asset_tag=data['asset_tag'],\
+				item_name=item.item_name, count=1, model_number=item.model_number, is_asset=True,
+				description=item.description);
+	
+	for tag in item.tags.all():
+		item_instance.tags.add(tag);
+
+	item_instance.save();
+	cfs = CustomFieldEntry.objects.filter(per_asset=True);
+
+	for field_entry in cfs:
+		field_type = field_entry.value_type;
+		field = field_entry.field_name;
+		if field_type == 'st' and not data[field]=="":
+			to_change = CustomShortTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+			to_change.save();
+		elif field_type == 'lt' and not data[field]=="":
+			to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+			to_change.save();
+		elif field_type == 'int' and data[field] is not None:
+			to_change = CustomIntField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+			to_change.save();
+		elif field_type == 'float' and data[field] is not None:
+			to_change = CustomFloatField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = data[field])
+			to_change.save();
 
 def create_success(request):
 	return render(request, 'manager/create_success.html');
@@ -461,17 +570,20 @@ def create_success(request):
 def tag_handler(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	
+
 	# on a POST, these definitions will be overwritten before rendering
 	create_form = TagCreateForm();
 	modify_form = TagModifyForm();
 	print('creating delte form');
 	delete_form = TagDeleteForm();
 
+	tags = Tag.objects.all()
+
 	context = {
 		'create_form': create_form,
 		'modify_form': modify_form,
 		'delete_form': delete_form,
+		'tags': tags
 	}
 
 	return render(request, 'manager/tag_handler.html', context);
@@ -610,7 +722,7 @@ def tag_success(request):
 def direct_disburse(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	
+
 	items = Item.objects.all()
 	users = User.objects.all()
 	# on a post we (print) the data and then return success
@@ -621,48 +733,64 @@ def direct_disburse(request):
 		user = request.POST.get('user',None)
 		owner=User.objects.get(username=user)
 		comment = request.POST.get('comment',None)
-		cart = Cart_Request(cart_status='O',cart_reason='direct disbursement',cart_admin_comment=comment,cart_owner=owner)
+		info=''
+		if type=='Disburse':
+			info='direct disbursement'
+		else:
+			info='direct loan'
+		cart = Cart_Request(cart_status='O',cart_reason=info,cart_admin_comment=comment,cart_owner=owner)
 		cart.save()
 		for i in range(0,len(items_set)):
-			item = Item.objects.get(item_name=items_set[i])
-			item_request=Request(status='O',reason='direct disbursement',item_id=item,owner=owner,admin_comment=comment,quantity=int(count_set[i]),parent_cart=cart)
-			item_request.save()
+			if items_set[i]!='':
+				try:
+					item = Item.objects.get(item_name=items_set[i])
+					if item.count<int(count_set[i]):
+						reqs = Request.objects.filter(parent_cart=cart)
+						for req in reqs:
+							req.delete()
+						cart.delete()
+						context = {
+							'items': items,
+							'users': users,
+							'error': 'Insufficient quantity of '+item.item_name
+						}
+						return render(request, 'manager/direct_disburse.html', context)
+					item_request=Request(status='O',reason=info,item_id=item,owner=owner,admin_comment=comment,quantity=int(count_set[i]),parent_cart=cart)
+					item_request.save()
+				except Item.DoesNotExist:
+					context = {
+						'items': items,
+						'users': users,
+						'error': 'Invalid item name entered: '+items_set[i]
+					}
+					return render(request, 'manager/direct_disburse.html', context)
 		#cart.save()
 		subrequests = Request.objects.filter(parent_cart=cart);
-		valid = True;
+		letter="A"
+		word="disbursed"
+		if type=='Loan':
+			letter="L"
+			word="loaned"
+		cart.cart_status=letter
+		message = 'You have been directly '+word+':\n'
 		for subrequest in subrequests:
 			itemToChange = Item.objects.get(id=subrequest.item_id_id);
-			oldQuantity = itemToChange.count;
-			requestAmount = subrequest.quantity;
-			newQuantity = oldQuantity - requestAmount;
-			if newQuantity < 0:
-				valid = False;
-				break;
-		if valid==True:
-			letter="A"
-			word="disbursed"
-			if type=='Loan':
-				letter="L"
-				word="loaned"
-			cart.cart_status=letter
-			message = 'You have been directly '+word+':\n'
-			for subrequest in subrequests:
-				itemToChange = Item.objects.get(id=subrequest.item_id_id);
-				newQuantity = itemToChange.count - subrequest.quantity;
-				itemToChange.count = newQuantity
-				subrequest.status=letter
-				subrequest.save()
-				message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
-				itemToChange.save()
-			cart.save()
-			tag=EmailTag.objects.all()[0].tag
-			email = EmailMessage(
-				tag+' Direct Disburse',
-				message,
-				'from@example.com',
-				[owner.email]
-			)
-			email.send()
+			newQuantity = itemToChange.count - subrequest.quantity;
+			itemToChange.count = newQuantity
+			subrequest.status=letter
+			subrequest.save()
+			message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
+			itemToChange.save()
+		cart.save()
+		tag=EmailTag.objects.all()[0].tag
+		email = EmailMessage(
+			tag+' Direct Disburse',
+			message,
+			'from@example.com',
+			[owner.email]
+		)
+		email.send()
+			
 		if type=='Disburse':
 			return HttpResponseRedirect('/manager/disburse_success/Disbursed');
 		else:
@@ -678,7 +806,7 @@ def disburse_success(request, message):
 	return render(request, 'manager/success.html', {'message': message})
 
 
-def handle_loan(request, request_id, disburse):
+def handle_loan(request, request_id, new_status):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	req = get_object_or_404(Request, pk=request_id);
@@ -688,39 +816,50 @@ def handle_loan(request, request_id, disburse):
 	if request.method == 'POST':
 		form = PositiveIntArgMaxForm(request.POST, max_val=quantity);
 		if form.is_valid():
-			to_disburse = form.cleaned_data['Amount'];
-			comment = form.cleaned_data['Comment']
+			to_new_status = form.cleaned_data['Amount'];
+			comment = form.cleaned_data['Comment'];
 
-			if disburse:
-				new_status = 'A';
+			if (quantity-to_new_status < 0):
+				return render(request, 'manager/success.html', {'message': 'Failure.'})
+
+			signal_logs = Request.objects.create(owner=req.owner, status='Z',\
+			quantity=(quantity-to_new_status), item_id=req.item_id, parent_cart=req.parent_cart,\
+			reason=req.reason, admin_comment=comment);
+			signal_logs.delete();
+			#still_old_status = Request.objects.create(owner=req.owner, status=req.status, \
+			#quantity=(quantity-no_longer_loaned), item_id=req.item_id, parent_cart=req.parent_cart,\
+			#reason=req.reason, admin_comment=comment);
+			#still_old_status.save();
+			req.quantity = quantity - to_new_status;
+			if(req.quantity > 0):
+				req.save();
 			else:
-				new_status = 'R';
+				req.delete();
 
-			if (quantity-to_disburse > 0):
-				signal_logs = Request.objects.create(owner=req.owner, status='Z',\
-				quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
-				reason=req.reason, admin_comment=comment);
-				signal_logs.delete();
-				still_loaned = Request.objects.create(owner=req.owner, status='L',\
-				quantity=(quantity-to_disburse), item_id=req.item_id, parent_cart=req.parent_cart,\
-				reason=req.reason, admin_comment=comment);
-				still_loaned.save();
-			
-			disbursed = Request.objects.create(owner=req.owner, status=new_status,\
-			quantity=(to_disburse), item_id=req.item_id, parent_cart=req.parent_cart, \
+			to_new_status = Request.objects.create(owner=req.owner, status=new_status,\
+			quantity=(to_new_status), item_id=req.item_id, parent_cart=req.parent_cart, \
 			reason=req.reason, admin_comment=comment);
 			#disbursed.save(); .create already saves
-			
+
 			tag=EmailTag.objects.all()[0].tag
 			message=""
-			
-			if disburse:	
-				message = "You have been disbursed "+str(to_disburse)+" x "+str(req.item_id)+" from your previous loan"
+
+			if new_status == 'A':
+				message = "You have been disbursed "+str(to_new_status)+" x "+str(req.item_id)+" from your previous loan"
 				tag += " Disbursement"
-			else:
-				message = "You have returned "+str(to_disburse)+" x "+str(req.item_id)
+			elif new_status == 'R':
+				message = "You have returned "+str(to_new_status)+" x "+str(req.item_id)
 				tag += " Loan Returned"
-			
+			elif new_status == 'L':
+				message = "Now on loan to you: "+str(to_new_status)+" x "+str(req.item_id)
+				tag += "Backfill now loaned" # maybe "backfill rejected"?
+			elif new_status == 'B':
+				message = "Marked for backfill: "+str(to_new_status)+" x "+str(req.item_id)
+				tag += "Marked for Backfill"
+			else:
+				message = "error"
+				tag += "error"
+
 			email = EmailMessage(
 				tag,
 				message,
@@ -728,15 +867,16 @@ def handle_loan(request, request_id, disburse):
 				[req.owner.email]
 			)
 			email.send()
-			if not disburse:
+			# have active and outstanding requests
+			# active = backfill or loans
+			if new_status == 'R':
 				involved_item = req.item_id;
-				involved_item.count = involved_item.count + to_disburse;
+				involved_item.count = involved_item.count + no_longer_loaned;
 				involved_item.save();
-			req.delete();
 
 			still_loaned = False;
 			for subreq in Request.objects.filter(parent_cart = parent):
-				if subreq.status == 'L':
+				if subreq.status == 'L' or subreq.status == 'B':
 					still_loaned = True;
 			if not still_loaned:
 				parent.cart_status = 'A';
@@ -746,14 +886,20 @@ def handle_loan(request, request_id, disburse):
 
 
 	else:
-		form = PositiveIntArgMaxForm(max_val=quantity);			
+		form = PositiveIntArgMaxForm(max_val=quantity);
 
-	if disburse:
+	if new_status == 'A':
 		heading = "Disbursing";
 		button = "Disburse";
-	else:
+	elif new_status == 'R':
 		heading = "Returning";
 		button = "Mark as Returned";
+	elif new_status == 'B':
+		heading = "For Backfill";
+		button = "Mark for Backfill";
+	elif new_status == 'L':
+		heading = "To Loan";
+		button = "Mark as Loaned";
 
 	context = {
 		'form': form,
@@ -765,18 +911,22 @@ def handle_loan(request, request_id, disburse):
 	return render(request, 'manager/disburse_loaned.html', context)
 
 def disburse_loaned(request, request_id):
-	return handle_loan(request, request_id, True);
+	return handle_loan(request, request_id, 'A');
 
 def return_loaned(request, request_id):
-	return handle_loan(request, request_id, False);
+	return handle_loan(request, request_id, 'R');
+
+def convert_status(request, request_id, new_status):
+	return handle_loan(request, reqeust_id, new_status);
 
 def loan_handle_success(request):
 	return render(request, 'manager/success.html', {'message': 'Loan Status Updated.'})
 
-def loan_handler(request):
+def loan_backfill_handler(request, status_type):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	request_list = Request.objects.all().filter(status='L');
+	request_list = Request.objects.all().filter(status=status_type);
+
 	# it's a search
 	if request.method == 'GET':
 		search_user = request.GET.get('user_box', None)
@@ -802,12 +952,39 @@ def loan_handler(request):
 		'request_list': request_list,
 		'items':items,
 		'users':users,
+		'loan': (status_type == 'L'),
 
 	}
 	return render(request, 'manager/loan_handler.html',context)
+
+def loan_handler(request):
+	return loan_backfill_handler(request, 'L');
+
+def backfill_handler(request):
+	return loan_backfill_handler(request, 'B');
 
 def assemble_loan_info(request_list):
 	req_info = [];
 	for req in request_list:
 		involved_item = req.item_id;
 	return 0;
+
+# a method to call after doing anything to an asset;
+# this will update the count of the row in the item table
+# call with either asset_tag or item_name
+# ex:  update_assets(asset_tag=1111)  or
+#      update_assets(item_name="Resistor")
+def update_assets(**kwargs):
+
+	if not (asset_tag or item_name):
+		raise ValueError("Neither valid argument (asset_tag or item_name) was provided");
+	
+	if asset_tag:
+		item_name = Asset.objects.get(asset_tag=asset_tag).item_name;
+		
+	assets_left = Asset.objects.filter(item_name=asset_item_name, count=1).count();	
+	asset_item_row = Item.objects.get(item_name=asset.item_name);
+	asset_item_row.count = assets_left;
+	asset_item_row.save();
+
+

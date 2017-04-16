@@ -2,6 +2,14 @@
 
 {% block content %}
 
+<div class="page-header" style="padding-left: 15px">
+  <h1>Inventory <small>Shopping Cart</small></h1>
+</div>
+
+{% if error %}
+<p style="color: red; padding-left: 15px">{{error}}</p>
+{% endif %}
+
 <ul class="list-group">
 	{% for subrequest in subrequests %}
 	<li class="list-group-item list-group-item-action flex-column align-items-start">
@@ -17,7 +25,7 @@
     				margin-bottom:10px; }
   </style>
 </head>
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
 	{% csrf_token %}
 	<div class="form_layout">
 	{{checkout_form.as_p}}

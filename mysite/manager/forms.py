@@ -2,7 +2,12 @@ from django import forms
 from home.models import CustomFieldEntry, Item, Tag;
 
 class ServiceForm(forms.Form):
-	CHOICES = (('A', 'Approve for Disbursment'), ('L', 'Approve for Loan'), ('D', 'Deny'));
+	CHOICES = (
+		('A', 'Approve for Disbursment'), 
+		('L', 'Approve for Loan'), 
+		('B', 'Approve for Backfill'),
+		('D', 'Deny'),
+		);
 	admin_comment = forms.CharField(max_length=200, required=False);
 	approve_deny = forms.ChoiceField(widget=forms.RadioSelect, \
 		choices=CHOICES);
@@ -54,9 +59,40 @@ def ItemForm_init(self, *args, **kwargs):
 	TAGS = generate_choices(Tag, 'tag');
 	self.fields['tags'].choices=TAGS;
 
-def ItemForm_factory():
+
+
+def AssetForm_factory(asset_tag):
+	properties = dict();
+	properties['asset_tag'] = forms.IntegerField(initial=asset_tag);
+
+	custom_fields = CustomFieldEntry.objects.filter(per_asset=True);
+	for cf in custom_fields:
+		field_name = cf.field_name;
+		field_type = cf.value_type;
+		print(field_name);
+		if field_type == 'st':
+			properties[field_name] = forms.CharField(max_length=100, required=False)
+		elif field_type == 'lt':
+			properties[field_name] = forms.CharField(widget=forms.Textarea, required=False);
+		elif field_type == 'int':
+			properties[field_name] = forms.IntegerField(required=False);
+		elif field_type == 'float':
+			properties[field_name] = forms.FloatField(required=False);
+
+	# use python's magic 'type' method to create a class
+	return type('AssetForm', (forms.Form,), properties);
+
+# takes two keyword arguments "item_type" and "is_asset_row"
+# item_type is either "Item" or "Asset" and alters the form accordingly
+# is_asset_row is True/False, and whether or not it's an Item that represents assets
+def ItemForm_factory(**kwargs):
 
 	TAGS = generate_choices(Tag, 'tag');
+
+	if kwargs['item_type'] == 'Asset':
+		count_field = forms.IntegerField(min_value=0, max_value=1);
+	else:
+		count_field = forms.IntegerField(min_value=0);
 
 	print('tags: ');
 	print(TAGS);
@@ -66,14 +102,20 @@ def ItemForm_factory():
 		'item_name': forms.CharField(max_length=100),
 		'model_number': forms.CharField(max_length=100, required=False),
 		'description': forms.CharField(widget=forms.Textarea, required=False),
-		'count': forms.IntegerField(min_value=0),
+		'count': count_field,
+		'minimum_stock': forms.IntegerField(min_value=0, required=False),
 		'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
 			choices=TAGS, required=False),
 		'__init__': ItemForm_init,
 	}
 
 	# add more class variables to properties for the custom fields
-	custom_fields = CustomFieldEntry.objects.all();
+	if kwargs['item_type'] == 'Asset':
+		custom_fields = CustomFieldEntry.objects.filter(per_asset=True);
+	elif kwargs['is_asset_row']:
+		custom_fields = CustomFieldEntry.objects.filter(per_asset=False);
+	else:
+		custom_fields = CustomFieldEntry.objects.all();
 	for cf in custom_fields:
 		field_name = cf.field_name;
 		field_type = cf.value_type;

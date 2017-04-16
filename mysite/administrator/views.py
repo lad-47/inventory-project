@@ -41,11 +41,20 @@ def create_user(request):
     # on a post we (print) the data and then return success
     if request.method == 'POST':
         username = request.POST.get('username_box', None)
-        email = request.POST.get('email_box', None)
         password = request.POST.get('password_box', None)
+        confirm_password = request.POST.get('confirm_password_box', None)
+        email = request.POST.get('email_box', None)
+        if password != confirm_password:
+            error = "Passwords must match!"
+            context = {
+                'error': error,
+                'username': username,
+                'email': email
+            }
+            return render(request, 'administrator/create_user.html', context)
         user = User.objects.create_user(username=username,email=email,password=password)
         user.save()
-        return HttpResponseRedirect('/manager/create_success');
+        return render(request, 'manager/success.html', {'message':"User was created successfully."});
 
     return render(request, 'administrator/create_user.html')
 
@@ -82,8 +91,9 @@ def cf_manager(request):
             vt = add_form.cleaned_data['value_type'];
             fn = add_form.cleaned_data['field_name'];
             i_p = add_form.cleaned_data['is_private'];
+            p_a = add_form.cleaned_data['per_asset'];
             new_field = CustomFieldEntry.objects.create(value_type=vt, \
-                field_name=fn, is_private=i_p);
+                field_name=fn, is_private=i_p, per_asset=p_a);
             new_field.save();
             return HttpResponseRedirect('/admin/custom_fields/create/success/');
     else:

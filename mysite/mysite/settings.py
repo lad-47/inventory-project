@@ -68,6 +68,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.media',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -83,16 +84,16 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 # SERVER
 # DATABASES = {
-#            'default': {
-#                'ENGINE': 'django.db.backends.postgresql',
-#                'NAME': 'inventory',
-#               'USER': 'postgres',
-#                'PASSWORD': '',
-#                'PORT': '5432'
-#            }
-#        }
+#             'default': {
+#                 'ENGINE': 'django.db.backends.postgresql',
+#                 'NAME': 'inventory',
+#                'USER': 'postgres',
+#                 'PASSWORD': '',
+#                 'PORT': '5432'
+#             }
+#         }
 
-## LOCALHOST 
+## LOCALHOST
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -103,7 +104,6 @@ DATABASES = {
         'PORT': '5432'
    }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
@@ -151,6 +151,9 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 STATIC_URL = '/staticfiles/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = (
