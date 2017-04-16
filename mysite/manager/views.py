@@ -382,7 +382,7 @@ def modify_an_item_action(request, item_id):
 	# if we do, just render the home page
 	render(request, 'index.html');
 
-def convert_item_to_asset(item):
+def convert_item_to_asset(item, request):
 	itemQuantity = item.count;
 	item.is_asset = True;
 	item.save();
