@@ -2,55 +2,27 @@
 
 {% block content %}
 
-{% if request_list %}
-	<h3>Outstanding Requests</h3>
-	<ul>
-	{% for request in request_list %}
-		{% if request.cart_status == "O" %}
-		<li>
-		<p><a href="{% url 'view request details' cart_request_id=request.id %}"> Reason: {{request.cart_reason}}</a><b><a style="margin-left:24px" href="{% url 'delete request' request.id%}">Delete Request</a></b></p>
-		</li>
-		{% endif %}
-	{% endfor %}
-	</ul>
-
-	<h3>Approved for Loan</h3>
-	<ul>
-	{% for request in request_list %}
-		{% if request.cart_status == "L" %}
-		<li>
-		<p><a href="{% url 'view request details' cart_request_id=request.id %}">Reason: {{request.cart_reason}} </a></p>
-		<p>Administrator Comment: {{request.cart_admin_comment}}</p>
-		</li>
-		{% endif %}
-	{% endfor %}
-	</ul>
-
-	<h3>Approved for Disbursment</h3>
-	<ul>
-	{% for request in request_list %}
-		{% if request.cart_status == "A" %}
-		<li>
-		<p><a href="{% url 'view request details' cart_request_id=request.id %}">Reason: {{request.cart_reason}} </a></p>
-		<p>Administrator Comment: {{request.cart_admin_comment}}</p>
-		</li>
-		{% endif %}
-	{% endfor %}
-	</ul>
-
-	<h3>Denied Requests</h3>
-	<ul>
-	{% for request in request_list %}
-		{% if request.cart_status == "D" %}
-		<li>
-		<p><a href="{% url 'view request details' cart_request_id=request.id %}">Reason: {{request.cart_reason}}</a> </p>
-		<p>Administrator Comment: {{request.cart_admin_comment}}</p>
-		</li>
-		{% endif %}
-	{% endfor %}
-	</ul>
-
-
+{% if outstanding or loans or backfills or approved or denied %}
+	{% if outstanding %}
+	<h3 style="margin-left:15px">Outstanding Requests</h3>
+	{% include "home/includes/request_table.html" with cart_requests=outstanding type='O' %}
+	{% endif %}
+	{% if loans %}
+	<h3 style="margin-left:15px">Active Loans</h3>
+	{% include "home/includes/request_table.html" with cart_requests=loans type='L' %}
+	{% endif %}
+	{% if backfills %}
+	<h3 style="margin-left:15px">Active Backfills</h3>
+	{% include "home/includes/request_table.html" with cart_requests=backfills type='B' %}
+	{% endif %}
+	{% if approved %}
+	<h3 style="margin-left:15px">Approved Requests</h3>
+	{% include "home/includes/request_table.html" with cart_requests=approved type='A' %}
+	{% endif %}
+	{% if denied %}
+	<h3 style="margin-left:15px">Denied Requests</h3>
+	{% include "home/includes/request_table.html" with cart_requests=denied type='D' %}
+	{% endif %}
 {% else %}
 	<head>
   <style type="text/css">
@@ -67,4 +39,5 @@
 <p><a href="{% url 'requests' %}">View Your Requests</a></p>
 </div>
 {% endif %}
-{% endblock%}
+
+{% endblock %}

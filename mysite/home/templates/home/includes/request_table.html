@@ -26,37 +26,22 @@ ul.pagination {
 
 <table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 	<tr class="active"> 
-	<th> Request Owner <input type="button" value="Show/Hide" onClick="dynamic(this);"></th><th> Reason </th><th> Actions </th>
+	<th> Reason <input type="button" value="Show/Hide" onClick="dynamic(this);"></th><th> Actions </th>
 	</tr>
 
 	<!-- rows for each cart request -->
-	{% for cart_request_and_v in cart_requests_and_v %}
-		<!-- color the row based on validity -->
-		{% if color %}
-			{% if cart_request_and_v.1 %}
-			<tr class="success">
-			{% else %}
-			<tr class="danger">
-			{% endif %}
-		{% else %}
+	{% for cart_request in cart_requests %}
+		{% if cart_request.cart_status == type %}
 		<tr>
-		{% endif %}
-
 		<!--make the actual tablerow -->
-		<th> {{cart_request_and_v.0.cart_owner}} </th>
-		<th> {{cart_request_and_v.0.cart_reason}} </th>
+		<th> <a href="{% url 'view request details' cart_request_id=cart_request.id %}"> Reason: {{cart_request.cart_reason}}</a> </th>
 		<th> 
-		{% if color %}
-			<a href="{% url 'cart request details' cart_request_id=cart_request_and_v.0.pk %}"> View Details / Service </a>
-		{% else %}
-		{% if cart_request_and_v.0.suggestion == 'B' %}
-		<span style="color: red">Requested For Backfill</span>
-		{% endif %}
-			<a href="{% url 'old cart request details' cart_request_id=cart_request_and_v.0.pk %}"> View Details</a>
-		{% endif %}
+			{% if type == 'O' %}
+			<a style="margin-left:24px" href="{% url 'delete request' cart_request.id%}">Delete Request</a>
+			{% endif %}
 		</th>
 		</tr>
-
+		{% endif %}
 
 	{% endfor %}
 	</table>

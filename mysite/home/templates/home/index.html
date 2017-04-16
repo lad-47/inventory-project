@@ -33,6 +33,14 @@
 	      </div>
 				<input class="btn btn-default btn-block" type="button" value="Exclude another tag" onClick="addExTag();">
 			</div>
+      {% if request.user.is_staff %}
+      <div class="col-lg-2">
+        <div>
+          <label for="low_stock">Only Show Understocked:</label>
+          <input type="checkbox" name="low_stock">
+        </div>
+      </div>
+      {% endif %}
 			<div class="col-lg-2" style="padding-top:25px">
 				<!--<label for="search_submit">Submit:</label>-->
 				<button id="search_submit" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
@@ -107,6 +115,7 @@ $(document).ready(function(){
 {% if request.user.is_staff %}
 <h4 style="padding-left: 15px;padding-bottom: 10px">
   <a href = "{% url 'add an item' %}" class="btn btn-primary" role="button"><span class="glyphicon glyphicon-plus-sign"></span> Add an Item</a>
+  <a href = "{% url 'add an asset row' %}" class="btn btn-primary" role="button"><span class="glyphicon glyphicon-plus-sign"></span> Create a new Asset</a>
 </h4>
 {% endif %}
 
@@ -138,6 +147,9 @@ $(document).ready(function(){
 				{% if request.user.is_staff or request.user.is_superuser %}
 					<td style="vertical-align:middle">
 						<a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span style="margin-left:5px; color:green" title="Modify" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
+            {% if item.is_asset %}
+            <a href="{% url 'add an asset' item_id=item.id%}" style="margin-right:15px"><span style="margin-left:5px; color:blue" title="Add" class="glyphicon glyphicon-plus" aria-hidden="true"> </span></a>
+            {% endif %}
 		        {% if request.user.is_superuser %}
 		          <a href="{% url 'delete check' item_id=item.id %}" ><span style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" title="Delete" aria-hidden="true"> </span></a>
 		        {% endif %}

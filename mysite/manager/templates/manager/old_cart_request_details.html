@@ -3,6 +3,7 @@
 {% block content %}
 
 <h3 style="margin-left:15px"> Requested by {{current_request.cart_owner.username}}: "{{current_request.cart_reason}}" </h3>
+
 <table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 
 	<tr class="active"> 
@@ -32,6 +33,9 @@
 		<th>
 		{% if req.5 == 'L' %}
 		Loaned
+		{% if req.0.suggestion == 'B' %}
+		/ <span style="color: red">Backfill Requested <a href="{{ req.6 }}">(View Receipt PDF)</a></span>
+		{% endif %}
 		<a style="margin-left:10px" href="{% url 'disburse loaned' req.0.pk %}">Disburse</a>
 		<a style="margin-left:10px" href="{% url 'return loaned' req.0.pk %}">Mark as Returned</a>
 		<a style="margin-left:10px" href="{% url 'change status' req.0.pk 'B' %}">Mark for Backfill</a>
@@ -44,6 +48,7 @@
 		<a style="margin-left:10px" href="{% url 'disburse loaned' req.0.pk %}">Disburse</a>
 		<a style="margin-left:10px" href="{% url 'change status' req.0.pk 'L' %}">Mark as Loaned</a>
 		<a style="margin-left:10px" href="{% url 'return loaned' req.0.pk %}">Mark as Returned</a>
+		<a style="margin-left:10px" href="{{ req.6 }}">View Receipt PDF</a>
 		{% else %}
 		{{req.5}}
 		{% endif %}

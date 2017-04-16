@@ -4,16 +4,41 @@
 <html>
 {% block content %}
 <head>
-	<title>{{item.item_name}}</title>
+	<title>{{item.item_name}} </title>
 </head>
 <body>
+
+<script type="text/javascript">
+  function dynamic(elem){
+    $(elem).parent().parent().nextUntil('h2').css('display', function(i,v){
+        return this.style.display === 'table-row' ? 'none' : 'table-row';
+    });
+};
+</script>
+
+<style type="text/css">
+  tr {
+    display: none;
+}
+
+tr.active {
+    display: table-row;
+}
+ul.pagination {
+  display: none;
+}
+</style>
+
 <div style="padding-left: 15px">
-  <h1>{{ item.item_name }}{% if request.user.is_staff or request.user.is_superuser %}
+  <h1>{{ item.item_name }}{% if asset_tag %}, Asset Tag: {{asset_tag}} {% endif %}{% if request.user.is_staff or request.user.is_superuser %}
         <small><a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span title="Modify" style="margin-left:15px; color:green" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
         {% if request.user.is_superuser %}
           <a href="{% url 'delete check' item_id=item.id %}" ><span title="Delete" style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" aria-hidden="true"> </span></a>
         {% endif %}</small>{% endif %}</h1>
   <p>Available: {{item.count}}</p>
+  {% if request.user.is_staff %}
+  <p>Minimum Stock Threshold: {{item.minimum_stock}} {% if item.understocked %}<span style="color: red">(Understocked)</span>{% endif %}</p>
+  {% endif %}
   <p>Model: {{item.model_number}}</p>
   <p>Description: {{item.description}}</p>
 </div>
@@ -32,44 +57,54 @@
   <p>None</p>
   {% endif %}
 </div>
+{% if item.is_asset %}
+<h2 style="margin-left:15px"> Asset Instances </h2>
+<table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
+
+  <tr class="active"> 
+  <th> Asset Tag <input type="button" value="Show/Hide" onClick="dynamic(this);"></th><th>In Stock?</th><th>Actions</th>
+  </tr>
+  {% for asset in assets %}
+    <!--make the actual tablerow -->
+    <tr>
+    <th>{{asset.asset_tag}}</th>
+    <th>{% if asset.quantity == 0 %} No {% else %} Yes {% endif %}</th>
+    <th>{% if request.user.is_staff or request.user.is_superuser %}
+        <small><a href="{% url 'modify_an_item' item_id=asset.id%}" style="margin-right:15px"><span title="Modify" style="margin-left:15px; color:green" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
+        {% if request.user.is_superuser %}
+          <a href="{% url 'delete check' item_id=asset.id %}" ><span title="Delete" style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" aria-hidden="true"> </span></a>
+        {% endif %}</small>{% endif %}</th></tr>
+  {% endfor %}
+  </table>
+{% endif %}
+
 
 {% if requests|length > 0 %}
 <h2 style="padding-left: 15px">Requests with this item</h2>
 {% endif %}
-<ul class="list-group">
-	{% for request in requests %}
-  	<li class="list-group-item list-group-item-action flex-column align-items-start">
-    <div class="d-flex w-100 justify-content-between">
-    {% if request.status == 'O' %}
-    {% if user.is_staff %} 
-      <big>Owner:</big> {{request.owner}}
-    {% endif %}
-    <big style="padding-left: 12px">Reason:</big> 
-    {% if user.is_staff %}
-    <a href="{% url 'cart request details' request.parent_cart.id %}">
-    {% else %}
-    <a href="{% url 'view request details' request.parent_cart.id %}"> 
-    {% endif %}
-    {{request.reason}}</a> <span style="margin-left:10px; margin-right:20px" class="badge">{{request.quantity}}</span>
-    <big>Requested</big></div></li> 
 
-    {% elif request.status == 'L' or request.status == 'B'%}
-    {% if user.is_staff %} 
-      <big>Owner:</big> {{request.owner}}
-    {% endif %}
-    <big style="padding-left: 12px">Reason:</big> 
-    {% if user.is_staff %}
+<table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
+
+  <tr class="active"> 
+  <th> Owner <input type="button" value="Show/Hide" onClick="dynamic(this);"></th><th>Reason</th><th>Quantity</th><th>Status</th>
+  </tr>
+  {% for request in requests %}
+    <!--make the actual tablerow -->
+    <tr>
+    <th>{{request.owner}} </th>
+    <th>{% if user.is_staff %}
     <a href="{% url 'cart request details' request.parent_cart.id %}">
     {% else %}
     <a href="{% url 'view request details' request.parent_cart.id %}"> 
     {% endif %}
-    {{request.reason}}</a> <span style="margin-left:10px; margin-right:20px" class="badge">{{request.quantity}}</span><big>{{request.get_status_display}}</big></div></li> 
-    {% endif %}
-	{% endfor %}
-</ul>
+    {{request.reason}}</a></th>
+    <th><span style="margin-left:10px; margin-right:20px" class="badge">{{request.quantity}}</span></th>
+    <th>{{request.get_status_display}}</th></tr>
+  {% endfor %}
+  </table>
 
 {% if not user.is_anonymous %}
-<h1 style="padding-left: 15px">Add Item to Cart: </h1>
+<h2 style="padding-left: 15px">Add Item to Cart: </h2>
 <div>
 <form class="navbar-form navbar-top" role="search" action="{% url 'request' item.id %}" method="POST">	
   {% csrf_token %}

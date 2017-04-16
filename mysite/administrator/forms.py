@@ -19,10 +19,13 @@ class CFAddForm(forms.Form):
 	TYPES = (('lt', 'Long Text'), ('st', 'Short Text'), \
 		('int', 'Integer'), ('float', 'Float'));
 	PRIV = ((True, 'Private'), (False, 'Not Private'));
+	PER_ASSET = ((True, 'Track Per Asset'), (False, "Don't Track Per Asset"));
 	
 	field_name = forms.CharField(max_length=100, label="Field Name");
 	value_type = forms.ChoiceField(widget=forms.RadioSelect, choices=TYPES, label="Field Datatype");
 	is_private = forms.ChoiceField(widget=forms.RadioSelect, choices=PRIV, label="Field Privacy");
+	per_asset = forms.ChoiceField(widget=forms.RadioSelect, choices=PER_ASSET, label="Per asset field?");
+
 
 class CFDeleteForm(forms.Form):
 	def __init__(self, *args, **kwargs):

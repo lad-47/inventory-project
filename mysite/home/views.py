@@ -1,9 +1,9 @@
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from .models import Item, Request, Tag, CustomFieldEntry, CustomLongTextField, CustomShortTextField, CustomIntField, CustomFloatField, Cart_Request,SubscribedEmail,EmailTag;
+from .models import *
 from .forms import CheckoutForm
 from .serializers import ItemSerializer
 # chance genereic.Listview stuff to ListView
@@ -17,6 +17,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from django.core.mail import EmailMessage
+
+from django.core.files.storage import FileSystemStorage
 
 import os, sys
 
@@ -33,6 +35,7 @@ def index(request):
 		#old_extag_query = request.GET.getlist('exselect', None)
 		tag_query = request.GET.getlist('myTags[]', None)
 		extag_query = request.GET.getlist('exTags[]', None)
+		low_stock = request.GET.get('low_stock',None)
 		if search_query is not None:
 			latest_item_list = latest_item_list.filter(item_name__icontains=search_query)
 		if model_query is not None:
@@ -54,6 +57,8 @@ def index(request):
 				if (tag != ''):
 					tag = Tag.objects.get(tag=tag)
 					latest_item_list = latest_item_list.exclude(tags=tag)
+		if low_stock is not None:
+			latest_item_list = latest_item_list.filter(understocked=True)
 		latest_item_list = sorted(latest_item_list, key=lambda item: item.item_name)
 	page = request.GET.get('page', 1)
 	paginator = Paginator(latest_item_list, 10)
@@ -78,46 +83,88 @@ def detail(request, item_id):
 	requests = Request.objects.filter(item_id=item.id, status='O');
 	requests = requests | Request.objects.filter(item_id=item.id, status='L')
 	requests = requests | Request.objects.filter(item_id=item.id, status='B')
+	if item.is_asset:
+		assets = Asset.objects.filter(item_name=item.item_name);
+	else:
+		assets = None;
 	if not request.user.is_staff:
 		requests = requests.filter(owner=request.user);
 
-	custom_fields = CustomFieldEntry.objects.all()
-	custom_values = []
-	for cf in custom_fields:
-		if request.user.is_staff or not cf.is_private:
-			if cf.value_type == 'lt': # Long Text
-				try:
-					val = CustomLongTextField.objects.get(parent_item=item.id, field_name=cf)
-					if val.field_value:
-						custom_values.append(val.field_name.field_name+": "+val.field_value)
-				except CustomLongTextField.DoesNotExist:
-					pass
-			elif cf.value_type == 'st': # Short Text
-				try:
-					val = CustomShortTextField.objects.get(parent_item=item.id, field_name=cf)
-					if val.field_value:
-						custom_values.append(val.field_name.field_name+": "+val.field_value)
-				except CustomShortTextField.DoesNotExist:
-					pass
-			elif cf.value_type == 'int': # Integer
-				try:
-					val = CustomIntField.objects.get(parent_item=item.id, field_name=cf)
-					if val.field_value:
-						custom_values.append(val.field_name.field_name+": "+str(val.field_value))
-				except CustomIntField.DoesNotExist:
-					pass
-			elif cf.value_type == 'float': # Float
-				try:
-					val = CustomFloatField.objects.get(parent_item=item.id, field_name=cf)
-					if val.field_value:
-						custom_values.append(val.field_name.field_name+": "+str(val.field_value))
-				except CustomFloatField.DoesNotExist:
-					pass
-			else:
-				return HttpResponseNotFound('<h1>Custom Field not found<h1>')
+	if request.user.is_staff:
+		cf_entries = CustomFieldEntry.objects.all();
+	else:
+		cf_entries = CustomFieldEntry.objects.filter(is_private=False);
+	custom_values = get_cfs_from_entries(cf_entries, item);
 	context = {
 		'item': item,
 		'tags': tags,
+		'requests': requests,
+		'custom': custom_values,
+		'user':request.user,
+		'assets':assets,
+	}
+	return render(request, 'home/detail.html', context)
+
+
+def get_cfs_from_entries(cf_entries, item):
+	custom_values = []
+	for cf in cf_entries:
+		if cf.value_type == 'lt': # Long Text
+			try:
+				val = CustomLongTextField.objects.get(parent_item=item.id, field_name=cf)
+				if val.field_value:
+					custom_values.append(val.field_name.field_name+": "+val.field_value)
+			except CustomLongTextField.DoesNotExist:
+				pass
+		elif cf.value_type == 'st': # Short Text
+			try:
+				val = CustomShortTextField.objects.get(parent_item=item.id, field_name=cf)
+				if val.field_value:
+					custom_values.append(val.field_name.field_name+": "+val.field_value)
+			except CustomShortTextField.DoesNotExist:
+				pass
+		elif cf.value_type == 'int': # Integer
+			try:
+				val = CustomIntField.objects.get(parent_item=item.id, field_name=cf)
+				if val.field_value:
+					custom_values.append(val.field_name.field_name+": "+str(val.field_value))
+			except CustomIntField.DoesNotExist:
+				pass
+		elif cf.value_type == 'float': # Float
+			try:
+				val = CustomFloatField.objects.get(parent_item=item.id, field_name=cf)
+				if val.field_value:
+					custom_values.append(val.field_name.field_name+": "+str(val.field_value))
+			except CustomFloatField.DoesNotExist:
+				pass
+	return custom_values;
+# asset detail doesn't actauly exist, I forgot Lucas was gonna do this
+# I'll leave the code here just in case
+def assets_detail(request, item_id):
+	item = get_object_or_404(Item, pk=item_id);
+	assets = Item.objects.filter(item_name=item.item_name);
+
+	context = {
+		'asset_row': item,
+		'asset_list': assets,
+	}
+	return render(request, 'manager/success.html', {'message':"Page Not Implemented"})
+
+def asset_detail(request, asset_id):
+	asset = get_object_or_404(Asset, pk=asset_id)
+	requests = Request.objects.filter(item_id=asset.id, status='O');
+	requests = requests | Request.objects.filter(item_id=asset.id, status='L')
+	requests = requests | Request.objects.filter(item_id=asset.id, status='B')
+	if request.user.is_staff:
+		cf_entries = CustomFieldEntry.objects.filter(per_asset=True);
+	else:
+		cf_entries = CustomFieldEntry.objects.filter(is_private=False, per_asset=True);
+
+	custom_values = get_cfs_from_entries(cf_entries, asset);
+	context = {
+		'asset_tag': asset.asset_tag,
+		'item': asset,
+		'tags': asset.tags.all(),
 		'requests': requests,
 		'custom': custom_values,
 		'user':request.user
@@ -151,13 +198,49 @@ class RequestOwnerMixin(object):
 			raise PermsisionDenied
 		return obj
 
-class requestsView(LoggedInMixin, RequestOwnerMixin, ListView):
-	model = Cart_Request;
-	context_object_name = 'request_list';
-	template_name = 'home/cart_requests.html';
+# class requestsView(LoggedInMixin, RequestOwnerMixin, ListView):
+# 	model = Cart_Request;
+# 	context_object_name = 'request_list';
+# 	template_name = 'home/cart_requests.html';
+# 
+# 	def get_queryset(self):
+# 		return Cart_Request.objects.filter(cart_owner=self.request.user).exclude(cart_status='P');
 
-	def get_queryset(self):
-		return Cart_Request.objects.filter(cart_owner=self.request.user).exclude(cart_status='P');
+def requestsView(request):
+
+	all_reqs = Request.objects.filter(owner=request.user)
+	outstanding = all_reqs.filter(status='O')
+	loans = all_reqs.filter(status='L')
+	backfills = all_reqs.filter(status='B')
+	approved = all_reqs.filter(status='A')
+	denied = all_reqs.filter(status='D')
+	
+	outstanding_carts = set()
+	loan_carts = set()
+	backfill_carts = set()
+	approved_carts = set()
+	denied_carts = set()
+	
+	for subreq in outstanding:
+		outstanding_carts.add(subreq.parent_cart)
+	for subreq in loans:
+		loan_carts.add(subreq.parent_cart)
+	for subreq in backfills:
+		backfill_carts.add(subreq.parent_cart)
+	for subreq in approved:
+		approved_carts.add(subreq.parent_cart)
+	for subreq in denied:
+		denied_carts.add(subreq.parent_cart)
+	
+	context = {
+		'outstanding': outstanding_carts,
+		'loans': loan_carts,
+		'backfills': backfill_carts,
+		'approved': approved_carts,
+		'denied': denied_carts
+	}
+	return render(request, 'home/cart_requests.html', context);
+
 
 #class serviceRequestsView(LoggedInMixin, ListView):
 #	model = Request;
@@ -259,6 +342,16 @@ def api_download(request):
 def cart_request_details(request, cart_request_id):
 	current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
 	subrequests = Request.objects.filter(parent_cart=current_request);
+	if request.method == 'POST':
+		items = request.POST.getlist('check[]',None)
+		for item in items:
+			req = subrequests.get(item_id__item_name=item)		
+			pdf = BackfillPDF(request=req,pdf=request.FILES['receipt'])
+			pdf.save()
+			req.suggestion = 'B'
+			req.save()
+			current_request.suggestion='B'
+		current_request.save()
 	context = {
 		'current_request':current_request,
 		'subrequests':subrequests,
@@ -277,29 +370,41 @@ def checkout(request):
 		to_checkout = Cart_Request.objects.get(cart_status='P', cart_owner=request.user);
 	except Cart_Request.DoesNotExist:
 		return render(request, 'home/message.html', {'message':"Cart Empty."});
+	checkout_form = CheckoutForm();
+	subrequests = Request.objects.filter(parent_cart=to_checkout);
 	if request.method=='GET':
-		checkout_form = CheckoutForm();
-		subrequests = Request.objects.filter(parent_cart=to_checkout);
 		context = {
 			'subrequests':subrequests,
 			'to_checkout':to_checkout,
-			'checkout_form':checkout_form,
+			'checkout_form':checkout_form
 		}
 		return render(request, 'home/checkout.html', context)
 	else:
 		# request.method == 'POST'
-		checkout_form = CheckoutForm(request.POST);
+		checkout_form = CheckoutForm(request.POST, request.FILES);
 		if checkout_form.is_valid():
+			to_checkout.suggestion = checkout_form.cleaned_data['loan_disburse'];
+			if to_checkout.suggestion == 'B' and not request.FILES:
+				context = {
+				'subrequests':subrequests,
+				'to_checkout':to_checkout,
+				'checkout_form':checkout_form,
+				'error':'You must provide a pdf receipt to request a backfill'
+				}
+				return render(request, 'home/checkout.html', context)
 			to_checkout.cart_reason = checkout_form.cleaned_data['cart_reason'];
 			to_checkout.cart_status = 'O';
-			to_checkout.suggestion = checkout_form.cleaned_data['loan_disburse'];
 			to_checkout.save();
 			message = 'You have requested:\n'
 			subrequests = Request.objects.filter(parent_cart=to_checkout);
 			for subrequest in subrequests:
 				subrequest.status = 'O';
 				subrequest.reason = to_checkout.cart_reason;
+				subrequest.suggestion = to_checkout.suggestion
 				subrequest.save();
+				if(to_checkout.suggestion=='B'):
+					pdf = BackfillPDF(request=subrequest,pdf=request.FILES['backfill_pdf'])
+					pdf.save()
 				message+=subrequest.item_id.item_name+' x'+str(subrequest.quantity)+"\n"
 			tag=EmailTag.objects.all()[0].tag
 			subscribed_emails=SubscribedEmail.objects.all()
