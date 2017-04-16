@@ -537,7 +537,7 @@ def createAsset(data, item):
 	item_instance = Asset.objects.create(asset_tag=data['asset_tag'],\
 				item_name=item.item_name, count=1, model_number=item.model_number, is_asset=True,
 				description=item.description);
-	
+
 	for tag in item.tags.all():
 		item_instance.tags.add(tag);
 
@@ -1015,13 +1015,11 @@ def update_assets(**kwargs):
 
 	if not (asset_tag or item_name):
 		raise ValueError("Neither valid argument (asset_tag or item_name) was provided");
-	
+
 	if asset_tag:
 		item_name = Asset.objects.get(asset_tag=asset_tag).item_name;
-		
-	assets_left = Asset.objects.filter(item_name=asset_item_name, count=1).count();	
+
+	assets_left = Asset.objects.filter(item_name=asset_item_name, count=1).count();
 	asset_item_row = Item.objects.get(item_name=asset.item_name);
 	asset_item_row.count = assets_left;
 	asset_item_row.save();
-
-
