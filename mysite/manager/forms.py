@@ -91,6 +91,8 @@ def ItemForm_factory(**kwargs):
 
 	TAGS = generate_choices(Tag, 'tag');
 
+	name_field = forms.CharField(max_length=100)
+
 	if kwargs['item_type'] == 'Asset':
 		count_field = forms.IntegerField(min_value=0, max_value=1);
 	else:
@@ -101,7 +103,7 @@ def ItemForm_factory(**kwargs):
 	#TAGS = (('1', 'pick 1'), ('2', 'pick 2'));
 	# class variables of the ItemForm class for which this is a factory
 	properties = {
-		'item_name': forms.CharField(max_length=100),
+		'item_name': name_field,
 		'model_number': forms.CharField(max_length=100, required=False),
 		'description': forms.CharField(widget=forms.Textarea, required=False),
 		'count': count_field,
