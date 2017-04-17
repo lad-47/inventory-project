@@ -168,7 +168,7 @@ def asset_detail(request, asset_id):
 		'requests': requests,
 		'custom': custom_values,
 		'user':request.user,
-		'convert':forms.BooleanField(required=False)
+		'convert':forms.BooleanField(required=False),
 		'is_asset_instance':True,
 	}
 	return render(request, 'home/detail.html', context)
