@@ -43,7 +43,7 @@ class RequestSerializer(serializers.ModelSerializer):
     admin_comment=serializers.CharField(required=False,allow_blank=True)
     class Meta:
         model = Request
-        fields = ('owner','item_id','reason', 'admin_comment','quantity','status')
+        fields = ('id','owner','item_id','reason', 'admin_comment','quantity','status')
         
 class UserSerializer(serializers.ModelSerializer):
     #requests = serializers.PrimaryKeyRelatedField(many=True,queryset=Request.objects.all())
@@ -62,7 +62,7 @@ class CustomFieldEntrySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CustomFieldEntry
-        fields = ('field_name','is_private','value_type')
+        fields = ('field_name','is_private','per_asset','value_type')
         
 class CustomShortTextFieldSerializer(serializers.ModelSerializer):
     
