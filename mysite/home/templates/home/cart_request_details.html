@@ -21,7 +21,7 @@
 <table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 
       <tr class="active"> 
-      <th> Item </th><th> Amount Requested </th><th> Status </th><th>Admin Comment</th><th>Check for Backfill</th>
+      <th> Item </th><th> Amount Requested </th><th> Status </th><th>Admin Comment</th>{% if not current_request.cart_status == 'A' and not current_request.cart_status == 'D' %}<th>Check for Backfill</th>{% endif %}
       </tr>
 
       <!-- rows for each cart request -->
@@ -32,12 +32,14 @@
             <th><span class="badge">{{subrequest.quantity}}</span></th>
             <th>{{subrequest.get_status_display}}</th>
             <th>{{subrequest.admin_comment}}</th>
-            <th>{% if subrequest.suggestion != 'B' %}<input id="check[]" name="check[]" type="checkbox" value="{{subrequest.item_id.item_name}}">{% else %}Requested for Backfill{% endif %}</th>
+            {% if not current_request.cart_status == 'A' and not current_request.cart_status == 'D' %}
+            <th>{% if subrequest.suggestion != 'B' and subrequest.status != 'B' %}<input id="check[]" name="check[]" type="checkbox" value="{{subrequest.item_id.item_name}}">{% else %}Requested for Backfill{% endif %}</th>
+            {% endif %}
       </tr>
       {% endfor %}
 </table>
      
-
+{% if not current_request.cart_status == 'A' and not current_request.cart_status == 'D' %}
   <div class="form-group">
     <label for="receipt">Receipt:</label>
     <input id="receipt" name="receipt" type="file" accept=".pdf" class="form-control" required>
@@ -45,5 +47,6 @@
   <button id="save_request" type="submit" class="btn btn-default">Request for Backfill</button>
 </form>
 </div>
+{% endif %}
 
 {% endblock %}

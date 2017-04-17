@@ -15,6 +15,8 @@ from rest_framework import status
 from home.models import SubscribedEmail,EmailBody,EmailTag,LoanDate
 from django.core.mail import EmailMessage
 from django.core.files.storage import FileSystemStorage
+from manager.auto_increment import generateAssetTag
+from jinja2.compiler import generate
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -586,7 +588,7 @@ def add_an_asset(request, item_id):
 		return render(request, 'home/notAdmin.html')
 	item = get_object_or_404(Item, pk=item_id);
 
-	asset_tag = 3;
+	asset_tag = generateAssetTag();
 	AssetForm = AssetForm_factory(asset_tag);
 
 	# on a post we (print) the data and then return success
@@ -617,8 +619,7 @@ def createItem(data, kind):
 		 	count=data['count'], is_asset=True);
 		cfs = CustomFieldEntry.objects.filter(per_asset=False);
 	elif(kind == 'asset'):
-		## TODO:  REPLACE ASSET TAGGGG!!!!!!!!!!!!!!!!!!!!!
-		item_instance = Asset.objects.create(asset_tag=5, item_name=data['item_name'],\
+		item_instance = Asset.objects.create(asset_tag=generateAssetTag(), item_name=data['item_name'],\
 		 	model_number=data['model_number'], description=data['description'],\
 		 	count=data['count'], is_asset=True);
 		cfs = CustomFieldEntry.objects.filter(per_asset=True);
