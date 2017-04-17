@@ -49,6 +49,7 @@
 			            <li role="separator" class="divider"></li>
 			            <li><a href="{% url 'emails' %}">Emails<span style="margin-left:5px" class="glyphicon glyphicon-envelope" aria-hidden="true"> </span></a></li>
 			            <li><a href="{% url 'tag handler' %}">Tags<span style="margin-left:5px" class="glyphicon glyphicon-tags" aria-hidden="true"> </span></a></li>
+			            <li><a href="{% url 'minimum stock bulk set' %}">Minimum Stocks<span style="margin-left:5px" class="glyphicon glyphicon-scale" aria-hidden="true"> </span></a></li>
       					<li><a href="{% url 'logs' %}">Logs<span style="margin-left:5px" class="glyphicon glyphicon-list-alt" aria-hidden="true"> </span></a></li>
 			          </ul>
       				{% if user.is_superuser %}
