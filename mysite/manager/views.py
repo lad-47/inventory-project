@@ -4,8 +4,8 @@ from datetime import date
 from django.contrib.auth.models import User
 from home.models import Request, Cart_Request, User, Item, Asset, Log, Tag, CustomFieldEntry, \
 CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, BackfillPDF
-#from .forms import ServiceForm, ItemForm_factory, AssetForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
-#PositiveIntArgMaxForm
+from .forms import ServiceForm, ItemForm_factory, AssetForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
+PositiveIntArgMaxForm
 from .auto_increment import generateAssetTag
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
