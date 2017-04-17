@@ -1,0 +1,11 @@
+Custom Fields st:
+[{"item_name":"RLED001","count":345,"custom_fields":[{"field_name":"Location","field_value":"Hudson"}]},{"item_name":"RLED002","count":375}]
+
+Custom Fields lt:
+[{"item_name":"RLED001","count":345,"custom_fields":[{"field_name":"Location","field_value":"Hudson"}]},{"item_name":"RLED002","count":375}]
+
+Custom Fields int:
+[{"item_name":"RLED001","count":345,"custom_fields":[{"field_name":"Location","field_value":"Hudson"}]},{"item_name":"RLED002","count":375}]
+
+Custom Fields float:
+[{"item_name":"RLED001","count":345,"custom_fields":[{"field_name":"Location","field_value":"Hudson"}]},{"item_name":"RLED002","count":375}]
