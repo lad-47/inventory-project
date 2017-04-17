@@ -84,7 +84,7 @@ def detail_user(request, user_id):
     return render(request, 'administrator/detail_user.html', context)
 
 def cf_manager(request):
-    delete_form = CFDeleteForm();
+    #delete_form = CFDeleteForm(); deprecated
     if request.method == 'POST':
         add_form = CFAddForm(request.POST);
         if add_form.is_valid():
@@ -99,9 +99,12 @@ def cf_manager(request):
     else:
         add_form = CFAddForm();
 
+    cfs = CustomFieldEntry.objects.all()
+
     context = {
         'add_form':add_form,
-        'delete_form':delete_form,
+        #'delete_form':delete_form, deprecated
+        'cfs':cfs
     }
 
     return render(request, 'administrator/cf_manager.html', context);
@@ -133,15 +136,27 @@ def cf_delete_conf(request):
 
 def cf_delete_action(request):
     if request.method == 'POST':
+        delete_cfs = request.POST.getlist('deleteCFs[]', None)
+        if delete_cfs is not None:
+            for cf in delete_cfs:
+                try:
+                    cf_instance = CustomFieldEntry.objects.get(field_name=cf)
+                    cf_instance.delete()
+                except:
+                    # User entered non-existent Custom Field
+                    pass
+            return HttpResponseRedirect('/admin/custom_fields/delete/success/')
+
+        """ deprecated form code
         delete_form = CFDeleteForm(request.POST);
         if delete_form.is_valid():
             for cfPK in delete_form.cleaned_data['to_delete']:
                 cf = CustomFieldEntry.objects.get(pk=cfPK);
                 cf.delete();
-                return HttpResponseRedirect('/admin/custom_fields/delete/success/');
+                return HttpResponseRedirect('/admin/custom_fields/delete/success/');"""
         add_form = CFAddForm();
         context = {
-            'delete_form':delete_form,
+            #'delete_form':delete_form,
             'add_form':add_form,
         }
         return render(request, 'administrator/cf_manager.html', context);

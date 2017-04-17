@@ -5,22 +5,6 @@
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
 <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
-<script type="text/javascript">
-	// auto-completes item name search
-	$(document).ready(function(){
-		var tag_box=$('input[id="id_old_name"]');
-		var tags = [
-			{% for tag in tags %}
-			"{{tag}}",
-			{%endfor%}
-		];
-		tag_box.autocomplete({
-			source: tags,
-			minLength: 2
-		});
-	} );
-
-</script>
 
 <div class="page-header" style="padding-left: 15px">
   <h1>Inventory <small>Tags</small></h1>
@@ -49,21 +33,126 @@
 <form method="POST" action="{% url 'create tag' %}">
 	{% csrf_token %}
 	<h4> <b>Create a New Tag </b></h4>
-	{{create_form.as_p}}
+	<!-- Deprecated Form
+	{{create_form.as_p}}-->
 
-	<p><input class="btn btn-default" type="submit" value="Create"></p>
+	<div style="margin-left:10px">
+		<div class="form-group">
+			<label for="new_tag_name">Tag Name:</label>
+			<input id="new_tag_name" name="new_tag_name" type="text" placeholder="New tag...">
+		</div>
+
+		<label for="tag_existing_items">Tag Some Items:</label>
+		<div id="dynamicTagExisting">
+			<input type="text" name="tagExisting[]" placeholder="Item name...">
+		</div>
+		<input class="btn btn-default" type="button" value="Tag another item" onClick="addTagExisting();">
+	</div>
+
+	<p style="padding-top:10px"><input class="btn btn-default" type="submit" value="Create"></p>
 </form>
 </div> <hr>
 
+<!--TODO: change action url to 'delete tag action' and delete 'delete tag conf'-->
 <div class="form_layout" >
-<form method="POST" action="{% url 'delete tag conf' %}">
+<form method="POST" action="{% url 'delete tag action' %}" onsubmit="return confirm('Deleting tags cannot be undone. Are you sure you want to delete these tags?');">
 	{% csrf_token %}
 	<h4> <b>Delete Tags </b></h4>
-	{{delete_form.as_p}}
+	<div style="margin-left:10px">
+		<div id="dynamicDelete">
+			<input type="text" name="deleteTags[]" placeholder="Tag name..." >
+		</div>
+		<input class="btn btn-default" type="button" value="Delete another tag" onClick="addDeleteTag();">
+	</div>
+	<!-- Commenting out old delete form
+	{{delete_form.as_p}} -->
 
-	<p><input class="btn btn-default" type="submit" value="Delete"></p>
+	<p style="padding-top:10px"><input type="submit" value="Delete" class="btn btn-default"></p>
 </form>
 </div>
 
+<script type="text/javascript">
+	// auto-completes modify tag name
+	$(document).ready(function(){
+		var old_tag_box=$('input[id="id_old_name"]');
+		var tags = [
+			{% for tag in tags %}
+			"{{tag}}",
+			{%endfor%}
+		];
+		old_tag_box.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	});
+</script>
+
+<script type="text/javascript">
+			// Script for creating tags
+	// auto-completes item name search
+	$(document).ready(function(){
+		var item_box=$('input[name="tagExisting[]"]');
+		var items = [
+			{% for item in items %}
+			"{{item}}",
+			{%endfor%}
+		];
+		item_box.autocomplete({
+			source: items,
+			minLength: 2
+		});
+	});
+
+	function addTagExisting(){
+		var newdiv = document.createElement('div');
+		newdiv.innerHTML = "<input type='text' name='tagExisting[]' placeholder='Item name...'>";
+		document.getElementById('dynamicTagExisting').appendChild(newdiv);
+
+		var tag_existing_item=$('input[name="tagExisting[]"]');
+		var items = [
+			{% for item in items %}
+			"{{item}}",
+			{%endfor%}
+		];
+		tag_existing_item.autocomplete({
+			source: items,
+			minLength: 2
+		});
+	}
+</script>
+
+<script type="text/javascript">
+			// Script for deleting tags
+	// auto-completes tag name search
+	$(document).ready(function(){
+		var tag_box=$('input[name="deleteTags[]"]');
+		var tags = [
+			{% for tag in tags %}
+			"{{tag}}",
+			{%endfor%}
+		];
+		tag_box.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	});
+
+	function addDeleteTag(){
+		var newdiv = document.createElement('div');
+		newdiv.innerHTML = "<input type='text' name='deleteTags[]' placeholder='Tag name...'>";
+		document.getElementById('dynamicDelete').appendChild(newdiv);
+
+		var delete_tag_input=$('input[name="deleteTags[]"]');
+		var tags = [
+			{% for tag in tags %}
+			"{{tag}}",
+			{%endfor%}
+		];
+		delete_tag_input.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	}
+</script>
 
 {% endblock %}
