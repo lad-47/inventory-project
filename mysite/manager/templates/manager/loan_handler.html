@@ -60,7 +60,7 @@
 		<th><a href='/{{req.item_id.pk}}'> {{req.item_id}}</a> </th>
 		<th> {{req.quantity}} </th>
 		<th>{% if req.suggestion == 'B' %}
-    <span style="color: red">Backfill Requested <a href="{% url 'old cart request details' cart_request_id=req.parent_cart.pk %}"> (View Details)</a></span>
+    <span style="color: red">Backfill Requested <a href="{% url 'old cart request details' cart_request_id=req.parent_cart.pk %}">(View Details) </a></span><a href="{% url 'deny backfill' req.pk %}"> Deny Backfill </a>
     {% endif %}<a style = "margin-right:10px" href="{% url 'disburse loaned' req.pk %}">Disburse</a>
 			<a style="margin-right:10px" href="{% url 'return loaned' req.pk %}">{% if req.status == 'B' %}Mark Backfill as Satisfied{% else %}Mark as Returned{% endif %}</a>
       {% if loan %}

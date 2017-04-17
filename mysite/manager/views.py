@@ -96,7 +96,7 @@ def create_indv_request_info(cart_request):
 		valid = not (newQuantity < 0)
 		req_info+=[(subrequest, requestAmount, oldQuantity, valid, itemToChange, subrequest.status)];
 		if subrequest.status=='B' or subrequest.suggestion=='B':
-			req_info[i]+= (FileSystemStorage().url(BackfillPDF.objects.get(request=subrequest).pdf),)
+			req_info[i]+= (FileSystemStorage().url(BackfillPDF.objects.filter(request=subrequest)[0].pdf),)
 		i+=1
 	return req_info;
 
@@ -1110,6 +1110,26 @@ def loan_handler(request):
 
 def backfill_handler(request):
 	return loan_backfill_handler(request, 'B');
+
+def deny_backfill(request, request_id):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	req = Request.objects.get(id=request_id)
+	if req.suggestion == 'B':
+		req.suggestion = 'L'
+		req.save()
+		
+	parent = req.parent_cart
+	if parent.suggestion == 'B':	
+				children = Request.objects.filter(parent_cart=parent)
+				still_suggest = False
+				for child in children:
+					if child.suggestion=='B':
+						still_suggest = True
+				if not still_suggest:
+					parent.suggestion='L'
+					parent.save()
+	return HttpResponseRedirect('/manager/loan_handler');
 
 def assemble_loan_info(request_list):
 	req_info = [];
