@@ -569,7 +569,7 @@ def add_an_asset(request, item_id):
 	else:
 		item_form = AssetForm();
 
-	return render(request, 'manager/add_an_item.html', {'item_form':item_form})
+	return render(request, 'manager/add_an_item.html', {'item_form':item_form, 'is_asset':True,})
 
 
 def createItem(data, kind):
