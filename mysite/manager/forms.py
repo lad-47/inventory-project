@@ -102,8 +102,8 @@ def ItemForm_factory(**kwargs):
 		'model_number': forms.CharField(max_length=100, required=False),
 		'description': forms.CharField(widget=forms.Textarea, required=False),
 		'minimum_stock': forms.IntegerField(min_value=0, required=False),
-		'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
-			choices=TAGS, required=False),
+		#'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
+		#	choices=TAGS, required=False),
 		'convert': forms.BooleanField(required=False),
 		'__init__': ItemForm_init,
 	}
