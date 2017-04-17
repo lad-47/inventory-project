@@ -5,7 +5,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import CFAddForm, CFDeleteForm
 from home.models import CustomFieldEntry
 from .import_logic import import_data
-
+from django.db import IntegrityError
 # Create your views here.
 
 def users(request):

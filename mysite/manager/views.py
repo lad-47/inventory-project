@@ -249,7 +249,7 @@ def logs(request, *args, **kwargs):
 
 def updateItem(item_instance, data):
 	for field in data.keys():
-
+		item_instance.name_unique_check = data['item_name']
 		# we have to parse the tags by hand
 		if field == 'tags':
 			for tag in Tag.objects.all():
@@ -335,7 +335,10 @@ def modify_an_item(request, item_id):
 
 			}
 			return render(request, 'manager/confirmation.html', context)
-			updateItem(itemToChange, item_form.cleaned_data);
+			try:
+				updateItem(itemToChange, item_form.cleaned_data);
+			except IntegrityError:
+				return render(request, 'manager/success.html', {'message':'Item with that name exists.'})
 			#for key in item_form.cleaned_data.keys():
 				#print('key: ' + key)
 				#print('data: ' + str(item_form.cleaned_data[key]))
@@ -367,7 +370,10 @@ def modify_an_item_action(request, item_id):
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
-			updateItem(itemToChange, item_form.cleaned_data);
+			try:
+				updateItem(itemToChange, item_form.cleaned_data);
+			except IntegrityError:
+				return render(request, 'manager/success.html', {'message':'Item with that name exists.'})
 			return HttpResponseRedirect('/manager/update_success');
 		else:
 			context = {
@@ -542,7 +548,10 @@ def add_an_asset_row(request):
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
 			try:
-				createItem(item_form.cleaned_data, 'asset_row');
+				d = item_form.cleaned_data;
+				d['count'] = 0;
+				d['tags'] = request.POST.getlist('addTags[]',None);
+				createItem(d, 'asset_row');
 			except IntegrityError:
 				return render(request, 'home/message.html',{'message':'An item with that name already exists'})
 			return HttpResponseRedirect('/manager/create_success');
@@ -579,12 +588,12 @@ def add_an_asset(request, item_id):
 
 def createItem(data, kind):
 	if(kind == 'item'):
-		item_instance = Item.objects.create(item_name=data['item_name'],\
+		item_instance = Item.objects.create(item_name=data['item_name'], name_unique_check=data['item_name'],\
 		 	model_number=data['model_number'], description=data['description'],\
 		 	count=data['count'], is_asset=False);
 		cfs = CustomFieldEntry.objects.all();
 	elif(kind == 'asset_row'):
-		item_instance = Item.objects.create(item_name=data['item_name'],\
+		item_instance = Item.objects.create(item_name=data['item_name'],name_unique_check=data['item_name'],\
 		 	model_number=data['model_number'], description=data['description'],\
 		 	count=data['count'], is_asset=True);
 		cfs = CustomFieldEntry.objects.filter(per_asset=False);
@@ -616,7 +625,10 @@ def createItem(data, kind):
 			to_change.save();
 
 	for tag in data['tags']:
-		item_instance.tags.add(Tag.objects.get(tag=tag));
+		try:
+			item_instance.tags.add(Tag.objects.get(tag=tag));
+		except Tag.DoesNotExist:
+			pass;
 	item_instance.save();
 
 def createAsset(data, item):
@@ -1096,15 +1108,26 @@ def assemble_loan_info(request_list):
 # call with either asset_tag or item_name
 # ex:  update_assets(asset_tag=1111)  or
 #      update_assets(item_name="Resistor")
+#      update_assets(check_all=True);
 def update_assets(**kwargs):
 
-	if not (asset_tag or item_name):
-		raise ValueError("Neither valid argument (asset_tag or item_name) was provided");
+	if not (kwargs):
+		raise ValueError("Neither valid argument (asset_tag or item_name or check_all) was provided");
 
-	if asset_tag:
-		item_name = Asset.objects.get(asset_tag=asset_tag).item_name;
+	if kwargs.get('check_all', False):
+		asset_rows = Item.objects.filter(is_asset=True);
+		for row in asset_rows:
+			num_assets = Asset.objects.filter(item_name=row.item_name, count=1).count();
+			row.count = num_assets;
+			row.save();
+		return;
+			
+	if kwargs.get('asset_tag', False):
+		item_name = Asset.objects.get(asset_tag=kwargs['asset_tag']).item_name;
+	else:
+		item_name = kwargs['item_name'];
 
-	assets_left = Asset.objects.filter(item_name=asset_item_name, count=1).count();
-	asset_item_row = Item.objects.get(item_name=asset.item_name);
+	assets_left = Asset.objects.filter(item_name=item_name, count=1).count();
+	asset_item_row = Item.objects.get(item_name=item_name);
 	asset_item_row.count = assets_left;
 	asset_item_row.save();
