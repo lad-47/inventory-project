@@ -321,9 +321,21 @@ def modify_an_item(request, item_id):
 	itemToChange = get_object_or_404(Item, pk=item_id);
 	ItemForm = ItemForm_factory(item_type=type(itemToChange), is_asset_row=itemToChange.is_asset);
 
+	tags = Tag.objects.all()
+
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
+
+		if item_form.is_valid():
+			raw_tag_names = request.POST.getlist('modifyTags[]', None)
+			tags_to_modify = process_tags(raw_tag_names)
+			data = item_form.cleaned_data
+			data['tags'] = tags_to_modify
+			updateItem(itemToChange, data)
+			return HttpResponseRedirect('/manager/update_success')
+
+		""" Deprecated code
 		if item_form.is_valid():
 			action = "/manager/modify_an_item_action/"+str(item_id) + "/";
 			message="Modification of this item will change it in the database.";
@@ -339,11 +351,12 @@ def modify_an_item(request, item_id):
 			#for key in item_form.cleaned_data.keys():
 				#print('key: ' + key)
 				#print('data: ' + str(item_form.cleaned_data[key]))
-			#return HttpResponseRedirect('/manager/update_success');
+			#return HttpResponseRedirect('/manager/update_success');"""
 
 	# otherwise, it's a GET, and we init the form using the current data
 	else:
 		item_dict = item_to_dict(itemToChange);
+		item_tags = item_dict.pop('tags')
 		item_form = ItemForm(item_dict);
 # 		item_form.fields['new']=item_form.fields.get('item_name')
 # 		print(item_form.fields.get('item_name'))
@@ -355,8 +368,24 @@ def modify_an_item(request, item_id):
 	#print(item_to_dict(itemToChange));
 	context = {
 		'item_form': item_form,
+		'item_tags': item_tags,
+		'tags': tags
 	}
 	return render(request, 'manager/modify_an_item.html', context);
+
+def process_tags(tags):
+	# Takes in a list of Tag names and returns a list of Tag object instances
+	processed_data = []
+	for tag in tags:
+		try:
+			tag_instance = Tag.objects.get(tag=tag)
+			tag_pk = tag_instance.pk
+			if tag_pk not in processed_data:
+				processed_data.append(tag_pk)
+		except:
+			# Ignore incorrect tags
+			pass
+	return processed_data
 
 def modify_an_item_action(request, item_id):
 	if not request.user.is_staff:
@@ -403,7 +432,7 @@ def item_to_dict(item_instance):
 	# now we add the tags by hand because... we have to
 	tag_list = [];
 	for tag in item_tags:
-		tag_list.append(tag.pk);
+		tag_list.append(tag.tag);
 	item_dict['tags'] = tag_list;
 
 	# and finally the custom fields

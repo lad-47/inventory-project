@@ -2,22 +2,74 @@
 
 {% block content %}
 
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
 <h3 style="margin-left:10px">Update Item </h3>
 
 <head>
   <style type="text/css">
-    .form_layout p { margin-left:10px; 
+    .form_layout p { margin-left:10px;
     				margin-bottom:10px; }
   </style>
 </head>
-<form method="POST">
+<form method="POST" onsubmit="return confirm('Modification of this item will change it in the database. Are you sure you want to modify this item?');">
 	{% csrf_token %}
 	<div class="form_layout">
 	{{item_form.as_p}}
-	<p><input type="submit" value="Update Item"></p>
+
+  <div class="form_group" style="margin-left:10px">
+    <label for="modifyTags[]">Tags:</label>
+    <div id="dynamicTag">
+    {% if item_tags|length > 0 %}
+      {%for tag in item_tags%}
+      <div>
+        <input type="text" name="modifyTags[]" value="{{tag}}">
+      </div>
+      {%endfor%}
+    {% endif %}
+    </div>
+    <input class="btn btn-default" type="button" value="Add another tag" onClick="addTag();">
+  </div>
+
+	<p><input style="margin-top:10px" type="submit" value="Update Item"></p>
 	</div>
 </form>
-    
+
+<script type="text/javascript">
+	// auto-completes tag name search
+	$(document).ready(function(){
+		var tag_box=$('input[name="modifyTags[]"]');
+		var tags = [
+			{% for tag in tags %}
+			"{{tag.tag}}",
+			{%endfor%}
+		];
+		tag_box.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	});
+
+	function addTag(){
+		var newdiv = document.createElement('div');
+		newdiv.innerHTML = "<input type='text' name='modifyTags[]' placeholder='Tag name...'>";
+		document.getElementById('dynamicTag').appendChild(newdiv);
+
+		var add_tag_input=$('input[name="modifyTags[]"]');
+		var tags = [
+			{% for tag in tags %}
+			"{{tag.tag}}",
+			{%endfor%}
+		];
+		add_tag_input.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	}
+</script>
+
 {% endblock %}
 
 
