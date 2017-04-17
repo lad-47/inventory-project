@@ -32,9 +32,10 @@
     Import multiple items by following JSON conventions, i.e., enclosing
     comma-separated JSON objects in square brackets (i.e., [{item 1},{item 2},{item 3},...]).
   </p>
+  <h4>Items</h4>
   <p>
     A sample JSON item is shown below. The acceptable tags are: 'item_name',
-    'count', 'model_number', 'description', 'tags', 'custom_fields'.
+    'count', 'model_number', 'description', 'is_asset', 'tags', 'custom_fields'.
   </p>
   <p>
     NOTE: 'item_name' and 'count' are required, and 'count' must be a positive integer.
@@ -42,14 +43,48 @@
     if a custom field which does not exist is input, an error will occur.
   </p>
   <p>
-    {
+    NOTE: If creating an item instance for an asset, 'is_asset' should be set to true, otherwise,
+    it will be automatically set to false. In this case, Custom Fields provided should not be 'per_asset'.
+  </p>
+  <p>
+    {      <!-- ITEM -->
       <div style="margin-left:10px">
         <p>'item_name': "str",</p>
         <p>'count': int,</p>
         <p>'model_number': "str",</p>
         <p>'description': "str",</p>
-        <p style="margin:0">'tags': [<div style="margin-left:10px">{<div style="margin-left:10px">'tag':"str"</div>},<p>{<div style="margin-left:10px">'tag':"str"</div>},...<p style="margin-left:-10px;">],</p></p></div></p>
-        <p style="margin:0">'custom_fields': [<div style="margin-left:10px">{<div style="margin-left:10px">'field_name':"str",<p style="margin:0">'field_value':int/float/"str"</p><p style="margin:0">'per_asset':boolean</p></div>},...</div>]</p>
+        <p>'is_asset': boolean (default = false)</p>
+        <p style="margin:0">'tags': [<div style="margin-left:10px">{<div style="margin-left:10px">'tag': "str"</div>},...<p style="margin-left:-10px;">],</p></div></p>
+        <p style="margin:0">'custom_fields': [<div style="margin-left:10px">{<div style="margin-left:10px">'field_name': "str",<p style="margin:0">'field_value': int/float/"str"</p></div>},...</div>]</p>
+      </div>
+    }
+  </p>
+  <h4>Assets</h4>
+  <p>
+    A sample JSON asset is shown below. The acceptable tags are: 'item_name', 'asset_id',
+    'custom_fields'.
+  </p>
+  <p>
+    NOTE: An Item instance must exist with the name 'item_name' before an Asset instance can be created.
+  </p>
+  <p>
+    NOTE: Custom Fields provided must be 'per_asset' fields.
+  </p>
+  <p>
+    {     <!-- ASSET -->
+      <div style="margin-left:10px">
+        <p>'item_name': "str",</p>
+        <p>'asset_id': int,</p>
+        <p style="margin:0">'custom_fields': [
+          <div style="margin-left:10px">
+            {
+              <div style="margin-left:10px">
+                <p style="margin:0">'field_name': "str",</p>
+                <p style="margin:0">'field_value': int/float/"str"</p>
+              </div>
+            },...
+          </div>
+          ]</p>
       </div>
     }
   </p>
