@@ -2,14 +2,32 @@ from .current_user import get_current_user
 from django.utils import timezone
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from .models import Item, Tag, User, CustomFieldEntry,CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, Cart_Request, Request, Log, EmailTag, SubscribedEmail
+from .models import *
 from .serializers import ItemSerializer, UserSerializer, TagSerializer, RequestSerializer, CustomFieldEntrySerializer, CustomShortTextFieldSerializer, CustomLongTextFieldSerializer, CustomIntFieldSerializer, CustomFloatFieldSerializer
 from django.core.mail import EmailMessage
+  
+@receiver(post_save, sender=Asset, dispatch_uid="asset_save")
+def log_asset(sender, instance, created, **kwargs):
+    user = get_current_user()
+    info = instance.item_name+", asset_tag: "+str(instance.asset_tag)
+    if created:
+        log = Log(initiating_user=user.id,initiating_username=user.username,involved_item=instance.id,involved_item_name=instance.item_name,nature='CREATE Asset '+info,timestamp=timezone.now())
+        log.save()
+    else:
+        log = Log(initiating_user=user.id,initiating_username=user.username,involved_item=instance.id,involved_item_name=instance.item_name,nature='UPDATE Asset '+info,timestamp=timezone.now())
+        log.save()
+        
+@receiver(pre_delete, sender=Asset, dispatch_uid="asset_delete")
+def log_asset_delete(sender, instance, **kwargs):
+    user = get_current_user()
+    serializer=AssetSerializer(instance)
+    log = Log(initiating_user=user.id,initiating_username=user.username,involved_item=instance.id,involved_item_name=instance.item_name,nature='DELETE Asset'+str(serializer.data),timestamp=timezone.now())
+    log.save()  
     
 @receiver(post_save, sender=Item, dispatch_uid="item_save")
 def log_item(sender, instance, created, **kwargs):
     user = get_current_user()
-    info = instance.item_name+", count: "+str(instance.count)+", model number: "+instance.model_number+", description: "+instance.description+", tags: "
+    info = instance.item_name+", count: "+str(instance.count)+", minimum stock: "+str(instance.minimum_stock)+", model number: "+instance.model_number+", description: "+instance.description+", is asset?: "+str(instance.is_asset)+", tags: "
     tag_count=0
     for tag in instance.tags.all():
         info+=tag.tag+", "

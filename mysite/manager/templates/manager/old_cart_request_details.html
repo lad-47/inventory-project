@@ -35,6 +35,7 @@
 		Loaned
 		{% if req.0.suggestion == 'B' %}
 		/ <span style="color: red">Backfill Requested <a href="{{ req.6 }}">(View Receipt PDF)</a></span>
+		<a href="{% url 'deny backfill' req.0.pk %}"> Deny Backfill </a>
 		{% endif %}
 		<a style="margin-left:10px" href="{% url 'disburse loaned' req.0.pk %}">Disburse</a>
 		<a style="margin-left:10px" href="{% url 'return loaned' req.0.pk %}">Mark as Returned</a>

@@ -30,9 +30,18 @@ def cart_requests(request):
 	cart_requests = Cart_Request.objects.exclude(cart_status='P');
 	cart_requestsO = cart_requests.filter(cart_status='O');
 	cart_requestsO_and_v = create_request_info(cart_requestsO);
-	cart_requestsL = cart_requests.filter(cart_status='L')
+
+	all_reqs = Request.objects.all()
+	loans = all_reqs.filter(status='L')
+	backfills = all_reqs.filter(status='B')
+	cart_requestsL = set()
+	cart_requestsB = set()
+	for subreq in loans:
+		cart_requestsL.add(subreq.parent_cart)
+	for subreq in backfills:
+		cart_requestsB.add(subreq.parent_cart)
+		
 	cart_requestsL_and_v = create_request_info(cart_requestsL);
-	cart_requestsB = cart_requests.filter(cart_status='B')
 	cart_requestsB_and_v = create_request_info(cart_requestsB);
 
 	context = {
@@ -89,7 +98,7 @@ def create_indv_request_info(cart_request):
 		valid = not (newQuantity < 0)
 		req_info+=[(subrequest, requestAmount, oldQuantity, valid, itemToChange, subrequest.status)];
 		if subrequest.status=='B' or subrequest.suggestion=='B':
-			req_info[i]+= (FileSystemStorage().url(BackfillPDF.objects.get(request=subrequest).pdf),)
+			req_info[i]+= (FileSystemStorage().url(BackfillPDF.objects.filter(request=subrequest)[0].pdf),)
 		i+=1
 	return req_info;
 
@@ -982,6 +991,13 @@ def handle_loan(request, request_id, new_status):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	req = get_object_or_404(Request, pk=request_id);
+	is_pdf = False
+	try:
+		pdf = BackfillPDF.objects.get(request=req)
+		is_pdf = True
+	except BackfillPDF.DoesNotExist:
+		pass
+	old_status = req.status
 	parent = req.parent_cart;
 	quantity = req.quantity;
 
@@ -989,6 +1005,7 @@ def handle_loan(request, request_id, new_status):
 		form = PositiveIntArgMaxForm(request.POST, max_val=quantity);
 		if form.is_valid():
 			to_new_status = form.cleaned_data['Amount'];
+			no_longer_loaned = to_new_status
 			comment = form.cleaned_data['Comment'];
 
 			if (quantity-to_new_status < 0):
@@ -1012,7 +1029,8 @@ def handle_loan(request, request_id, new_status):
 			quantity=(to_new_status), item_id=req.item_id, parent_cart=req.parent_cart, \
 			reason=req.reason, admin_comment=comment);
 			#disbursed.save(); .create already saves
-
+			if is_pdf:
+				BackfillPDF.objects.create(request=to_new_status,pdf=pdf.pdf)
 			tag=EmailTag.objects.all()[0].tag
 			message=""
 
@@ -1054,6 +1072,16 @@ def handle_loan(request, request_id, new_status):
 			if not still_loaned:
 				parent.cart_status = 'A';
 				parent.save();
+			
+			if parent.suggestion == 'B':	
+				children = Request.objects.filter(parent_cart=parent)
+				still_suggest = False
+				for child in children:
+					if child.suggestion=='B':
+						still_suggest = True
+				if not still_suggest:
+					parent.suggestion='D'
+					parent.save()
 
 			return HttpResponseRedirect('/manager/loan_handle_success');
 
@@ -1064,6 +1092,9 @@ def handle_loan(request, request_id, new_status):
 	if new_status == 'A':
 		heading = "Disbursing";
 		button = "Disburse";
+	elif new_status == 'R' and old_status == 'B':
+		heading = "Backfilling";
+		button = "Mark Backfill as Satisfied";
 	elif new_status == 'R':
 		heading = "Returning";
 		button = "Mark as Returned";
@@ -1135,6 +1166,26 @@ def loan_handler(request):
 
 def backfill_handler(request):
 	return loan_backfill_handler(request, 'B');
+
+def deny_backfill(request, request_id):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	req = Request.objects.get(id=request_id)
+	if req.suggestion == 'B':
+		req.suggestion = 'L'
+		req.save()
+		
+	parent = req.parent_cart
+	if parent.suggestion == 'B':	
+				children = Request.objects.filter(parent_cart=parent)
+				still_suggest = False
+				for child in children:
+					if child.suggestion=='B':
+						still_suggest = True
+				if not still_suggest:
+					parent.suggestion='L'
+					parent.save()
+	return HttpResponseRedirect('/manager/loan_handler');
 
 def assemble_loan_info(request_list):
 	req_info = [];
