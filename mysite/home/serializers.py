@@ -1,4 +1,4 @@
-from .models import Item,Request,Tag,CustomShortTextField,CustomLongTextField,CustomIntField,CustomFloatField,CustomFieldEntry,Log
+from .models import *
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
@@ -16,7 +16,14 @@ class ItemSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Item
-        fields = ('item_name', 'count', 'model_number', 'description', 'tags')
+        fields = ('id', 'item_name', 'count', 'minimum_stock', 'model_number', 'description', 'tags', 'is_asset')
+
+class AssetSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Asset
+        fields = ('item_name', 'asset_tag')
+
 
 class TagSerializer(serializers.ModelSerializer):
     

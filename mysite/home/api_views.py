@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from .models import Item, Request, Cart_Request, Tag, CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, CustomFieldEntry, Log
-from .serializers import ItemSerializer, RequestSerializer, UserSerializer, UserCreateSerializer, CustomShortTextFieldSerializer, CustomLongTextFieldSerializer, CustomIntFieldSerializer,CustomFloatFieldSerializer,CustomFieldEntrySerializer,LogSerializer
+from .serializers import *
 from rest_framework.reverse import reverse
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -18,6 +18,7 @@ from rest_framework.authtoken.models import Token
 def api_root(request, format=None):
     return Response({
         'items': reverse('item-list', request=request, format=format),
+        'assets': reverse('asset-list', request=request, format=format),
         'requests': reverse('request-list', request=request, format=format),
         'users': reverse('user-list', request=request, format=format),
         'custom fields': reverse('api-custom', request=request, format=format),
@@ -66,15 +67,16 @@ def item_list(request, format=None):
                     try: 
                         Tag.objects.get(tag=tag)
                         tag_object=Tag.objects.get(tag=tag)
-                        tag_object.item_set.add(item)
+                        tag_object.abstractitem_set.add(item)
                         tag_object.save()
                         item.save()
                     except Tag.DoesNotExist:
                         tag_object=Tag(tag=tag)
                         tag_object.save()
-                        tag_object.item_set.add(item)
+                        tag_object.abstractitem_set.add(item)
                         tag_object.save()
                         item.save()
+                    serializer = ItemSerializer(item)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response('Manager Permission Required')
@@ -138,6 +140,61 @@ def item_detail(request, pk, format=None):
             item.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response('Administrator Permission Required')
+    
+@api_view(['GET', 'POST'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def asset_list(request, format=None):
+    """
+    List all items, or create a new item.
+    curl -X GET -H "Authorization: Token <insert API token>" https://<insert project domain>/api/item
+    """
+    if request.method == 'GET':
+        assets = Asset.objects.all()
+        serializer = AssetSerializer(assets, many=True)
+        response = Response(serializer.data)
+        return response
+
+    elif request.method == 'POST':
+        if request.user.is_staff:
+            serializer = AssetSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response('Manager Permission Required')
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@authentication_classes((TokenAuthentication,SessionAuthentication))
+@permission_classes((IsAuthenticated,))
+def asset_detail(request, pk, format=None):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    try:
+        asset = Asset.objects.get(pk=pk)
+    except Asset.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = AssetSerializer(asset)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        if request.user.is_staff:
+            serializer = AssetSerializer(asset, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response('Manager Permission Required')
+
+    elif request.method == 'DELETE':
+        if request.user.is_superuser:
+            item.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response('Administrator Permission Required')
+        
     
 @api_view(['GET', 'POST'])
 @authentication_classes((TokenAuthentication,SessionAuthentication))
