@@ -11,3 +11,4 @@ mysite/env
 **/.DS_Store
 mysite/mysite/settings.py
 mysite/mysite/media
+mysite/home/migrations/
