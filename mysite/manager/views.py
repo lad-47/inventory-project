@@ -387,6 +387,7 @@ def process_tags(tags):
 			pass
 	return processed_data
 
+# Deprecated
 def modify_an_item_action(request, item_id):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
