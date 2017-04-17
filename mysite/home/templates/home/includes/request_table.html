@@ -31,7 +31,6 @@ ul.pagination {
 
 	<!-- rows for each cart request -->
 	{% for cart_request in cart_requests %}
-		{% if cart_request.cart_status == type %}
 		<tr>
 		<!--make the actual tablerow -->
 		<th> <a href="{% url 'view request details' cart_request_id=cart_request.id %}"> Reason: {{cart_request.cart_reason}}</a> </th>
@@ -41,7 +40,6 @@ ul.pagination {
 			{% endif %}
 		</th>
 		</tr>
-		{% endif %}
 
 	{% endfor %}
 	</table>
