@@ -5,7 +5,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 #from .forms import CFAddForm, CFDeleteForm
 from home.models import CustomFieldEntry
 from .import_logic import import_data
-
+from django.db import IntegrityError
 # Create your views here.
 
 def users(request):
@@ -92,9 +92,12 @@ def cf_manager(request):
             fn = add_form.cleaned_data['field_name'];
             i_p = add_form.cleaned_data['is_private'];
             p_a = add_form.cleaned_data['per_asset'];
-            new_field = CustomFieldEntry.objects.create(value_type=vt, \
-                field_name=fn, is_private=i_p, per_asset=p_a);
-            new_field.save();
+            try:
+                new_field = CustomFieldEntry.objects.create(value_type=vt, \
+                    field_name=fn, is_private=i_p, per_asset=p_a);
+                new_field.save();
+            except IntegrityError:
+                return render(request, 'manager/success.html', {'message':'Custom field by that name already exists.'})
             return HttpResponseRedirect('/admin/custom_fields/create/success/');
     else:
         add_form = CFAddForm();

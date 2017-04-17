@@ -6,14 +6,14 @@
 <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
 
-<h3 style="padding-left: 10px"> Add an Item </h1>
+<h3 style="padding-left: 10px"> Add an {% if is_asset %}Asset{% else %}Item {% endif %} </h1>
 
 <form method="POST" style="padding-left: 15px">
 	{% csrf_token %}
 	<div class="form_layout">
 	{{item_form.as_p}}
 	</div>
-
+{% if not is_asset %}
 	<div class="form-group" style="margin-left:10px">
 		<label for="addTags[]">Tags:</label>
 		<div id="dynamicTag">
@@ -21,8 +21,13 @@
 		</div>
 		<input class="btn btn-default" type="button" value="Add another tag" onClick="addTag();">
 	</div>
-
+{% endif %}
+{% if is_asset %}
+	<input type="submit" value="Add Asset">
+{% else %}
 	<input type="submit" value="Create Item">
+{% endif %}
+
 </form>
 
 <script type="text/javascript">
