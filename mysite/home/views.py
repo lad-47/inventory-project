@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
 from .models import *
-from .forms import CheckoutForm
+from .forms import CheckoutForm, BooleanField
 from .serializers import ItemSerializer
 # chance genereic.Listview stuff to ListView
 from django.views.generic import View, DetailView, ListView, DeleteView, CreateView, FormView
@@ -168,7 +168,7 @@ def asset_detail(request, asset_id):
 		'requests': requests,
 		'custom': custom_values,
 		'user':request.user,
-		'convert':forms.BooleanField(required=False),
+		'convert':BooleanField(required=False),
 		'is_asset_instance':True,
 	}
 	return render(request, 'home/detail.html', context)
