@@ -79,7 +79,7 @@ def detail(request, item_id):
 	tags = item.tags.all()
 	if request.user.is_anonymous:
 		requests = Request.objects.none()
-		
+
 	requests = Request.objects.filter(item_id=item.id, status='O');
 	requests = requests | Request.objects.filter(item_id=item.id, status='L')
 	requests = requests | Request.objects.filter(item_id=item.id, status='B')

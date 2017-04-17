@@ -513,8 +513,10 @@ def add_an_item(request):
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
+			d = item_form.cleaned_data
+			d['tags'] = request.POST.getlist('addTags[]', [])
 			try:
-				createItem(item_form.cleaned_data, 'item');
+				createItem(d, 'item');
 			except IntegrityError:
 				return render(request, 'home/message.html',{'message':'An item with that name already exists'})
 			return HttpResponseRedirect('/manager/create_success');
@@ -522,7 +524,9 @@ def add_an_item(request):
 	else:
 		item_form = ItemForm();
 
-	return render(request, 'manager/add_an_item.html', {'item_form':item_form})
+	tags = Tag.objects.all()
+
+	return render(request, 'manager/add_an_item.html', {'item_form':item_form,'tags':tags})
 
 def add_an_asset_row(request):
 	if not request.user.is_staff:
@@ -606,16 +610,15 @@ def createItem(data, kind):
 				field_name=field_entry, field_value = data[field])
 			to_change.save();
 
-
-	for tagPK in data['tags']:
-		item_instance.tags.add(Tag.objects.get(pk=tagPK));
+	for tag in data['tags']:
+		item_instance.tags.add(Tag.objects.get(tag=tag));
 	item_instance.save();
 
 def createAsset(data, item):
 	item_instance = Asset.objects.create(asset_tag=data['asset_tag'],\
 				item_name=item.item_name, count=1, model_number=item.model_number, is_asset=True,
 				description=item.description);
-	
+
 	for tag in item.tags.all():
 		item_instance.tags.add(tag);
 
@@ -650,18 +653,19 @@ def tag_handler(request):
 		return render(request, 'home/notAdmin.html')
 
 	# on a POST, these definitions will be overwritten before rendering
-	create_form = TagCreateForm();
+	#create_form = TagCreateForm(); --- deprecated
 	modify_form = TagModifyForm();
-	print('creating delte form');
-	delete_form = TagDeleteForm();
+	#delete_form = TagDeleteForm(); --- deprecated
 
 	tags = Tag.objects.all()
+	items = Item.objects.all()
 
 	context = {
-		'create_form': create_form,
+		#'create_form': create_form,
 		'modify_form': modify_form,
-		'delete_form': delete_form,
-		'tags': tags
+		#'delete_form': delete_form,
+		'tags': tags,
+		'items': items
 	}
 
 	return render(request, 'manager/tag_handler.html', context);
@@ -670,6 +674,27 @@ def create_tag(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	if request.method == 'POST':
+		try:
+			tag_name = request.POST.get('new_tag_name', None)
+			print("Tag Name: "+str(tag_name))
+			new_tag = Tag.objects.create(tag=tag_name)
+		except IntegrityError:
+			context = {
+				#'create_form': create_form,
+				'modify_form': TagModifyForm(),
+				'delete_form': TagDeleteForm()
+			}
+			return render(request, 'manager/tag_exists.html', context)
+
+		new_tag.save()
+		items = request.POST.getlist('tagExisting[]', [])
+		for item in items:
+			if item != "":
+				item_instance = Item.objects.get(item_name=item)
+				item_instance.tags.add(new_tag)
+				item_instance.save()
+		return HttpResponseRedirect('/manager/tag_success')
+		"""
 		create_form = TagCreateForm(request.POST);
 		if create_form.is_valid():
 			try:
@@ -690,7 +715,7 @@ def create_tag(request):
 				item.save();
 			return HttpResponseRedirect('/manager/tag_success');
 	else:
-		create_form = TagCreateForm();
+		create_form = TagCreateForm();"""
 	modify_form = TagModifyForm();
 	delete_form = TagDeleteForm();
 
@@ -738,7 +763,9 @@ def modify_tag(request):
 
 	return render(request, 'manager/tag_handler.html', context);
 
+# deprecated
 def delete_tag_conf(request):
+
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	if request.method=='POST':
@@ -771,6 +798,17 @@ def delete_tag_action(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	if request.method=='POST':
+		delete_tags = request.POST.getlist('deleteTags[]', [])
+		if delete_tags is not None:
+			for tag in delete_tags:
+				try:
+					tag_instance = Tag.objects.get(tag=tag)
+					tag_instance.delete()
+				except:
+					# User entered a nonexistent tag, or tag was not able to be deleted
+					pass
+			return HttpResponseRedirect('/manager/tag_success')
+		""" deprecated form code:
 		delete_form = TagDeleteForm(request.POST);
 		if delete_form.is_valid():
 			for tagPK in delete_form.cleaned_data['to_delete']:
@@ -778,14 +816,14 @@ def delete_tag_action(request):
 				tag.delete();
 			return HttpResponseRedirect('/manager/tag_success');
 	else:
-		delete_form = TagDeleteForm();
+		delete_form = TagDeleteForm();"""
 	create_form = TagCreateForm();
 	modify_form = TagModifyForm();
 
 	context = {
 		'create_form': create_form,
-		'modify_form': modify_form,
-		'delete_form': delete_form,
+		'modify_form': modify_form#,
+		#'delete_form': delete_form,
 	}
 
 	return render(request, 'manager/tag_handler.html', context);
@@ -868,7 +906,7 @@ def direct_disburse(request):
 			[owner.email]
 		)
 		email.send()
-			
+
 		if type=='Disburse':
 			return HttpResponseRedirect('/manager/disburse_success/Disbursed');
 		else:
@@ -1056,13 +1094,11 @@ def update_assets(**kwargs):
 
 	if not (asset_tag or item_name):
 		raise ValueError("Neither valid argument (asset_tag or item_name) was provided");
-	
+
 	if asset_tag:
 		item_name = Asset.objects.get(asset_tag=asset_tag).item_name;
-		
-	assets_left = Asset.objects.filter(item_name=asset_item_name, count=1).count();	
+
+	assets_left = Asset.objects.filter(item_name=asset_item_name, count=1).count();
 	asset_item_row = Item.objects.get(item_name=asset.item_name);
 	asset_item_row.count = assets_left;
 	asset_item_row.save();
-
-
