@@ -104,6 +104,7 @@ def ItemForm_factory(**kwargs):
 		'minimum_stock': forms.IntegerField(min_value=0, required=False),
 		#'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
 		#	choices=TAGS, required=False),
+		'convert': forms.BooleanField(required=False),
 		'__init__': ItemForm_init,
 	}
 	if not kwargs['is_asset_row']:
