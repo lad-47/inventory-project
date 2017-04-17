@@ -265,61 +265,60 @@ def updateItem(item_instance, data):
 		# AttributeError should mean it's a custom field
 		# I have no idea why it throws ValueError for customs...
 		except AttributeError as ex:
-			field_entry = CustomFieldEntry.objects.get(field_name=field);
-			field_type = field_entry.value_type;
-			print("inside attribute error")
-			try:
-				if field_type == 'st':
-					print("updating st field")
-					to_change = CustomShortTextField.objects.get(parent_item=item_instance,\
-						field_name=field_entry)
-				elif field_type == 'lt':
-					to_change = CustomLongTextField.objects.get(parent_item=item_instance,\
-						field_name=field_entry)
-				elif field_type == 'int':
-					to_change = CustomIntField.objects.get(parent_item=item_instance,\
-						field_name=field_entry)
-				elif field_type == 'float':
-					to_change = CustomFloatField.objects.get(parent_item=item_instance,\
-						field_name=field_entry)
-				print("old value")
-				print(to_change.field_value)
-				to_change.field_value = data[field];
-				print("new value")
-				print(to_change.field_value)
-				to_change.save();
-			# perhaps the data is currently null (no entry in custom table)
-			except ObjectDoesNotExist as ex2:
-				print("Exception: ")
-				print(type(ex2).__name__)
-				if field_type == 'st' and not data[field]=="":
-					to_change = CustomShortTextField.objects.create(parent_item=item_instance,\
-						field_name=field_entry, field_value = data[field])
-					to_change.save();
-				elif field_type == 'lt' and not data[field]=="":
-					to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
-						field_name=field_entry, field_value = data[field])
-					to_change.save();
-				elif field_type == 'int' and data[field] is not None:
-					to_change = CustomIntField.objects.create(parent_item=item_instance,\
-						field_name=field_entry, field_value = data[field])
-					to_change.save();
-				elif field_type == 'float' and data[field] is not None:
-					to_change = CustomFloatField.objects.create(parent_item=item_instance,\
-						field_name=field_entry, field_value = data[field])
-					to_change.save();
-
-
+			change_cf(item_instance, field, data[field]);
 
 	item_instance.save();
 
-
+def change_cf(item_instance, field, new_data):
+	field_entry = CustomFieldEntry.objects.get(field_name=field);
+	field_type = field_entry.value_type;
+	try:
+		if field_type == 'st':
+			to_change = CustomShortTextField.objects.get(parent_item=item_instance,\
+				field_name=field_entry)
+		elif field_type == 'lt':
+			to_change = CustomLongTextField.objects.get(parent_item=item_instance,\
+				field_name=field_entry)
+		elif field_type == 'int':
+			to_change = CustomIntField.objects.get(parent_item=item_instance,\
+				field_name=field_entry)
+		elif field_type == 'float':
+			to_change = CustomFloatField.objects.get(parent_item=item_instance,\
+				field_name=field_entry)
+		else:
+			raise ValueError("Field type not st, lt, int, or float");
+		print("old value")
+		print(to_change.field_value)
+		to_change.field_value = new_data;
+		print("new value")
+		print(to_change.field_value)
+		to_change.save();
+	# perhaps the data is currently null (no entry in custom table)
+	except ObjectDoesNotExist as ex2:
+		print("Exception: ")
+		print(type(ex2).__name__)
+		if field_type == 'st' and not new_data=="":
+			to_change = CustomShortTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = new_data)
+			to_change.save();
+		elif field_type == 'lt' and not new_data=="":
+			to_change = CustomLongTextField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = new_data)
+			to_change.save();
+		elif field_type == 'int' and new_data is not None:
+			to_change = CustomIntField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = new_data)
+			to_change.save();
+		elif field_type == 'float' and new_data is not None:
+			to_change = CustomFloatField.objects.create(parent_item=item_instance,\
+				field_name=field_entry, field_value = new_data)
+			to_change.save();to_change.save();
 
 def modify_an_item(request, item_id):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	itemToChange = get_object_or_404(Item, pk=item_id);
-	ItemForm = ItemForm_factory(item_type=type(itemToChange), is_asset_row=itemToChange.is_asset);
+	ItemForm = ItemForm_factory(is_asset_row=itemToChange.is_asset);
 
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
@@ -355,6 +354,7 @@ def modify_an_item(request, item_id):
 	#print(item_to_dict(itemToChange));
 	context = {
 		'item_form': item_form,
+		'is_asset': False,
 	}
 	return render(request, 'manager/modify_an_item.html', context);
 
@@ -362,7 +362,7 @@ def modify_an_item_action(request, item_id):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	itemToChange = get_object_or_404(Item, pk=item_id);
-	ItemForm = ItemForm_factory(item_type=type(itemToChange), is_asset_row=itemToChange.is_asset);
+	ItemForm = ItemForm_factory(is_asset_row=itemToChange.is_asset);
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
@@ -371,15 +371,93 @@ def modify_an_item_action(request, item_id):
 		else:
 			context = {
 				'item_form:':item_form,
+				'is_asset': False,
 				}
-			return render(request, '/manager/modify_an_item.html', context)
+			return render(request, 'manager/modify_an_item.html', context)
 
 	# we should never get here with a GET
 	# if we do, just render the home page
 	render(request, 'index.html');
 
+def modify_an_asset(request, asset_id, conf):
+	if not request.user.is_staff:
+		return render(request, 'home/notAdmin.html')
+	asset = get_object_or_404(Asset, pk=asset_id);
+	AssetForm = AssetForm_factory(asset_tag=asset.asset_tag);
+	asset_form = AssetForm(asset_to_dict(asset));
+	print(asset_to_dict(asset));
+	# on a post we (print) the data and then return success
+	if (request.method=='POST' and conf=='0'):
+		print("in post 0")
+		print(request.POST);
+		asset_form = AssetForm(request.POST);
+		if asset_form.is_valid():
+			action = "/manager/modify_an_asset/"+str(asset_id) + "/1/";
+			message="Modification of this asset will change it in the database.";
+			context = {
+				'form':asset_form,
+				'action':action,
+				'message':message,
+				'submit_button':"Yes, Update Asset",
+			}
+			return render(request, 'manager/confirmation.html', context)
+	elif request.method == 'POST' and conf=='1':
+			asset_form = AssetForm(request.POST);
+			if asset_form.is_valid():
+				print(asset_form.cleaned_data);
+				updateAsset(asset, asset_form.cleaned_data);
+			return HttpResponseRedirect('/manager/asset_update_success');
+
+
+	context = {
+		'item_form':asset_form,
+		'is_asset': True,
+	}
+	print("before get (or invalid) render")
+	print(asset_form.is_valid());
+	print(conf);
+	return render(request, 'manager/modify_an_item.html', context);
+
+def updateAsset(asset, data):
+	asset.asset_tag = data['asset_tag'];
+	asset.save();
+	for field in data.keys():
+		try:
+			cf_entry = CustomFieldEntry.objects.get(field_name=field);
+		except CustomFieldEntry.DoesNotExist:
+			cf_entry = None; #no data provided for this field or field doesn't exist
+		if cf_entry:
+			print("in change_cf");
+			print(field);
+			print(data[field])
+			change_cf(asset, field, data[field]);
+
+
+def asset_update_success(request):
+	return render(request, 'manager/success.html', {'message':'Asset Modification Successful.'})
+
 def update_success(request):
 	return render(request, 'manager/update_success.html');
+
+def asset_to_dict(item_instance):
+	item_dict = dict();
+	item_dict['asset_tag'] = item_instance.asset_tag;
+	custom_fields = CustomFieldEntry.objects.filter(per_asset=True);
+	for cf in custom_fields:
+		field_type = cf.value_type;
+		try:
+			if field_type == 'st':
+				data_field = CustomShortTextField.objects.get(parent_item=item_instance, field_name=cf);
+			elif field_type == 'lt':
+				data_field = CustomLongTextField.objects.get(parent_item=item_instance,field_name=cf);
+			elif field_type == 'int':
+				data_field = CustomIntField.objects.get(parent_item=item_instance,field_name=cf);
+			elif field_type == 'float':
+				data_field = CustomFloatField.objects.get(parent_item=item_instance,field_name=cf);
+			item_dict[cf.field_name] = data_field.field_value;
+		except ObjectDoesNotExist:
+			pass; # no need to do anything to the dictionary
+	return item_dict;
 
 def item_to_dict(item_instance):
 	item_dict = dict();
@@ -429,7 +507,7 @@ def item_to_dict(item_instance):
 def add_an_item(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	ItemForm = ItemForm_factory(item_type='Item', is_asset_row=False);
+	ItemForm = ItemForm_factory(is_asset_row=False);
 
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
@@ -449,7 +527,7 @@ def add_an_item(request):
 def add_an_asset_row(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	ItemForm = ItemForm_factory(item_type='Item', is_asset_row=True);
+	ItemForm = ItemForm_factory(is_asset_row=True);
 
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
