@@ -63,9 +63,10 @@ def ItemForm_init(self, *args, **kwargs):
 
 
 
-def AssetForm_factory(asset_tag):
+def AssetForm_factory(asset_tag, hide_asset_tag):
 	properties = dict();
-	properties['asset_tag'] = forms.IntegerField(initial=asset_tag);
+	if not hide_asset_tag:
+		properties['asset_tag'] = forms.IntegerField(initial=asset_tag);
 
 	custom_fields = CustomFieldEntry.objects.filter(per_asset=True);
 	for cf in custom_fields:

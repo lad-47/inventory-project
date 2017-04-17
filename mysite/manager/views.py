@@ -117,6 +117,7 @@ def cart_request_details(request, cart_request_id):
 						return HttpResponseRedirect('/manager/request_failure');
 				for el in req_info:
 					el[4].count = el[2]-el[1]; ##update item quantity
+					update_assets(item_name=el[4].item_name);
 					message+=el[0].item_id.item_name+' x'+str(el[0].quantity)+"\n"
 					el[0].status=new_status; ##subrequest was serviced
 					el[0].admin_comment=service_form.cleaned_data['admin_comment'];
@@ -383,7 +384,7 @@ def modify_an_asset(request, asset_id, conf):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	asset = get_object_or_404(Asset, pk=asset_id);
-	AssetForm = AssetForm_factory(asset_tag=asset.asset_tag);
+	AssetForm = AssetForm_factory(asset.asset_tag, (not request.user.is_superuser));
 	asset_form = AssetForm(asset_to_dict(asset));
 	print(asset_to_dict(asset));
 	# on a post we (print) the data and then return success
@@ -405,7 +406,10 @@ def modify_an_asset(request, asset_id, conf):
 			asset_form = AssetForm(request.POST);
 			if asset_form.is_valid():
 				print(asset_form.cleaned_data);
-				updateAsset(asset, asset_form.cleaned_data);
+				try:
+					updateAsset(asset, asset_form.cleaned_data);
+				except IntegrityError:
+					return render(request, 'home/message.html',{'message':'Asset Tag Exists.'})
 			return HttpResponseRedirect('/manager/asset_update_success');
 
 
@@ -554,7 +558,7 @@ def add_an_asset(request, item_id):
 	item = get_object_or_404(Item, pk=item_id);
 
 	asset_tag = 3;
-	AssetForm = AssetForm_factory(asset_tag);
+	AssetForm = AssetForm_factory(asset_tag, False);
 
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
@@ -562,6 +566,7 @@ def add_an_asset(request, item_id):
 		if item_form.is_valid():
 			try:
 				createAsset(item_form.cleaned_data, item);
+				update_assets(asset_tag=asset_tag);
 			except IntegrityError:
 				return render(request, 'home/message.html',{'message':'Asset Tag Exists.'})
 			return HttpResponseRedirect('/manager/create_success');
@@ -989,6 +994,7 @@ def handle_loan(request, request_id, new_status):
 				involved_item = req.item_id;
 				involved_item.count = involved_item.count + no_longer_loaned;
 				involved_item.save();
+				update_assets(item_name=involved_item.item_name);
 
 			still_loaned = False;
 			for subreq in Request.objects.filter(parent_cart = parent):
