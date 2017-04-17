@@ -16,8 +16,7 @@ class AbstractItem(models.Model):
 	model_number = models.CharField(max_length=100, null=True)
 	description = models.TextField(null=True)
 	tags = models.ManyToManyField(Tag);
-	is_asset = models.BooleanField(default=False);
-
+	is_asset = models.BooleanField(default=False)
 	#location = models.CharField(max_length=100,null=True)
 	def __str__(self):
 		return self.item_name

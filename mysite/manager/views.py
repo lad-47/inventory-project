@@ -2,9 +2,11 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from datetime import date
 from django.contrib.auth.models import User
-from home.models import *
-from .forms import ServiceForm, ItemForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
-PositiveIntArgMaxForm, AssetForm_factory
+from home.models import Request, Cart_Request, User, Item, Asset, Log, Tag, CustomFieldEntry, \
+CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, BackfillPDF
+from .forms import ServiceForm, ItemForm_factory, AssetForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
+PositiveIntArgMaxForm
+from .auto_increment import generateAssetTag
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from urllib import parse
@@ -13,6 +15,8 @@ from rest_framework import status
 from home.models import SubscribedEmail,EmailBody,EmailTag,LoanDate
 from django.core.mail import EmailMessage
 from django.core.files.storage import FileSystemStorage
+from manager.auto_increment import generateAssetTag
+from jinja2.compiler import generate
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -396,7 +400,18 @@ def modify_an_item_action(request, item_id):
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
+			convertCheck = False;
+			if 'convert' in item_form.cleaned_data.keys():
+				convertCheck = item_form.cleaned_data.pop('convert')
 			updateItem(itemToChange, item_form.cleaned_data);
+			print(convertCheck);
+			print(itemToChange.is_asset); 
+			if convertCheck  and itemToChange.is_asset:
+				convert_asset_to_item(itemToChange);
+				print("asset to item");
+			elif convertCheck  and not itemToChange.is_asset:
+				convert_item_to_asset(itemToChange);
+				print("item to asset");
 			return HttpResponseRedirect('/manager/update_success');
 		else:
 			context = {
@@ -408,6 +423,26 @@ def modify_an_item_action(request, item_id):
 	# we should never get here with a GET
 	# if we do, just render the home page
 	render(request, 'index.html');
+
+def convert_item_to_asset(item):
+	itemQuantity = item.count;
+	item.is_asset = True;
+	item.save();
+	print(itemQuantity);
+	for x in range (0, itemQuantity):
+		print(x);
+		newAsset = Asset.objects.create(item_name=item.item_name, model_number=item.model_number, description=item.description, is_asset = True, asset_tag = generateAssetTag());
+	return True;
+
+def convert_asset_to_item(asset):
+	print("here in asset to item conversion!");
+	assets = Asset.objects.filter(item_name=asset.item_name);
+	asset.count = len(assets);
+	asset.is_asset = False;
+	asset.save();
+	for asset in assets:
+		asset.delete();
+	return True;
 
 def modify_an_asset(request, asset_id, conf):
 	if not request.user.is_staff:
@@ -583,7 +618,7 @@ def add_an_asset(request, item_id):
 		return render(request, 'home/notAdmin.html')
 	item = get_object_or_404(Item, pk=item_id);
 
-	asset_tag = 3;
+	asset_tag = generateAssetTag();
 	AssetForm = AssetForm_factory(asset_tag);
 
 	# on a post we (print) the data and then return success
@@ -614,8 +649,7 @@ def createItem(data, kind):
 		 	count=data['count'], is_asset=True);
 		cfs = CustomFieldEntry.objects.filter(per_asset=False);
 	elif(kind == 'asset'):
-		## TODO:  REPLACE ASSET TAGGGG!!!!!!!!!!!!!!!!!!!!!
-		item_instance = Asset.objects.create(asset_tag=5, item_name=data['item_name'],\
+		item_instance = Asset.objects.create(asset_tag=generateAssetTag(), item_name=data['item_name'],\
 		 	model_number=data['model_number'], description=data['description'],\
 		 	count=data['count'], is_asset=True);
 		cfs = CustomFieldEntry.objects.filter(per_asset=True);
