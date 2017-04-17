@@ -436,10 +436,9 @@ def add_an_item(request):
 		item_form = ItemForm(request.POST);
 		if item_form.is_valid():
 			d = item_form.cleaned_data
-			# TODO: get tag names from html
-			d['tags'] = []
+			d['tags'] = request.POST.getlist('addTags[]', [])
 			try:
-				createItem(item_form.cleaned_data, 'item');
+				createItem(d, 'item');
 			except IntegrityError:
 				return render(request, 'home/message.html',{'message':'An item with that name already exists'})
 			return HttpResponseRedirect('/manager/create_success');
@@ -533,9 +532,8 @@ def createItem(data, kind):
 				field_name=field_entry, field_value = data[field])
 			to_change.save();
 
-	# TODO: use tag names
-	for tagPK in data['tags']:
-		item_instance.tags.add(Tag.objects.get(pk=tagPK));
+	for tag in data['tags']:
+		item_instance.tags.add(Tag.objects.get(tag=tag));
 	item_instance.save();
 
 def createAsset(data, item):
