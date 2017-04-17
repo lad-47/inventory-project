@@ -685,8 +685,8 @@ def modify_tag(request):
 
 	return render(request, 'manager/tag_handler.html', context);
 
+# deprecated
 def delete_tag_conf(request):
-	# TODO: Fix delete tag logic!!! DONT use forms.
 
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
@@ -717,12 +717,10 @@ def delete_tag_conf(request):
 	return render(request, 'manager/tag_handler.html', context);
 
 def delete_tag_action(request):
-	# TODO: Fix delete tag logic!!! DONT use forms.
-
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
 	if request.method=='POST':
-		delete_tags = request.POST.getlist('deleteTags[]', None)
+		delete_tags = request.POST.getlist('deleteTags[]', [])
 		if delete_tags is not None:
 			for tag in delete_tags:
 				try:
@@ -732,7 +730,7 @@ def delete_tag_action(request):
 					# User entered a nonexistent tag, or tag was not able to be deleted
 					pass
 			return HttpResponseRedirect('/manager/tag_success')
-		"""
+		""" deprecated form code:
 		delete_form = TagDeleteForm(request.POST);
 		if delete_form.is_valid():
 			for tagPK in delete_form.cleaned_data['to_delete']:
