@@ -167,7 +167,8 @@ def asset_detail(request, asset_id):
 		'tags': asset.tags.all(),
 		'requests': requests,
 		'custom': custom_values,
-		'user':request.user
+		'user':request.user,
+		'is_asset_instance':True,
 	}
 	return render(request, 'home/detail.html', context)
 
