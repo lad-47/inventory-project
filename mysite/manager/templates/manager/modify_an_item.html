@@ -2,8 +2,7 @@
 
 {% block content %}
 
-<h3 style="margin-left:10px">Update Item </h3>
-
+<h3 style="margin-left:10px">Update {% if is_asset %}Asset{% else %}Item{% endif %} </h3>
 <head>
   <style type="text/css">
     .form_layout p { margin-left:10px; 
@@ -14,7 +13,7 @@
 	{% csrf_token %}
 	<div class="form_layout">
 	{{item_form.as_p}}
-	<p><input type="submit" value="Update Item"></p>
+	<p>{% if is_asset %}<input type="submit" value="Update Asset">{% else %}<input type="submit" value="Update Item">{% endif %}</p>
 	</div>
 </form>
     

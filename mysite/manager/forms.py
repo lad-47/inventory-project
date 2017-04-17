@@ -93,11 +93,6 @@ def ItemForm_factory(**kwargs):
 
 	name_field = forms.CharField(max_length=100)
 
-	if kwargs['item_type'] == 'Asset':
-		count_field = forms.IntegerField(min_value=0, max_value=1);
-	else:
-		count_field = forms.IntegerField(min_value=0);
-
 	print('tags: ');
 	print(TAGS);
 	#TAGS = (('1', 'pick 1'), ('2', 'pick 2'));
@@ -106,21 +101,21 @@ def ItemForm_factory(**kwargs):
 		'item_name': name_field,
 		'model_number': forms.CharField(max_length=100, required=False),
 		'description': forms.CharField(widget=forms.Textarea, required=False),
-		'count': count_field,
 		'minimum_stock': forms.IntegerField(min_value=0, required=False),
 		'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
 			choices=TAGS, required=False),
 		'convert': forms.BooleanField(required=False),
 		'__init__': ItemForm_init,
 	}
+	if not kwargs['is_asset_row']:
+		properties['count'] = forms.IntegerField(min_value=0);
 
 	# add more class variables to properties for the custom fields
-	if kwargs['item_type'] == 'Asset':
-		custom_fields = CustomFieldEntry.objects.filter(per_asset=True);
-	elif kwargs['is_asset_row']:
+	if kwargs['is_asset_row']:
 		custom_fields = CustomFieldEntry.objects.filter(per_asset=False);
 	else:
 		custom_fields = CustomFieldEntry.objects.all();
+
 	for cf in custom_fields:
 		field_name = cf.field_name;
 		field_type = cf.value_type;
