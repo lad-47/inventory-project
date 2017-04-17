@@ -61,7 +61,7 @@ ul.pagination {
 <h2 style="margin-left:15px"> Asset Instances </h2>
 <table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 
-  <tr class="active"> 
+  <tr class="active">
   <th> Asset Tag <input type="button" value="Show/Hide" onClick="dynamic(this);"></th><th>In Stock?</th><th>Actions</th>
   </tr>
   {% for asset in assets %}
@@ -84,7 +84,7 @@ ul.pagination {
 
 <table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 
-  <tr class="active"> 
+  <tr class="active">
   <th> Owner <input type="button" value="Show/Hide" onClick="dynamic(this);"></th><th>Reason</th><th>Quantity</th><th>Status</th>
   </tr>
   {% for request in requests %}
@@ -94,20 +94,19 @@ ul.pagination {
     <th>{% if user.is_staff %}
     <a href="{% url 'cart request details' request.parent_cart.id %}">
     {% else %}
-    <a href="{% url 'view request details' request.parent_cart.id %}"> 
+    <a href="{% url 'view request details' request.parent_cart.id %}">
     {% endif %}
     {{request.reason}}</a></th>
     <th><span style="margin-left:10px; margin-right:20px" class="badge">{{request.quantity}}</span></th>
     <th>{{request.get_status_display}}</th></tr>
   {% endfor %}
   </table>
-  
 {% endif %}
 
 {% if not user.is_anonymous %}
 <h2 style="padding-left: 15px">Add Item to Cart: </h2>
 <div>
-<form class="navbar-form navbar-top" role="search" action="{% url 'request' item.id %}" method="POST">	
+<form class="navbar-form navbar-top" role="search" action="{% url 'request' item.id %}" method="POST">
   {% csrf_token %}
   <div class="form-group">
     <label for="quantity">Quantity:</label>

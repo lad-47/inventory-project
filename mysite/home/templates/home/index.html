@@ -96,7 +96,6 @@ $(document).ready(function(){
 		document.getElementById('dynamicExclude').appendChild(newdiv);
 
 		var exclude_tag_input=$('input[name="exTags[]"]');
-		var tag_input=$('input[name="myTags[]"]');
 		var tags = [
 			{% for tag in tag_list %}
 			"{{tag}}",

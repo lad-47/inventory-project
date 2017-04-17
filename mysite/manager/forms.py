@@ -3,8 +3,8 @@ from home.models import CustomFieldEntry, Item, Tag;
 
 class ServiceForm(forms.Form):
 	CHOICES = (
-		('A', 'Approve for Disbursment'), 
-		('L', 'Approve for Loan'), 
+		('A', 'Approve for Disbursment'),
+		('L', 'Approve for Loan'),
 		('B', 'Approve for Backfill'),
 		('D', 'Deny'),
 		);
@@ -29,6 +29,7 @@ class TagModifyForm(forms.Form):
 	old_name = forms.CharField(max_length=100);
 	new_name = forms.CharField(max_length=100);
 
+# @deprecated
 class TagCreateForm(forms.Form):
 	current_items = Item.objects.all();
 
@@ -43,6 +44,7 @@ class TagCreateForm(forms.Form):
 		ITEMS = generate_choices(Item, 'item_name');
 		self.fields['tagged_items'].choices=ITEMS;
 
+# @deprecated
 class TagDeleteForm(forms.Form):
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)
@@ -56,8 +58,8 @@ class TagDeleteForm(forms.Form):
 # the item form; complicated by custom fields
 def ItemForm_init(self, *args, **kwargs):
 	super(self.__class__, self).__init__(*args, **kwargs)
-	TAGS = generate_choices(Tag, 'tag');
-	self.fields['tags'].choices=TAGS;
+	#TAGS = generate_choices(Tag, 'tag');
+	#self.fields['tags'].choices=TAGS;
 
 
 
@@ -89,6 +91,8 @@ def ItemForm_factory(**kwargs):
 
 	TAGS = generate_choices(Tag, 'tag');
 
+	name_field = forms.CharField(max_length=100)
+
 	if kwargs['item_type'] == 'Asset':
 		count_field = forms.IntegerField(min_value=0, max_value=1);
 	else:
@@ -99,13 +103,13 @@ def ItemForm_factory(**kwargs):
 	#TAGS = (('1', 'pick 1'), ('2', 'pick 2'));
 	# class variables of the ItemForm class for which this is a factory
 	properties = {
-		'item_name': forms.CharField(max_length=100),
+		'item_name': name_field,
 		'model_number': forms.CharField(max_length=100, required=False),
 		'description': forms.CharField(widget=forms.Textarea, required=False),
 		'count': count_field,
 		'minimum_stock': forms.IntegerField(min_value=0, required=False),
-		'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
-			choices=TAGS, required=False),
+		#'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
+		#	choices=TAGS, required=False),
 		'__init__': ItemForm_init,
 	}
 
@@ -149,4 +153,3 @@ class PositiveIntArgMaxForm(forms.Form):
 		#print(kwargs['max_val'])
 		self.fields['Amount'] = forms.IntegerField(min_value=1, max_value=max_val)
 		self.fields['Comment'] = forms.CharField(initial='No Comment', required=False);
-
