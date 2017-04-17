@@ -2,6 +2,10 @@
 
 {% block content %}
 
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
 <div class="page-header" style="padding-left: 15px">
   <h1>Inventory <small>Custom Fields</small></h1>
 </div>
@@ -26,13 +30,52 @@
 </div> <hr>
 
 <div class="form_layout" >
-<form method="POST" action="{% url 'cf delete conf' %}">
+<form method="POST" action="{% url 'cf delete action' %}" onsubmit="return confirm('Deleting Custom Fields cannot be undone. Are you sure you want to delete these Custom Fields?');">
 	{% csrf_token %}
 	<h4> <b>Delete Custom Fields</b></h4>
-	{{delete_form.as_p}}
+	<!--{{delete_form.as_p}} deprecated-->
+  <div style="margin-left:10px">
+		<div id="dynamicDelete">
+			<input type="text" name="deleteCFs[]" placeholder="CF name..." >
+		</div>
+		<input class="btn btn-default" type="button" value="Delete another CF" onClick="addDeleteCF();">
+	</div>
 
-	<p><input class="btn btn-default" type="submit" value="Delete"></p>
+	<p style="margin-top:10px"><input class="btn btn-default" type="submit" value="Delete"></p>
 </form>
 </div> <br><br>
+
+<script type="text/javascript">
+	// auto-completes cf name search
+	$(document).ready(function(){
+		var cf_box=$('input[name="deleteCFs[]"]');
+		var cfs = [
+			{% for cf in cfs %}
+			"{{cf.field_name}}",
+			{%endfor%}
+		];
+		cf_box.autocomplete({
+			source: cfs,
+			minLength: 2
+		});
+	});
+
+	function addDeleteCF(){
+		var newdiv = document.createElement('div');
+		newdiv.innerHTML = "<input type='text' name='deleteCFs[]' placeholder='CF name...'>";
+		document.getElementById('dynamicDelete').appendChild(newdiv);
+
+		var delete_cf_input=$('input[name="deleteCFs[]"]');
+		var cfs = [
+			{% for cf in cfs %}
+			"{{cf.field_name}}",
+			{%endfor%}
+		];
+		delete_cf_input.autocomplete({
+			source: cfs,
+			minLength: 2
+		});
+	}
+</script>
 
 {% endblock %}
