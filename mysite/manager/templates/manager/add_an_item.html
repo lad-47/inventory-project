@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
 <h3 style="padding-left: 10px"> Add an Item </h1>
 
 <form method="POST" style="padding-left: 15px">
@@ -8,7 +13,49 @@
 	<div class="form_layout">
 	{{item_form.as_p}}
 	</div>
+
+	<div class="form-group" style="margin-left:10px">
+		<label for="addTags[]">Tags:</label>
+		<div id="dynamicTag">
+			<input type="text" name="addTags[]" placeholder="Tag name..." >
+		</div>
+		<input class="btn btn-default" type="button" value="Add another tag" onClick="addTag();">
+	</div>
+
 	<input type="submit" value="Create Item">
 </form>
+
+<script type="text/javascript">
+	// auto-completes tag name search
+	$(document).ready(function(){
+		var tag_box=$('input[name="addTags[]"]');
+		var tags = [
+			{% for tag in tags %}
+			"{{tag}}",
+			{%endfor%}
+		];
+		tag_box.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	});
+
+	function addTag(){
+		var newdiv = document.createElement('div');
+		newdiv.innerHTML = "<input type='text' name='addTags[]' placeholder='Tag name...'>";
+		document.getElementById('dynamicTag').appendChild(newdiv);
+
+		var add_tag_input=$('input[name="addTags[]"]');
+		var tags = [
+			{% for tag in tags %}
+			"{{tag}}",
+			{%endfor%}
+		];
+		add_tag_input.autocomplete({
+			source: tags,
+			minLength: 2
+		});
+	}
+</script>
 
 {% endblock %}
