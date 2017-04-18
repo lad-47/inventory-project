@@ -90,11 +90,7 @@ def create_indv_request_info(cart_request):
 	req_info = []
 	i=0
 	for subrequest in subrequests:
-<<<<<<< HEAD
 		itemToChange = subrequest.item_id
-=======
-		itemToChange = subrequest.item_id;
->>>>>>> 3b772d651c0f80653617f2a35b1593014124b40b
 		oldQuantity = itemToChange.count;
 		requestAmount = subrequest.quantity;
 		newQuantity = oldQuantity - requestAmount;
