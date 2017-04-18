@@ -347,6 +347,8 @@ def modify_an_item(request, item_id):
 
 			}
 			return render(request, 'manager/confirmation.html', context)
+			if 'convert' in item_form.cleaned_data.keys():
+				convertCheck = item_form.cleaned_data.pop('convert')
 			try:
 				updateItem(itemToChange, item_form.cleaned_data);
 			except IntegrityError:
