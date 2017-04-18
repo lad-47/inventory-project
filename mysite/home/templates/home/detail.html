@@ -109,7 +109,7 @@ ul.pagination {
   </table>
 {% endif %}
 
-{% if not user.is_anonymous %}
+{% if not user.is_anonymous and not is_asset_instance %}
 <h2 style="padding-left: 15px">Add Item to Cart: </h2>
 <div>
 <form class="navbar-form navbar-top" role="search" action="{% url 'request' item.id %}" method="POST">
