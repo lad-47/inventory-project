@@ -32,7 +32,7 @@ def check_valid_items(items_from_json):
         return name_is_valid
     # If one item is not valid, the whole import fails
     for item in items_from_json:
-        item_is_valid = valid_item(item)
+        item_is_valid = valid_item(item,items_from_json)
         if item_is_valid != "OK":
             return item_is_valid
     #print("All Items Valid.")
@@ -49,7 +49,6 @@ def check_name_conflicts(items):
         if not item.get('asset_name',None):
             if item.get('item_name',None):
                 name = item['item_name']
-                print ("Item: "+name)
                 if name not in item_set:
                     item_set.add(name)
                 else:
@@ -64,8 +63,6 @@ def check_name_conflicts(items):
                 # if name not in item_set:
                 #     return "Format: Tried to add an asset instance of "+name+" but "+\
                 #             "an asset row does not exist for that Item."
-    print("Assets: "+str(asset_set))
-    print("Items: "+str(item_set))
     for asset_name in asset_set:
         if asset_name not in item_set:
             # Check to make sure an item with that name exists!
@@ -76,7 +73,7 @@ def check_name_conflicts(items):
                         "an asset row does not exist for that Item."
     return "OK"
 
-def valid_item(item):
+def valid_item(item, items):
     """ checks if a single item is valid """
     keys = []
     isAsset = item.get('is_asset', False)
@@ -106,34 +103,12 @@ def valid_item(item):
             return valid_item_asset
     elif assetName:
         # This is an Asset instance
-        valid_asset = help_valid_asset(item)
+        valid_asset = help_valid_asset(item, items)
         if valid_asset != "OK":
             return valid_asset
     else:
         return "Format: Item "+name+" formatted incorrectly."
     return "OK"
-    """if not isAsset and not item.get('asset_name',None):
-        # Item is not an Asset, validate normally
-        valid_normal_item = help_valid_item(item)
-        if valid_normal_item != "OK":
-            return valid_normal_item
-    #print(str(keys))
-    elif item.get('asset_name',None):
-        # Item is an Asset
-        valid_asset_item = help_valid_asset(item)
-        if valid_asset_item != "OK":
-            return valid_asset_item
-    else:
-        if item.get('item_name',None) and item.get('asset_name',None):
-            return "Format: Item can only have an item_name or asset_name, not both."
-        name = ''
-        if item.get('item_name',None):
-            name = item['item_name']
-        elif item.get('asset_name',None):
-            name = item['asset_name']
-        else:
-            return "Format: item_name or asset_name must be provided."
-        return "Format: Item "+name+" formatted incorrectly."""
 
 def help_valid_item(item):
     is_asset = item.get('is_asset', False)
@@ -208,12 +183,12 @@ def help_valid_item_asset(item):
         return "Format: do not include a count for Asset Items."
     return "OK"
 
-def help_valid_asset(item):
+def help_valid_asset(item, items):
     keys = []
     for key,value in item.items():
         keys.append(key)
         if key == 'asset_name':
-            asset_name_valid = valid_asset_name(value)
+            asset_name_valid = valid_asset_name(value, items)
             if asset_name_valid != "OK":
                 return asset_name_valid
         elif key == 'custom_fields':
@@ -224,15 +199,20 @@ def help_valid_asset(item):
             return "Format: Illegal JSON key name. Accepted tags for Assets are: "+\
                     "asset_name, custom_fields."
 
-def valid_asset_name(name):
-    #TODO: Include set of item names included in bulk import and check if it exists there!
+def valid_asset_name(name, items):
     try:
         item_instance = Item.objects.get(item_name=name)
         if not item_instance.is_asset:
             return "Format: Item with name "+name+" is not an Asset."
     except:
-        return "An Item with name "+name+" does not exist. Please create an "+\
-                "item instance with this name before trying to create Asset instances."
+        asset_row_in_input = False
+        for item in items:
+            if item.get('item_name',None) == name:
+                asset_row_in_input = True
+                break
+        if not asset_row_in_input:
+            return "An Item with name "+name+" does not exist. Please create an "+\
+                    "item instance with this name before trying to create Asset instances."
     return "OK"
 
 def valid_cfs_asset(custom_fields):
@@ -351,6 +331,7 @@ def valid_customs(custom_fields, is_asset):
     return "OK"
 
 def save_items(items):
+    print("Saving Items...")
     for item in items:
         if item.get('item_name',None):
             # Item instance

@@ -51,7 +51,7 @@
 <table class="table table-condensed" style="border:1px solid black; margin-left:15px; width:95%">
 
 	<tr class="active"> 
-	<th> {% if loan %} Loan {% else %} Backfill {% endif %} Owner</th><th>Item </th><th>Request</th><th> Amount {{reqeust_list.0.get_status_display}} </th><th> Actions </th>
+	<th> {% if loan %} Loan {% else %} Backfill {% endif %} Owner</th><th>Reason</th><th>Item</th><th> Amount {{reqeust_list.0.get_status_display}} </th><th> Actions </th>
 	</tr>
 	{% for req in request_list %}
 		<!--make the actual tablerow -->
@@ -59,8 +59,10 @@
     <th>{{req.reason}}</th>
 		<th><a href='/{{req.item_id.pk}}'> {{req.item_id}}</a> </th>
 		<th> {{req.quantity}} </th>
-		<th><a style = "margin-right:10px" href="{% url 'disburse loaned' req.pk %}">Disburse</a>
-			<a style="margin-right:10px" href="{% url 'return loaned' req.pk %}">Mark as Returned</a>
+		<th>{% if req.suggestion == 'B' %}
+    <span style="color: red">Backfill Requested <a href="{% url 'old cart request details' cart_request_id=req.parent_cart.pk %}">(View Details) </a></span><a href="{% url 'deny backfill' req.pk %}"> Deny Backfill </a>
+    {% endif %}<a style = "margin-right:10px" href="{% url 'disburse loaned' req.pk %}">Disburse</a>
+			<a style="margin-right:10px" href="{% url 'return loaned' req.pk %}">{% if req.status == 'B' %}Mark Backfill as Satisfied{% else %}Mark as Returned{% endif %}</a>
       {% if loan %}
       <a href="{% url 'change status' request_id=req.pk new_status='B' %}">Convert To Backfill</a></th>
       {% else %}

@@ -81,14 +81,14 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 # SERVER
 # DATABASES = {
-#              'default': {
-#                  'ENGINE': 'django.db.backends.postgresql',
-#                  'NAME': 'inventory',
-#                 'USER': 'postgres',
-#                  'PASSWORD': '',
-#                  'PORT': '5432'
-#              }
-#          }
+#               'default': {
+#                   'ENGINE': 'django.db.backends.postgresql',
+#                   'NAME': 'inventory',
+#                  'USER': 'postgres',
+#                   'PASSWORD': '',
+#                   'PORT': '5432'
+#               }
+#           }
 
 ## LOCALHOST
 DATABASES = {
