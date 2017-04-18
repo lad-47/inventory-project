@@ -16,7 +16,7 @@ from home.models import SubscribedEmail,EmailBody,EmailTag,LoanDate
 from django.core.mail import EmailMessage
 from django.core.files.storage import FileSystemStorage
 from manager.auto_increment import generateAssetTag
-from jinja2.compiler import generate
+#from jinja2.compiler import generate
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -405,7 +405,7 @@ def modify_an_item_action(request, item_id):
 				convertCheck = item_form.cleaned_data.pop('convert')
 			updateItem(itemToChange, item_form.cleaned_data);
 			print(convertCheck);
-			print(itemToChange.is_asset); 
+			print(itemToChange.is_asset);
 			if convertCheck  and itemToChange.is_asset:
 				convert_asset_to_item(itemToChange);
 				print("asset to item");
