@@ -358,6 +358,7 @@ def modify_an_item(request, item_id):
 	ItemForm = ItemForm_factory(is_asset_row=itemToChange.is_asset);
 
 	tags = Tag.objects.all()
+	item_tags = []
 
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
@@ -368,8 +369,18 @@ def modify_an_item(request, item_id):
 			tags_to_modify = process_tags(raw_tag_names)
 			data = item_form.cleaned_data
 			data['tags'] = tags_to_modify
-			updateItem(itemToChange, data)
-			return HttpResponseRedirect('/manager/update_success')
+			convertCheck = False;
+			if 'convert' in data.keys():
+				convertCheck = data.pop('convert')
+			try:
+				updateItem(itemToChange, data);
+			except IntegrityError:
+				return render(request, 'manager/success.html', {'message':'Item with that name exists.'})
+			if convertCheck  and itemToChange.is_asset:
+				convert_asset_to_item(itemToChange);
+			elif convertCheck  and not itemToChange.is_asset:
+				convert_item_to_asset(itemToChange);
+			return HttpResponseRedirect('/manager/update_success');
 
 		""" Deprecated code
 		if item_form.is_valid():
