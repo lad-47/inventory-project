@@ -38,6 +38,9 @@ ul.pagination {
         <a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px">
         {% endif %}
         <span title="Modify" style="margin-left:15px; color:green" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
+        {% if not is_asset_instance and item.is_asset %}
+            <a href="{% url 'add an asset' item_id=item.id%}"><span style="margin-left:5px; color:blue" title="Add" class="glyphicon glyphicon-plus" aria-hidden="true"> </span></a>
+            {% endif %}
         {% if request.user.is_superuser %}
           <a href="{% url 'delete check' item_id=item.id %}" ><span title="Delete" style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" aria-hidden="true"> </span></a>
         {% endif %}</small>{% endif %}</h1>
@@ -98,7 +101,11 @@ ul.pagination {
     <tr>
     <th>{{request.owner}} </th>
     <th>{% if user.is_staff %}
+    {% if request.status == 'O' %}
     <a href="{% url 'cart request details' request.parent_cart.id %}">
+    {% else %}
+    <a href="{% url 'old cart request details' request.parent_cart.id %}">
+    {% endif %}
     {% else %}
     <a href="{% url 'view request details' request.parent_cart.id %}">
     {% endif %}
@@ -109,7 +116,7 @@ ul.pagination {
   </table>
 {% endif %}
 
-{% if not user.is_anonymous %}
+{% if not user.is_anonymous and not is_asset_instance %}
 <h2 style="padding-left: 15px">Add Item to Cart: </h2>
 <div>
 <form class="navbar-form navbar-top" role="search" action="{% url 'request' item.id %}" method="POST">

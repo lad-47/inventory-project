@@ -3,8 +3,19 @@ from django.utils import timezone
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from .models import *
-from .serializers import ItemSerializer, UserSerializer, TagSerializer, RequestSerializer, CustomFieldEntrySerializer, CustomShortTextFieldSerializer, CustomLongTextFieldSerializer, CustomIntFieldSerializer, CustomFloatFieldSerializer
+from .serializers import *
 from django.core.mail import EmailMessage
+  
+@receiver(post_save, sender=AbstractItem, dispatch_uid="abstractitem_save")
+def log_abstractitem(sender, instance, created, **kwargs):
+    try:
+        instance.item.save()
+    except Item.DoesNotExist:
+        pass
+    try:
+        instance.asset.save()
+    except Asset.DoesNotExist:
+        pass  
   
 @receiver(post_save, sender=Asset, dispatch_uid="asset_save")
 def log_asset(sender, instance, created, **kwargs):
