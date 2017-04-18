@@ -74,7 +74,7 @@ def create_request_info(cart_requests):
 		subrequests = Request.objects.filter(parent_cart=cart_request);
 		valid = True;
 		for subrequest in subrequests:
-			itemToChange = subrequest.item_id;
+			itemToChange = subrequest.item_id
 			oldQuantity = itemToChange.count;
 			requestAmount = subrequest.quantity;
 			newQuantity = oldQuantity - requestAmount;
@@ -90,7 +90,11 @@ def create_indv_request_info(cart_request):
 	req_info = []
 	i=0
 	for subrequest in subrequests:
+<<<<<<< HEAD
+		itemToChange = subrequest.item_id
+=======
 		itemToChange = subrequest.item_id;
+>>>>>>> 3b772d651c0f80653617f2a35b1593014124b40b
 		oldQuantity = itemToChange.count;
 		requestAmount = subrequest.quantity;
 		newQuantity = oldQuantity - requestAmount;
@@ -426,15 +430,23 @@ def convert_item_to_asset(item):
 				a = CustomFloatField.objects.get(parent_item=item, field_name=cf)
 				a.delete()
 		except Exception:
-			pass;
+			pass
 
 	for x in range (0, itemQuantity):
 		newAsset = Asset.objects.create(item_name=item.item_name, count=1, model_number=item.model_number, description=item.description, is_asset = True, asset_tag = generateAssetTag())
 	requests = Request.objects.filter(item_id=item).exclude(status='O').exclude(status='A').exclude(status='D').exclude(status='P').exclude(status='R').exclude(status='Z')
 	for request in requests:
+		is_pdf = False
+		try:
+			pdf = BackfillPDF.objects.get(request=request)
+			is_pdf = True
+		except BackfillPDF.DoesNotExist:
+			pass
 		for x in range(0,request.quantity):
 			newAsset = Asset.objects.create(item_name=item.item_name, count=0, model_number=item.model_number, description=item.description, is_asset = True, asset_tag = generateAssetTag())
 			newreq = Request.objects.create(owner = request.owner,item_id = newAsset,reason = request.reason,admin_comment = request.admin_comment,quantity = 1,status = request.status,suggestion = request.suggestion,parent_cart = request.parent_cart)
+			if is_pdf:
+				BackfillPDF.objects.create(request=newreq,pdf=pdf.pdf)
 	for request in requests:
 		request.delete()
 	return True;
@@ -1049,6 +1061,10 @@ def handle_loan(request, request_id, new_status):
 			#disbursed.save(); .create already saves
 			if is_pdf:
 				BackfillPDF.objects.create(request=new_request,pdf=pdf.pdf)
+<<<<<<< HEAD
+			
+=======
+>>>>>>> 3b772d651c0f80653617f2a35b1593014124b40b
 			tag=EmailTag.objects.all()[0].tag
 			message=""
 
