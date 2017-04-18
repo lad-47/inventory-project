@@ -1,22 +1,33 @@
 from django import forms
-from home.models import CustomFieldEntry, Item, Tag;
-
-class ServiceForm(forms.Form):
-	CHOICES = (
-		('A', 'Approve for Disbursment'),
-		('L', 'Approve for Loan'),
-		('B', 'Approve for Backfill'),
-		('D', 'Deny'),
-		);
-	admin_comment = forms.CharField(max_length=200, required=False);
-	approve_deny = forms.ChoiceField(widget=forms.RadioSelect, \
-		choices=CHOICES);
+from home.models import *;
+#class ServiceForm(forms.Form):
+#	CHOICES = (
+#		('A', 'Approve for Disbursment'),
+#		('L', 'Approve for Loan'),
+#		('B', 'Approve for Backfill'),
+#		('D', 'Deny'),
+#		);
+#	admin_comment = forms.CharField(max_length=200, required=False);
+#	approve_deny = forms.ChoiceField(widget=forms.RadioSelect, \
+#		choices=CHOICES);
 
 def generate_choices(db_Model, data_display_field):
 	print('in generate choices')
 	CHOICES = (());
 	first = True;
 	for instance in db_Model.objects.all():
+		if first:
+			CHOICES = ((instance.pk, getattr(instance, data_display_field)),);
+			first = False;
+			continue;
+		CHOICES = CHOICES + ((instance.pk, getattr(instance, data_display_field)),);
+	return CHOICES;
+
+def generate_choices2(db_Model, data_display_field, asset_row):
+	print('in generate choices2')
+	CHOICES = (());
+	first = True;
+	for instance in db_Model.objects.filter(item_name=asset_row.item_name,count=1):
 		if first:
 			CHOICES = ((instance.pk, getattr(instance, data_display_field)),);
 			first = False;
@@ -63,9 +74,10 @@ def ItemForm_init(self, *args, **kwargs):
 
 
 
-def AssetForm_factory(asset_tag):
+def AssetForm_factory(asset_tag, hide_asset_tag):
 	properties = dict();
-	properties['asset_tag'] = forms.IntegerField(initial=asset_tag);
+	if not hide_asset_tag:
+		properties['asset_tag'] = forms.IntegerField(initial=asset_tag);
 
 	custom_fields = CustomFieldEntry.objects.filter(per_asset=True);
 	for cf in custom_fields:
@@ -149,3 +161,33 @@ class PositiveIntArgMaxForm(forms.Form):
 		#print(kwargs['max_val'])
 		self.fields['Amount'] = forms.IntegerField(min_value=1, max_value=max_val)
 		self.fields['Comment'] = forms.CharField(initial='No Comment', required=False);
+
+def ServiceForm_factory(cart_request):
+
+	properties = dict();
+
+	subrequests = Request.objects.filter(parent_cart=cart_request);
+
+	CHOICES = (
+		('A', 'Approve for Disbursment'),
+		('L', 'Approve for Loan'),
+		('B', 'Approve for Backfill'),
+		('D', 'Deny'),
+		);
+	properties['admin_comment'] = forms.CharField(max_length=200, required=False);
+	properties['approve_deny'] = forms.ChoiceField(widget=forms.RadioSelect, \
+		choices=CHOICES);
+
+	for subrequest in subrequests:
+		print(subrequest.item_id.item_name);
+		item = subrequest.item_id;
+		if item.is_asset:
+			ASSETS = generate_choices2(Asset, 'asset_tag', item)
+
+			for i in range(0, subrequest.quantity):
+				key = item.item_name+'_'+str(i+1);
+				label = item.item_name+' '+str(i+1);
+				print(key);
+				properties[key] = forms.ChoiceField(widget=forms.Select, choices=ASSETS, label=label);
+		print(properties);
+	return type('ServiceForm', (forms.Form,), properties);

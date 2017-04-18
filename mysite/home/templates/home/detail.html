@@ -4,7 +4,7 @@
 <html>
 {% block content %}
 <head>
-	<title>{{item.item_name}} </title>
+	<title>{{item}} </title>
 </head>
 <body>
 
@@ -30,8 +30,14 @@ ul.pagination {
 </style>
 
 <div style="padding-left: 15px">
-  <h1>{{ item.item_name }}{% if asset_tag %}, Asset Tag: {{asset_tag}} {% endif %}{% if request.user.is_staff or request.user.is_superuser %}
-        <small><a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px"><span title="Modify" style="margin-left:15px; color:green" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
+  <h1>{{ item }}{% if request.user.is_staff or request.user.is_superuser %}
+        <small>
+        {% if is_asset_instance %}
+        <a href="{% url 'modify an asset' asset_id=item.id conf=0%}" style="margin-right:15px">
+        {% else %}
+        <a href="{% url 'modify_an_item' item_id=item.id%}" style="margin-right:15px">
+        {% endif %}
+        <span title="Modify" style="margin-left:15px; color:green" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
         {% if request.user.is_superuser %}
           <a href="{% url 'delete check' item_id=item.id %}" ><span title="Delete" style="margin-left:5px; color:red" class="glyphicon glyphicon-remove" aria-hidden="true"> </span></a>
         {% endif %}</small>{% endif %}</h1>
@@ -68,7 +74,7 @@ ul.pagination {
     <!--make the actual tablerow -->
     <tr>
     <th><a href="{% url 'asset detail' asset.pk %}">{{asset.asset_tag}}</a> </th>
-    <th>{% if asset.quantity == 0 %} No {% else %} Yes {% endif %}</th>
+    <th>{% if asset.count == 0 %} No {% else %} Yes {% endif %}</th>
     <th>{% if request.user.is_staff or request.user.is_superuser %}
         <small><a href="{% url 'modify an asset' asset_id=asset.id conf=0%}" style="margin-right:15px"><span title="Modify" style="margin-left:15px; color:green" class="glyphicon glyphicon-edit" aria-hidden="true"> </span></a>
         {% if request.user.is_superuser %}
