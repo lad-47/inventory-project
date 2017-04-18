@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from datetime import date
 from django.contrib.auth.models import User
 from home.models import *
-from .forms import ServiceForm, ItemForm_factory, AssetForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
+from .forms import ServiceForm_factory, ItemForm_factory, AssetForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
 PositiveIntArgMaxForm
 from .auto_increment import generateAssetTag
 from django.core.exceptions import ObjectDoesNotExist
@@ -115,6 +115,7 @@ def cart_request_details(request, cart_request_id):
 	req_info = create_indv_request_info(current_request);
 	##handle the data from the form on a post
 	if request.method == 'POST':
+		ServiceForm = ServiceForm_factory(current_request);
 		service_form = ServiceForm(request.POST);
 		if service_form.is_valid():
 			message = 'Your request for:\n'
@@ -128,14 +129,34 @@ def cart_request_details(request, cart_request_id):
 						#this is a place I could fix things
 						return HttpResponseRedirect('/manager/request_failure');
 				for el in req_info:
-					el[4].count = el[2]-el[1]; ##update item quantity
-					update_assets(item_name=el[4].item_name);
-					message+=el[0].item_id.item_name+' x'+str(el[0].quantity)+"\n"
-					el[0].status=new_status; ##subrequest was serviced
-					el[0].admin_comment=service_form.cleaned_data['admin_comment'];
-					el[0].suggestion='D'
-					el[0].save();  ##save the subrequest's updated status
-					el[4].save();  ##save the item with new quantity
+					if el[0].item_id.is_asset:
+						assetPKs_used = list();
+						for i in range(0, el[0].quantity):
+							key = el[4].item_name+'_'+str(i+1);
+							assetPK = service_form.cleaned_data[key];
+							if assetPK in assetPKs_used:
+								return render(request, 'manager/success.html', {'message': 'Cannot assign the same asset twice.'})
+							assetPKs_used.append(assetPK);
+						for i in range(0, el[0].quantity):
+							key = el[4].item_name+'_'+str(i+1);
+							assetPK = service_form.cleaned_data[key];
+							if not assetPK:
+								return render(request, 'manager/success.html', {'message':'Did not assign assets.'});
+							asset = Asset.objects.get(pk=assetPK);
+							new_req = Request.objects.create(owner=el[0].owner, item_id=asset, \
+								reason=el[0].reason, admin_comment=el[0].admin_comment, quantity=1, \
+								status=new_status, suggestion='D',\
+								parent_cart=el[0].parent_cart)
+						el[0].delete();
+					else:
+						el[4].count = el[2]-el[1]; ##update item quantity
+						update_assets(item_name=el[4].item_name);
+						message+=el[0].item_id.item_name+' x'+str(el[0].quantity)+"\n"
+						el[0].status=new_status; ##subrequest was serviced
+						el[0].admin_comment=service_form.cleaned_data['admin_comment'];
+						el[0].suggestion='D'
+						el[0].save();  ##save the subrequest's updated status
+						el[4].save();  ##save the item with new quantity
 				message+='has been APPROVED'
 				tag+=' Request APPROVED'
 			else:
@@ -162,6 +183,7 @@ def cart_request_details(request, cart_request_id):
 
 	##the form that will be sent to the template on a GET
 	else:
+		ServiceForm = ServiceForm_factory(current_request);
 		service_form = ServiceForm();
 
 	context = {
@@ -191,6 +213,8 @@ def old_cart_request_details(request, cart_request_id):
 		'req_info': req_info,
 	}
 	return render(request, 'manager/old_cart_request_details.html', context);
+
+
 
 def logs(request, *args, **kwargs):
 	if not request.user.is_staff:

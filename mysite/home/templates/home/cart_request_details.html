@@ -33,7 +33,7 @@
             <th>{{subrequest.get_status_display}}</th>
             <th>{{subrequest.admin_comment}}</th>
             {% if not current_request.cart_status == 'A' and not current_request.cart_status == 'D' %}
-            <th>{% if subrequest.suggestion != 'B' and subrequest.status != 'B' and subrequest.status != 'R' %}<input id="check[]" name="check[]" type="checkbox" value="{{subrequest.item_id.item_name}}">{% else %}{% if subrequest.status == 'R' %} {% else %}Requested for Backfill{% endif %}{% endif %}</th>
+            <th>{% if subrequest.suggestion != 'B' and subrequest.status != 'B' and subrequest.status != 'R' %}<input id="check[]" name="check[]" type="checkbox" value="{{subrequest.item_id.pk}}">{% else %}{% if subrequest.status == 'R' %} {% else %}Requested for Backfill{% endif %}{% endif %}</th>
             {% endif %}
       </tr>
       {% endfor %}
