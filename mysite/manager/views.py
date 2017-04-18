@@ -1081,10 +1081,6 @@ def handle_loan(request, request_id, new_status):
 			#disbursed.save(); .create already saves
 			if is_pdf:
 				BackfillPDF.objects.create(request=new_request,pdf=pdf.pdf)
-<<<<<<< HEAD
-			
-=======
->>>>>>> 3b772d651c0f80653617f2a35b1593014124b40b
 			tag=EmailTag.objects.all()[0].tag
 			message=""
 
