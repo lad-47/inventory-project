@@ -90,7 +90,11 @@ def create_indv_request_info(cart_request):
 	req_info = []
 	i=0
 	for subrequest in subrequests:
+<<<<<<< HEAD
 		itemToChange = subrequest.item_id
+=======
+		itemToChange = subrequest.item_id;
+>>>>>>> 3b772d651c0f80653617f2a35b1593014124b40b
 		oldQuantity = itemToChange.count;
 		requestAmount = subrequest.quantity;
 		newQuantity = oldQuantity - requestAmount;
@@ -1023,8 +1027,12 @@ def handle_loan(request, request_id, new_status):
 	quantity = req.quantity;
 
 	# will be used to null out per_asset cf's later
-	backfill_return = (req.status == 'B' and new_status == 'R' and type(req.item_id)==Asset);
-	print(type(req.item_id));
+	try:
+		a = req.item_id.asset
+		backfill_return = (req.status == 'B' and new_status == 'R')
+	except Asset.DoesNotExist:
+		backfill_return = False;
+	print(backfill_return);
 
 
 	if request.method == 'POST':
@@ -1053,7 +1061,10 @@ def handle_loan(request, request_id, new_status):
 			#disbursed.save(); .create already saves
 			if is_pdf:
 				BackfillPDF.objects.create(request=new_request,pdf=pdf.pdf)
+<<<<<<< HEAD
 			
+=======
+>>>>>>> 3b772d651c0f80653617f2a35b1593014124b40b
 			tag=EmailTag.objects.all()[0].tag
 			message=""
 
