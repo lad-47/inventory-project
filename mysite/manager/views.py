@@ -16,7 +16,7 @@ from home.models import SubscribedEmail,EmailBody,EmailTag,LoanDate
 from django.core.mail import EmailMessage
 from django.core.files.storage import FileSystemStorage
 from manager.auto_increment import generateAssetTag
-from jinja2.compiler import generate
+#from jinja2.compiler import generate
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
