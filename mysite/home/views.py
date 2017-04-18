@@ -331,6 +331,9 @@ def delete_check(request, item_id):
 
 def delete_item(request, item_id):
 	itemToDelete = get_object_or_404(Item, pk=item_id)
+	assets = Asset.objects.filter(item_name=itemToDelete.item_name)
+	for asset in assets:
+		asset.delete()
 	itemToDelete.delete();
 	return render(request, 'admin/delete_success.html');
 

@@ -651,7 +651,7 @@ def item_to_dict(item_instance):
 def add_an_item(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	ItemForm = ItemForm_factory(is_asset_row=False);
+	ItemForm = ItemForm_factory(is_asset_row=False,is_new_item=True);
 
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
@@ -1099,6 +1099,7 @@ def handle_loan(request, request_id, new_status):
 		form = PositiveIntArgMaxForm(request.POST, max_val=quantity);
 		if form.is_valid():
 			to_new_status = form.cleaned_data['Amount'];
+			print(to_new_status)
 			no_longer_loaned = to_new_status
 			comment = form.cleaned_data['Comment'];
 
@@ -1152,7 +1153,9 @@ def handle_loan(request, request_id, new_status):
 			# active = backfill or loans
 			if new_status == 'R':
 				involved_item = req.item_id;
+				print(involved_item.count)
 				involved_item.count = involved_item.count + no_longer_loaned;
+				print(involved_item.count)
 				involved_item.save();
 				update_assets(item_name=involved_item.item_name);
 
@@ -1336,5 +1339,6 @@ def update_assets(**kwargs):
 
 	assets_left = Asset.objects.filter(item_name=item_name, count=1).count();
 	asset_item_row = Item.objects.get(item_name=item_name);
-	asset_item_row.count = assets_left;
-	asset_item_row.save();
+	if asset_item_row.is_asset:
+		asset_item_row.count = assets_left;
+		asset_item_row.save();
