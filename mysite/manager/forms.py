@@ -105,11 +105,13 @@ def ItemForm_factory(**kwargs):
 		'minimum_stock': forms.IntegerField(min_value=0, required=False),
 		#'tags': forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple, \
 		#	choices=TAGS, required=False),
-		'convert': forms.BooleanField(required=False,label='Convert between Item and Asset'),
 		'__init__': ItemForm_init,
 	}
 	if not kwargs['is_asset_row']:
 		properties['count'] = forms.IntegerField(min_value=0);
+		if not kwargs['is_new_item']:
+			properties['convert'] = forms.BooleanField(required=False,label='Convert Item to Asset')
+		
 
 	# add more class variables to properties for the custom fields
 	if kwargs['is_asset_row']:

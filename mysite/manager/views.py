@@ -347,8 +347,6 @@ def modify_an_item(request, item_id):
 
 			}
 			return render(request, 'manager/confirmation.html', context)
-			if 'convert' in item_form.cleaned_data.keys():
-				convertCheck = item_form.cleaned_data.pop('convert')
 			try:
 				updateItem(itemToChange, item_form.cleaned_data);
 			except IntegrityError:
@@ -589,7 +587,7 @@ def item_to_dict(item_instance):
 def add_an_item(request):
 	if not request.user.is_staff:
 		return render(request, 'home/notAdmin.html')
-	ItemForm = ItemForm_factory(is_asset_row=False);
+	ItemForm = ItemForm_factory(is_asset_row=False,is_new_item=True);
 
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
