@@ -120,7 +120,7 @@ def ItemForm_factory(**kwargs):
 	}
 	if not kwargs['is_asset_row']:
 		properties['count'] = forms.IntegerField(min_value=0);
-		if not kwargs['is_new_item']:
+		if not kwargs.get('is_new_item', False):
 			properties['convert'] = forms.BooleanField(required=False,label='Convert Item to Asset')
 		
 
