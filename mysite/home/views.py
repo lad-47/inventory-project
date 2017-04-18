@@ -75,7 +75,11 @@ def index(request):
 	return render(request, 'home/index.html', context)
 
 def detail(request, item_id):
-	item = get_object_or_404(Item, pk=item_id)
+	try:
+		item = Item.objects.get(pk=item_id)
+	except Item.DoesNotExist:
+		return asset_detail(request, item_id);
+		
 	tags = item.tags.all()
 	if request.user.is_anonymous:
 		requests = Request.objects.none()
@@ -344,9 +348,9 @@ def cart_request_details(request, cart_request_id):
 	current_request = get_object_or_404(Cart_Request, pk=cart_request_id);
 	subrequests = Request.objects.filter(parent_cart=current_request);
 	if request.method == 'POST':
-		items = request.POST.getlist('check[]',None)
-		for item in items:
-			req = subrequests.get(item_id__item_name=item)		
+		itemPKs = request.POST.getlist('check[]',None)
+		for itemPK in itemPKs:
+			req = subrequests.get(item_id__pk=itemPK)		
 			pdf = BackfillPDF(request=req,pdf=request.FILES['receipt'])
 			pdf.save()
 			req.suggestion = 'B'
