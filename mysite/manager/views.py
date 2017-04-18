@@ -39,7 +39,7 @@ def cart_requests(request):
 		cart_requestsL.add(subreq.parent_cart)
 	for subreq in backfills:
 		cart_requestsB.add(subreq.parent_cart)
-		
+
 	cart_requestsL_and_v = create_request_info(cart_requestsL);
 	cart_requestsB_and_v = create_request_info(cart_requestsB);
 
@@ -90,7 +90,7 @@ def create_indv_request_info(cart_request):
 	req_info = []
 	i=0
 	for subrequest in subrequests:
-		itemToChange = subrequest.item_id
+		itemToChange = subrequest.item_id;
 		oldQuantity = itemToChange.count;
 		requestAmount = subrequest.quantity;
 		newQuantity = oldQuantity - requestAmount;
@@ -361,9 +361,32 @@ def modify_an_item(request, item_id):
 	itemToChange = get_object_or_404(Item, pk=item_id);
 	ItemForm = ItemForm_factory(is_asset_row=itemToChange.is_asset);
 
+	tags = Tag.objects.all()
+	item_tags = []
+
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':
 		item_form = ItemForm(request.POST);
+
+		if item_form.is_valid():
+			raw_tag_names = request.POST.getlist('modifyTags[]', None)
+			tags_to_modify = process_tags(raw_tag_names)
+			data = item_form.cleaned_data
+			data['tags'] = tags_to_modify
+			convertCheck = False;
+			if 'convert' in data.keys():
+				convertCheck = data.pop('convert')
+			try:
+				updateItem(itemToChange, data);
+			except IntegrityError:
+				return render(request, 'manager/success.html', {'message':'Item with that name exists.'})
+			if convertCheck  and itemToChange.is_asset:
+				convert_asset_to_item(itemToChange);
+			elif convertCheck  and not itemToChange.is_asset:
+				convert_item_to_asset(itemToChange);
+			return HttpResponseRedirect('/manager/update_success');
+
+		""" Deprecated code
 		if item_form.is_valid():
 			action = "/manager/modify_an_item_action/"+str(item_id) + "/";
 			message="Modification of this item will change it in the database.";
@@ -382,11 +405,12 @@ def modify_an_item(request, item_id):
 			#for key in item_form.cleaned_data.keys():
 				#print('key: ' + key)
 				#print('data: ' + str(item_form.cleaned_data[key]))
-			#return HttpResponseRedirect('/manager/update_success');
+			#return HttpResponseRedirect('/manager/update_success');"""
 
 	# otherwise, it's a GET, and we init the form using the current data
 	else:
 		item_dict = item_to_dict(itemToChange);
+		item_tags = item_dict.pop('tags')
 		item_form = ItemForm(item_dict);
 # 		item_form.fields['new']=item_form.fields.get('item_name')
 # 		print(item_form.fields.get('item_name'))
@@ -398,9 +422,25 @@ def modify_an_item(request, item_id):
 	#print(item_to_dict(itemToChange));
 	context = {
 		'item_form': item_form,
+		'item_tags': item_tags,
+		'tags': tags,
 		'is_asset': False,
 	}
 	return render(request, 'manager/modify_an_item.html', context);
+
+def process_tags(tags):
+	# Takes in a list of Tag names and returns a list of Tag object instances
+	processed_data = []
+	for tag in tags:
+		try:
+			tag_instance = Tag.objects.get(tag=tag)
+			tag_pk = tag_instance.pk
+			if tag_pk not in processed_data:
+				processed_data.append(tag_pk)
+		except:
+			# Ignore incorrect tags
+			pass
+	return processed_data
 
 def modify_an_item_action(request, item_id):
 	if not request.user.is_staff:
@@ -589,7 +629,7 @@ def item_to_dict(item_instance):
 	# now we add the tags by hand because... we have to
 	tag_list = [];
 	for tag in item_tags:
-		tag_list.append(tag.pk);
+		tag_list.append(tag.tag);
 	item_dict['tags'] = tag_list;
 
 	# and finally the custom fields
@@ -1079,7 +1119,7 @@ def handle_loan(request, request_id, new_status):
 			#quantity=(quantity-no_longer_loaned), item_id=req.item_id, parent_cart=req.parent_cart,\
 			#reason=req.reason, admin_comment=comment);
 			#still_old_status.save();
-			
+
 
 			new_request = Request.objects.create(owner=req.owner, status=new_status,\
 			quantity=(to_new_status), item_id=req.item_id, parent_cart=req.parent_cart, \
@@ -1153,7 +1193,7 @@ def handle_loan(request, request_id, new_status):
 				req.save();
 			else:
 				req.delete();
-			
+
 			still_loaned = False;
 			for subreq in Request.objects.filter(parent_cart = parent):
 				if subreq.status == 'L' or subreq.status == 'B':
@@ -1161,8 +1201,8 @@ def handle_loan(request, request_id, new_status):
 			if not still_loaned:
 				parent.cart_status = 'A';
 				parent.save();
-			
-			if parent.suggestion == 'B':	
+
+			if parent.suggestion == 'B':
 				children = Request.objects.filter(parent_cart=parent)
 				still_suggest = False
 				for child in children:
@@ -1272,9 +1312,9 @@ def deny_backfill(request, request_id):
 	if req.suggestion == 'B':
 		req.suggestion = 'L'
 		req.save()
-		
+
 	parent = req.parent_cart
-	if parent.suggestion == 'B':	
+	if parent.suggestion == 'B':
 				children = Request.objects.filter(parent_cart=parent)
 				still_suggest = False
 				for child in children:
@@ -1309,7 +1349,7 @@ def update_assets(**kwargs):
 			row.count = num_assets;
 			row.save();
 		return;
-			
+
 	if kwargs.get('asset_tag', False):
 		item_name = Asset.objects.get(asset_tag=kwargs['asset_tag']).item_name;
 	else:

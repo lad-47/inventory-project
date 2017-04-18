@@ -4,7 +4,8 @@ from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import CFAddForm, CFDeleteForm
 from home.models import CustomFieldEntry
-from .import_logic import import_data
+from .item_import_logic import import_data
+from .asset_import_logic import import_asset_data
 from django.db import IntegrityError
 # Create your views here.
 
@@ -177,10 +178,17 @@ def bulk_import(request):
         return render(request, 'home/notAdmin.html')
     if request.method == 'POST':
         raw_data = request.POST.get('import_data', None);
+        raw_asset_data = request.POST.get('import_assets', None)
         if raw_data is not None:
             # process/import data and show success/failure to user
             status = import_data(raw_data)
             #print(str(status))
+            if status == "OK":
+                return render(request, 'manager/success.html', {'message':"Data was imported and saved correctly."})
+            else:
+                return render(request, 'administrator/import_failure.html', {'message':str(status)})
+        elif raw_asset_data is not None:
+            status = import_asset_data(raw_asset_data)
             if status == "OK":
                 return render(request, 'manager/success.html', {'message':"Data was imported and saved correctly."})
             else:

@@ -4,9 +4,6 @@ Needs item_name and count fields:
 Needs item_name and count fields:
 [{"item_name":"RLED002","count":268},{"item_name":"RLED003"}]
 
-Custom Fields:
-[{"item_name":"RLED001","count":345,"custom_fields":[{"field_name":"Location","field_value":"Hudson"}]},{"item_name":"RLED002","count":375}]
-
 Illegal JSON format:
 {"item_name":"RLED002","count":268},{"item_name":"RLED003","count":375}
 

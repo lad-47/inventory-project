@@ -1,0 +1,116 @@
+Custom Fields lt:
+[
+  {
+    "item_name":"ALED001",
+    "count":200,
+    "custom_fields":[
+      {
+        "field_name":"Location",
+        "field_value":"Hudson"
+      },
+      {
+        "field_name":"Extra Description",
+        "field_value":"blah blah blah blah blah blahhhhhhhhh"
+      }
+    ]
+  },
+  {
+    "item_name":"ALED002",
+    "count":375
+  }
+]
+
+Custom Fields st:
+[{"item_name":"RLED001","count":345,"custom_fields":[{"field_name":"Location","field_value":"Hudson"}]},{"item_name":"RLED002","count":375}]
+
+Custom Fields int & float:
+[
+  {
+    "item_name":"AALED001",
+    "count":201,
+    "minimum_stock":10,
+    "custom_fields":[
+      {
+        "field_name":"Restock Price",
+        "field_value":"1.02"
+      },
+      {
+        "field_name":"Group Number",
+        "field_value":"4"
+      }
+    ]
+  },
+  {
+    "item_name":"AALED002",
+    "count":90
+  }
+]
+
+Item (asset) normal import:
+[
+  {
+    "item_name":"AAAZod",
+    "is_asset":true,
+    "tags":[
+      {
+        "tag":"ECE"
+      },
+      {
+        "tag":"Red"
+      }
+    ]
+  },
+  {
+    "item_name":"test",
+    "count":1
+  }
+]
+
+Item/Asset instance import:
+[
+  {
+    "item_name":"AAZod",
+    "is_asset":true,
+    "tags":[
+      {
+        "tag":"ECE"
+      },
+      {
+        "tag":"Green"
+      }
+    ]
+  },
+  {
+    "asset_name":"AAZod"
+  }
+]
+
+Asset Instance with cfs:
+[
+  {
+    "asset_name":"AAAsset",
+    "custom_fields":[
+      {
+        "field_name":"Location",
+        "field_value":"Hudson"
+      },
+      {
+        "field_name":"Extra Description",
+        "field_value":"Blah"
+      }
+    ]
+  },
+  {
+    "asset_name":"AAAsset",
+    "custom_fields":[
+      {
+        "field_name":"Location",
+        "field_value":"Teer"
+      },
+      {
+        "field_name":"Extra Description",
+        "field_value":"NO WAY"
+      }
+    ]
+  }
+]

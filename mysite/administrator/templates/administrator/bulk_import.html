@@ -6,40 +6,43 @@
   <h1>Inventory <small>Import Data</small></h1>
 </div>
 
-<p style="margin-left:10px">
-  Use this tool for the bulk import of many items at once. Please refer to the
-  style guide below for formatting.
-</p>
-
-<div class="form-group" style="margin-left:10px">
-  <form method="POST" id="import">
-    {% csrf_token %}
-    <div>
-      <label for="import_data">Data:</label>
-    </div>
-    <div>
-      <textarea label="import_data" name="import_data" id="import_data" rows="10" cols="50"></textarea>
-    </div>
-    <div>
-      <input class="btn btn-primary" type="submit" value="Import Data">
-    <div>
-  </form>
-</div>
-
 <div style="margin-left:10px">
   <h3>Format - JSON</h3>
+  <p>
+    Use this tool for the bulk import of many items at once. Please refer to the
+    style guide below for formatting.
+  </p>
   <p>
     Import multiple items by following JSON conventions, i.e., enclosing
     comma-separated JSON objects in square brackets (i.e., [{item 1},{item 2},{item 3},...]).
   </p>
+  <h4>Items</h4>
+  <div class="form-group" style="margin-left:10px">
+    <form method="POST" id="import">
+      {% csrf_token %}
+      <div>
+        <label for="import_data">Item JSON Data:</label>
+      </div>
+      <div>
+        <textarea label="import_data" name="import_data" id="import_data" rows="10" cols="50"></textarea>
+      </div>
+      <div>
+        <input class="btn btn-primary" type="submit" value="Import Items">
+      <div>
+    </form>
+  </div>
   <p>
     A sample JSON item is shown below. The acceptable tags are: 'item_name',
-    'count', 'model_number', 'description', 'tags', 'custom_fields'.
+    'count', 'model_number', 'description', 'minimum_stock', 'is_asset', 'tags', 'custom_fields'.
   </p>
   <p>
-    NOTE: 'item_name' and 'count' are required, and 'count' must be a positive integer.
+    NOTE: When creating a normal Item instance, 'item_name' and 'count' are required, and 'count' must be a positive integer.
     If a tag which does not exist is input, it will be created in the system. However,
     if a custom field which does not exist is input, an error will occur.
+  </p>
+  <p>
+    NOTE: When creating an item instance for an Asset, 'count' should be omitted and 'is_asset' should be set to true, otherwise,
+    it will be automatically set to false. In this case, Custom Fields provided should not be 'per_asset'.
   </p>
   <p>
     {
@@ -48,8 +51,51 @@
         <p>'count': int,</p>
         <p>'model_number': "str",</p>
         <p>'description': "str",</p>
-        <p>'tags': [<div style="margin-left:10px">{<div style="margin-left:10px">'tag':"str"</div>},<p>{<div style="margin-left:10px">'tag':"str"</div>},...<p style="margin-left:-10px">],</p></p></div></p>
-        <p>'custom_fields': [<div style="margin-left:10px">{<div style="margin-left:10px">'field_name':"str",<p>'field_value':int/float/"str"</p></div>},...</div>]</p>
+        <p>'minimum_stock': int,</p>
+        <p>'is_asset': boolean (default = false)</p>
+        <p style="margin:0">'tags': [<div style="margin-left:10px">{<div style="margin-left:10px">'tag': "str"</div>},...<p style="margin-left:-10px;">],</p></div></p>
+        <p style="margin:0">'custom_fields': [<div style="margin-left:10px">{<div style="margin-left:10px">'field_name': "str",<p style="margin:0">'field_value': int/float/"str"</p></div>},...</div>]</p>
+      </div>
+    }
+  </p>
+  <h4>Assets</h4>
+  <div class="form-group" style="margin-left:10px">
+    <form method="POST" id="import_assets">
+      {% csrf_token %}
+      <div>
+        <label for="import_assets">Asset JSON Data:</label>
+      </div>
+      <div>
+        <textarea label="import_assets" name="import_assets" id="import_assets" rows="10" cols="50"></textarea>
+      </div>
+      <div>
+        <input class="btn btn-primary" type="submit" value="Import Asset Instances">
+      <div>
+    </form>
+  </div>
+  <p>
+    A sample JSON asset is shown below. The acceptable tags are: 'asset_name' and 'custom_fields'.
+  </p>
+  <p>
+    NOTE: An Item instance must exist with the name 'asset_name' before an Asset instance can be created.
+  </p>
+  <p>
+    NOTE: Custom Fields provided must be 'per_asset' fields.
+  </p>
+  <p>
+    {
+      <div style="margin-left:10px">
+        <p>'asset_name': "str",</p>
+        <p style="margin:0">'custom_fields': [
+          <div style="margin-left:10px">
+            {
+              <div style="margin-left:10px">
+                <p style="margin:0">'field_name': "str",</p>
+                <p style="margin:0">'field_value': int/float/"str"</p>
+              </div>
+            },...
+          </div>
+          ]</p>
       </div>
     }
   </p>
