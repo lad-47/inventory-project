@@ -74,7 +74,7 @@ def create_request_info(cart_requests):
 		subrequests = Request.objects.filter(parent_cart=cart_request);
 		valid = True;
 		for subrequest in subrequests:
-			itemToChange = Item.objects.get(id=subrequest.item_id_id);
+			itemToChange = subrequest.item_id;
 			oldQuantity = itemToChange.count;
 			requestAmount = subrequest.quantity;
 			newQuantity = oldQuantity - requestAmount;
@@ -90,7 +90,7 @@ def create_indv_request_info(cart_request):
 	req_info = []
 	i=0
 	for subrequest in subrequests:
-		itemToChange = Item.objects.get(id=subrequest.item_id_id);
+		itemToChange = subrequest.item_id;
 		oldQuantity = itemToChange.count;
 		requestAmount = subrequest.quantity;
 		newQuantity = oldQuantity - requestAmount;
@@ -411,19 +411,22 @@ def convert_item_to_asset(item):
 	item.save();
 	cfs = CustomFieldEntry.objects.filter(per_asset=True)
 	for cf in cfs:
-		kind = cf.value_type
-		if kind == 'st':
-			a = CustomShortTextField.objects.get(parent_item=item, field_name=cf)
-			a.delete()
-		if kind == 'lt':
-			a = CustomLongTextField.objects.get(parent_item=item, field_name=cf)
-			a.delete()
-		if kind == 'int':
-			a = CustomIntField.objects.get(parent_item=item, field_name=cf)
-			a.delete()
-		if kind == 'float':
-			a = CustomFloatField.objects.get(parent_item=item, field_name=cf)
-			a.delete()
+		try:
+			kind = cf.value_type
+			if kind == 'st':
+				a = CustomShortTextField.objects.get(parent_item=item, field_name=cf)
+				a.delete()
+			if kind == 'lt':
+				a = CustomLongTextField.objects.get(parent_item=item, field_name=cf)
+				a.delete()
+			if kind == 'int':
+				a = CustomIntField.objects.get(parent_item=item, field_name=cf)
+				a.delete()
+			if kind == 'float':
+				a = CustomFloatField.objects.get(parent_item=item, field_name=cf)
+				a.delete()
+		except Exception:
+			pass;
 
 	for x in range (0, itemQuantity):
 		newAsset = Asset.objects.create(item_name=item.item_name, count=1, model_number=item.model_number, description=item.description, is_asset = True, asset_tag = generateAssetTag())
@@ -1012,8 +1015,12 @@ def handle_loan(request, request_id, new_status):
 	quantity = req.quantity;
 
 	# will be used to null out per_asset cf's later
-	backfill_return = (req.status == 'B' and new_status == 'R' and type(req.item_id)==Asset);
-	print(type(req.item_id));
+	try:
+		a = req.item_id.asset
+		backfill_return = (req.status == 'B' and new_status == 'R')
+	except Asset.DoesNotExist:
+		backfill_return = False;
+	print(backfill_return);
 
 
 	if request.method == 'POST':
@@ -1041,7 +1048,7 @@ def handle_loan(request, request_id, new_status):
 			reason=req.reason, admin_comment=comment);
 			#disbursed.save(); .create already saves
 			if is_pdf:
-				BackfillPDF.objects.create(request=to_new_status,pdf=pdf.pdf)
+				BackfillPDF.objects.create(request=new_request,pdf=pdf.pdf)
 			tag=EmailTag.objects.all()[0].tag
 			message=""
 
