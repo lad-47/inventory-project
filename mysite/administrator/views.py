@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-#from .forms import CFAddForm, CFDeleteForm
+from .forms import CFAddForm, CFDeleteForm
 from home.models import CustomFieldEntry
 from .import_logic import import_data
 from django.db import IntegrityError
