@@ -2,8 +2,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from datetime import date
 from django.contrib.auth.models import User
-from home.models import Request, Cart_Request, User, Item, Asset, Log, Tag, CustomFieldEntry, \
-CustomShortTextField, CustomLongTextField, CustomIntField, CustomFloatField, BackfillPDF
+from home.models import *
 from .forms import ServiceForm, ItemForm_factory, AssetForm_factory, TagCreateForm, TagModifyForm, TagDeleteForm, \
 PositiveIntArgMaxForm
 from .auto_increment import generateAssetTag
@@ -390,14 +389,10 @@ def modify_an_item_action(request, item_id):
 				updateItem(itemToChange, item_form.cleaned_data);
 			except IntegrityError:
 				return render(request, 'manager/success.html', {'message':'Item with that name exists.'})
-			print(convertCheck);
-			print(itemToChange.is_asset); 
 			if convertCheck  and itemToChange.is_asset:
 				convert_asset_to_item(itemToChange);
-				print("asset to item");
 			elif convertCheck  and not itemToChange.is_asset:
 				convert_item_to_asset(itemToChange);
-				print("item to asset");
 			return HttpResponseRedirect('/manager/update_success');
 		else:
 			context = {
@@ -414,14 +409,34 @@ def convert_item_to_asset(item):
 	itemQuantity = item.count;
 	item.is_asset = True;
 	item.save();
-	print(itemQuantity);
+	cfs = CustomFieldEntry.objects.filter(per_asset=True)
+	for cf in cfs:
+		kind = cf.value_type
+		if kind == 'st':
+			a = CustomShortTextField.objects.get(parent_item=item, field_name=cf)
+			a.delete()
+		if kind == 'lt':
+			a = CustomLongTextField.objects.get(parent_item=item, field_name=cf)
+			a.delete()
+		if kind == 'int':
+			a = CustomIntField.objects.get(parent_item=item, field_name=cf)
+			a.delete()
+		if kind == 'float':
+			a = CustomFloatField.objects.get(parent_item=item, field_name=cf)
+			a.delete()
+
 	for x in range (0, itemQuantity):
-		print(x);
-		newAsset = Asset.objects.create(item_name=item.item_name, model_number=item.model_number, description=item.description, is_asset = True, asset_tag = generateAssetTag());
+		newAsset = Asset.objects.create(item_name=item.item_name, count=1, model_number=item.model_number, description=item.description, is_asset = True, asset_tag = generateAssetTag())
+	requests = Request.objects.filter(item_id=item).exclude(status='O').exclude(status='A').exclude(status='D').exclude(status='P').exclude(status='R').exclude(status='Z')
+	for request in requests:
+		for x in range(0,request.quantity):
+			newAsset = Asset.objects.create(item_name=item.item_name, count=0, model_number=item.model_number, description=item.description, is_asset = True, asset_tag = generateAssetTag())
+			newreq = Request.objects.create(owner = request.owner,item_id = newAsset,reason = request.reason,admin_comment = request.admin_comment,quantity = 1,status = request.status,suggestion = request.suggestion,parent_cart = request.parent_cart)
+	for request in requests:
+		request.delete()
 	return True;
 
 def convert_asset_to_item(asset):
-	print("here in asset to item conversion!");
 	assets = Asset.objects.filter(item_name=asset.item_name);
 	asset.count = len(assets);
 	asset.is_asset = False;
@@ -610,13 +625,8 @@ def add_an_asset(request, item_id):
 		return render(request, 'home/notAdmin.html')
 	item = get_object_or_404(Item, pk=item_id);
 
-<<<<<<< HEAD
-	asset_tag = 3;
-	AssetForm = AssetForm_factory(asset_tag, False);
-=======
 	asset_tag = generateAssetTag();
-	AssetForm = AssetForm_factory(asset_tag);
->>>>>>> 3222e73bbe385c7765a918a58e93bd57e8327ba3
+	AssetForm = AssetForm_factory(asset_tag, False);
 
 	# on a post we (print) the data and then return success
 	if request.method == 'POST':

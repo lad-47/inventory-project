@@ -28,7 +28,7 @@
       {% for subrequest in subrequests %}
       <tr>
             <!--make the actual tablerow -->
-            <th><a href="{{ subrequest.item_id.get_absolute_url }}">{{subrequest.item_id.item_name}}</a></th>
+            <th><a href="{{ subrequest.item_id.get_absolute_url }}">{{subrequest.item_id}}</a></th>
             <th><span class="badge">{{subrequest.quantity}}</span></th>
             <th>{{subrequest.get_status_display}}</th>
             <th>{{subrequest.admin_comment}}</th>

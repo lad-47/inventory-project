@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-
 class Tag(models.Model):
 	#item_id = models.ForeignKey(Item, related_name='tags', on_delete=models.CASCADE)
 	tag = models.CharField(max_length=100, unique=True);
@@ -19,7 +18,10 @@ class AbstractItem(models.Model):
 	is_asset = models.BooleanField(default=False)
 	#location = models.CharField(max_length=100,null=True)
 	def __str__(self):
-		return self.item_name
+		try:
+			return self.item_name+": "+str(self.asset.asset_tag)
+		except Asset.DoesNotExist:
+			return self.item_name
 	
 	def get_absolute_url(self):
 		return reverse('detail', kwargs={'item_id': self.id})
@@ -36,7 +38,8 @@ class Item(AbstractItem):
 class Asset(AbstractItem):
 	asset_tag = models.PositiveIntegerField(unique=True);
 
-
+	def __str__(self):
+		return str(self.item_name)+": "+str(self.asset_tag)
 
 class Cart_Request(models.Model):
 	STATUSES = (
