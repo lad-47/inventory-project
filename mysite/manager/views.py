@@ -74,7 +74,7 @@ def create_request_info(cart_requests):
 		subrequests = Request.objects.filter(parent_cart=cart_request);
 		valid = True;
 		for subrequest in subrequests:
-			itemToChange = Item.objects.get(id=subrequest.item_id_id);
+			itemToChange = subrequest.item_id
 			oldQuantity = itemToChange.count;
 			requestAmount = subrequest.quantity;
 			newQuantity = oldQuantity - requestAmount;
@@ -90,7 +90,7 @@ def create_indv_request_info(cart_request):
 	req_info = []
 	i=0
 	for subrequest in subrequests:
-		itemToChange = Item.objects.get(id=subrequest.item_id_id);
+		itemToChange = subrequest.item_id
 		oldQuantity = itemToChange.count;
 		requestAmount = subrequest.quantity;
 		newQuantity = oldQuantity - requestAmount;
@@ -411,27 +411,38 @@ def convert_item_to_asset(item):
 	item.save();
 	cfs = CustomFieldEntry.objects.filter(per_asset=True)
 	for cf in cfs:
-		kind = cf.value_type
-		if kind == 'st':
-			a = CustomShortTextField.objects.get(parent_item=item, field_name=cf)
-			a.delete()
-		if kind == 'lt':
-			a = CustomLongTextField.objects.get(parent_item=item, field_name=cf)
-			a.delete()
-		if kind == 'int':
-			a = CustomIntField.objects.get(parent_item=item, field_name=cf)
-			a.delete()
-		if kind == 'float':
-			a = CustomFloatField.objects.get(parent_item=item, field_name=cf)
-			a.delete()
+		try:
+			kind = cf.value_type
+			if kind == 'st':
+				a = CustomShortTextField.objects.get(parent_item=item, field_name=cf)
+				a.delete()
+			if kind == 'lt':
+				a = CustomLongTextField.objects.get(parent_item=item, field_name=cf)
+				a.delete()
+			if kind == 'int':
+				a = CustomIntField.objects.get(parent_item=item, field_name=cf)
+				a.delete()
+			if kind == 'float':
+				a = CustomFloatField.objects.get(parent_item=item, field_name=cf)
+				a.delete()
+		except Exception:
+			pass
 
 	for x in range (0, itemQuantity):
 		newAsset = Asset.objects.create(item_name=item.item_name, count=1, model_number=item.model_number, description=item.description, is_asset = True, asset_tag = generateAssetTag())
 	requests = Request.objects.filter(item_id=item).exclude(status='O').exclude(status='A').exclude(status='D').exclude(status='P').exclude(status='R').exclude(status='Z')
 	for request in requests:
+		is_pdf = False
+		try:
+			pdf = BackfillPDF.objects.get(request=request)
+			is_pdf = True
+		except BackfillPDF.DoesNotExist:
+			pass
 		for x in range(0,request.quantity):
 			newAsset = Asset.objects.create(item_name=item.item_name, count=0, model_number=item.model_number, description=item.description, is_asset = True, asset_tag = generateAssetTag())
 			newreq = Request.objects.create(owner = request.owner,item_id = newAsset,reason = request.reason,admin_comment = request.admin_comment,quantity = 1,status = request.status,suggestion = request.suggestion,parent_cart = request.parent_cart)
+			if is_pdf:
+				BackfillPDF.objects.create(request=newreq,pdf=pdf.pdf)
 	for request in requests:
 		request.delete()
 	return True;
@@ -1041,7 +1052,8 @@ def handle_loan(request, request_id, new_status):
 			reason=req.reason, admin_comment=comment);
 			#disbursed.save(); .create already saves
 			if is_pdf:
-				BackfillPDF.objects.create(request=to_new_status,pdf=pdf.pdf)
+				BackfillPDF.objects.create(request=new_request,pdf=pdf.pdf)
+			
 			tag=EmailTag.objects.all()[0].tag
 			message=""
 
