@@ -130,6 +130,7 @@ def cart_request_details(request, cart_request_id):
 						return HttpResponseRedirect('/manager/request_failure');
 				for el in req_info:
 					if el[0].item_id.is_asset:
+						print("ASSET!")
 						assetPKs_used = list();
 						for i in range(0, el[0].quantity):
 							key = el[4].item_name+'_'+str(i+1);
@@ -147,6 +148,9 @@ def cart_request_details(request, cart_request_id):
 								reason=el[0].reason, admin_comment=el[0].admin_comment, quantity=1, \
 								status=new_status, suggestion='D',\
 								parent_cart=el[0].parent_cart)
+							asset.count=0
+							asset.save()
+						update_assets(item_name=el[4].item_name)
 						el[0].delete();
 					else:
 						el[4].count = el[2]-el[1]; ##update item quantity
@@ -1050,6 +1054,7 @@ def handle_loan(request, request_id, new_status):
 	try:
 		a = req.item_id.asset
 		backfill_return = (req.status == 'B' and new_status == 'R')
+		loan_return = (not backfill_return and new_status == 'R')
 	except Asset.DoesNotExist:
 		backfill_return = False;
 	print(backfill_return);
@@ -1116,9 +1121,13 @@ def handle_loan(request, request_id, new_status):
 				print(involved_item.count)
 				involved_item.count = involved_item.count + no_longer_loaned;
 				print(involved_item.count)
+				number=involved_item.count
 				involved_item.save();
-				update_assets(item_name=involved_item.item_name);
-
+				
+			
+			number = involved_item.count
+			print(number)
+			
 			if backfill_return:
 				asset = req.item_id;
 				cfs = CustomFieldEntry.objects.filter(per_asset=True);
@@ -1162,7 +1171,16 @@ def handle_loan(request, request_id, new_status):
 				if not still_suggest:
 					parent.suggestion='D'
 					parent.save()
-
+			
+			try:
+				print("hERE")
+				asset = req.item_id.asset
+				asset.count=number
+				asset.save()
+			except Asset.DoesNotExist:
+				pass
+			update_assets(item_name=req.item_id.item_name);
+			
 			return HttpResponseRedirect('/manager/loan_handle_success');
 
 
