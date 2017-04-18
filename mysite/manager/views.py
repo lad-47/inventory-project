@@ -16,7 +16,7 @@ from home.models import SubscribedEmail,EmailBody,EmailTag,LoanDate
 from django.core.mail import EmailMessage
 from django.core.files.storage import FileSystemStorage
 from manager.auto_increment import generateAssetTag
-from jinja2.compiler import generate
+#from jinja2.compiler import generate
 
 def manager_home(request):
 	return render(request, 'manager/manager_home.html');
@@ -963,6 +963,11 @@ def handle_loan(request, request_id, new_status):
 	parent = req.parent_cart;
 	quantity = req.quantity;
 
+	# will be used to null out per_asset cf's later
+	backfill_return = (req.status == 'B' and new_status == 'R' and type(req.item_id)==Asset);
+	print(type(req.item_id));
+
+
 	if request.method == 'POST':
 		form = PositiveIntArgMaxForm(request.POST, max_val=quantity);
 		if form.is_valid():
@@ -980,13 +985,9 @@ def handle_loan(request, request_id, new_status):
 			#quantity=(quantity-no_longer_loaned), item_id=req.item_id, parent_cart=req.parent_cart,\
 			#reason=req.reason, admin_comment=comment);
 			#still_old_status.save();
-			req.quantity = quantity - to_new_status;
-			if(req.quantity > 0):
-				req.save();
-			else:
-				req.delete();
+			
 
-			to_new_status = Request.objects.create(owner=req.owner, status=new_status,\
+			new_request = Request.objects.create(owner=req.owner, status=new_status,\
 			quantity=(to_new_status), item_id=req.item_id, parent_cart=req.parent_cart, \
 			reason=req.reason, admin_comment=comment);
 			#disbursed.save(); .create already saves
@@ -1024,6 +1025,32 @@ def handle_loan(request, request_id, new_status):
 				involved_item.count = involved_item.count + no_longer_loaned;
 				involved_item.save();
 
+			if backfill_return:
+				asset = req.item_id;
+				cfs = CustomFieldEntry.objects.filter(per_asset=True);
+				for cf in cfs:
+					kind = cf.value_type;
+					if kind == 'st':
+						a = CustomShortTextField.objects.get(parent_item=asset, field_name=cf);
+					elif kind == 'lt':
+						a = CustomLongTextField.objects.get(parent_item=asset, field_name=cf);
+					elif kind == 'int':
+						a = CustomIntField.objects.get(parent_item=asset, field_name=cf);
+					elif kind == 'float':
+						a = CustomFloatField.objects.get(parent_item=asset, field_name=cf);
+					else:
+						raise ValueError('value_type wasnt st, lt, int, or float');
+					a.field_value = None;
+					a.save();
+
+
+
+			req.quantity = quantity - to_new_status;
+			if(req.quantity > 0):
+				req.save();
+			else:
+				req.delete();
+			
 			still_loaned = False;
 			for subreq in Request.objects.filter(parent_cart = parent):
 				if subreq.status == 'L' or subreq.status == 'B':
