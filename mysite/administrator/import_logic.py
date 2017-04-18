@@ -32,7 +32,7 @@ def check_valid_items(items_from_json):
         return name_is_valid
     # If one item is not valid, the whole import fails
     for item in items_from_json:
-        item_is_valid = valid_item(item,items_from_json)
+        item_is_valid = valid_item(item)
         if item_is_valid != "OK":
             return item_is_valid
     #print("All Items Valid.")

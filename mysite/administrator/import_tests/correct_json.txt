@@ -28,6 +28,7 @@ Custom Fields int & float:
   {
     "item_name":"AALED001",
     "count":201,
+    "minimum_stock":10,
     "custom_fields":[
       {
         "field_name":"Restock Price",
@@ -81,5 +82,35 @@ Item/Asset instance import:
   },
   {
     "asset_name":"AAZod"
+  }
+]
+
+Asset Instance with cfs:
+[
+  {
+    "asset_name":"AAAsset",
+    "custom_fields":[
+      {
+        "field_name":"Location",
+        "field_value":"Hudson"
+      },
+      {
+        "field_name":"Extra Description",
+        "field_value":"Blah"
+      }
+    ]
+  },
+  {
+    "asset_name":"AAAsset",
+    "custom_fields":[
+      {
+        "field_name":"Location",
+        "field_value":"Teer"
+      },
+      {
+        "field_name":"Extra Description",
+        "field_value":"NO WAY"
+      }
+    ]
   }
 ]
